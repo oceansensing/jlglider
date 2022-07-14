@@ -56,10 +56,16 @@ ad2cplist_raw = Glob.glob(ad2cproot_raw * "*", scidir);
 legatolist_raw = Glob.glob(legatoroot_raw * "*", scidir);
 
 timeformat = "dd/mm/yyyy HH:MM:SS.sss"
+global time1d = Array{DateTime,1};
 
-time1d = Array{DateTime,1};
+#i = 3
+#print(scidir * pldroot_raw * string(i) * "\n")
+#df = CSV.read(scidir * pldroot_raw * string(i), header=1, delim=";", DataFrame);
+#global time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
+
 for i = 1:length(pldlist_raw)
-    print(i)
-    df = CSV.read(scidir * pldroot_raw * string(i), header=1, DataFrame);
-    time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
+    display(i)
+    print(scidir * pldroot_raw * string(i) * "\n")
+    df = CSV.read(scidir * pldroot_raw * string(i), header=1, delim=";", DataFrame);
+    global time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
 end
