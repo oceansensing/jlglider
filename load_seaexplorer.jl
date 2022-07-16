@@ -57,8 +57,10 @@ legatolist_raw = Glob.glob(legatoroot_raw * "*", scidir);
 
 timeformat = "dd/mm/yyyy HH:MM:SS.sss"
 global time1d = Array{DateTime,1};
+global lon1d = Array{Float64,1};
+global lat1d = Array{Float64,1};
 
-#i = 3
+#i = 1
 #print(scidir * pldroot_raw * string(i) * "\n")
 #df = CSV.read(scidir * pldroot_raw * string(i), header=1, delim=";", DataFrame);
 #global time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
@@ -67,5 +69,11 @@ for i = 1:length(pldlist_raw)
     display(i)
     print(scidir * pldroot_raw * string(i) * "\n")
     df = CSV.read(scidir * pldroot_raw * string(i), header=1, delim=";", DataFrame);
+    navlon = df.NAV_LONGITUDE;
+    navlat = df.NAV_LATITUDE;
+    lon = trunc.(navlon ./ 100) + (navlon .- trunc.(navlon ./ 100)*100) / 60;
+    lat = trunc.(navlat ./ 100) + (navlat .- trunc.(navlat ./ 100)*100) / 60;
     global time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
+    global lon1d = cat(lon1d, lon, dims=1);
+    global lat1d = cat(lat1d, lat, dims=1);
 end
