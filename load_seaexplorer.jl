@@ -32,12 +32,14 @@ end
 srcdir = "/Users/gong/Research/jlglider/";
 dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
 
+# define dataset loading parameters
 project = "maracoos"
 deploydate = "20220311"
 suffix = "data"
 glidername = "sea064"
 mission = "24"
 
+# set directory paths
 missionroot = glidername * "." * mission;
 gliroot = missionroot * "." * "gli.sub.";
 pldroot_rt = missionroot * "." * "pld1.sub.";
@@ -49,6 +51,7 @@ datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffi
 navdir = datadir * "nav/";
 scidir = datadir * "science/";
 
+# load data file lists
 glilist = Glob.glob(gliroot * "*", navdir);
 pldlist_rt = Glob.glob(pldroot_rt * "*", scidir);
 pldlist_raw = Glob.glob(pldroot_raw * "*", scidir);
@@ -66,18 +69,19 @@ global lat1d = [];
 #global time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
 
 for i = 1:length(pldlist_raw)
-#for i = 1:1
-        display(i)
+    display(i)
     print(scidir * pldroot_raw * string(i) * "\n")
     df = CSV.read(scidir * pldroot_raw * string(i), header=1, delim=";", DataFrame);
 
+    # extract location data from data frame
     navlon = df.NAV_LONGITUDE;
     navlat = df.NAV_LATITUDE;
     lon = Array{Float64,1};
     lat = Array{Float64,1};
     lon = trunc.(navlon ./ 100) + (navlon .- trunc.(navlon ./ 100)*100) / 60;
     lat = trunc.(navlat ./ 100) + (navlat .- trunc.(navlat ./ 100)*100) / 60;
-    
+
+    # concatinate data into 1D arrays
     global time1d = cat(time1d, DateTime.(df.PLD_REALTIMECLOCK, timeformat), dims=1);
     global lon1d = cat(lon1d, lon, dims=1);
     global lat1d = cat(lat1d, lat, dims=1);
