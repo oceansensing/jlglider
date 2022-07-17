@@ -3,6 +3,7 @@
 
 using Glob, DataFrames, CSV, Dates, Missings
 
+# creating glider data types
 mutable struct NAV
     t::Array{DateTime};
     z::Array{AbstractFloat};
@@ -35,15 +36,18 @@ mutable struct SeaExplorer
     flbbcd1d::FLBBCD;
 end
 
+# define a function that converts missings in an array to NaN
 function missing2nan(varin)
     varout = Float64.(collect(Missings.replace(varin, NaN)));
 end
 
+# initilized data strucctures
 nav = NAV[];
 ctd = LEGATO[];
 flbbcd = FLBBCD[];
 #glider = SeaExplorer[];
 
+# setting src and data directory paths
 srcdir = "/Users/gong/Research/jlglider/";
 dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
 
@@ -91,6 +95,7 @@ global bb1d = [];
 
 timeformat = "dd/mm/yyyy HH:MM:SS.sss"
 
+# loop through the list of data files
 for i = 1:length(pldlist_raw)
     display(i)
     print(scidir * pldroot_raw * string(i) * "\n")
@@ -142,6 +147,7 @@ for i = 1:length(pldlist_raw)
     push!(flbbcd, FLBBCD(t, chla, cdom, bb700));
 end
 
+# storing 1d data into NAV, CTD, and FLBBCD data structures
 nav1d = NAV(t1d, z1d, lon1d, lat1d);
 ctd1d = LEGATO(t1d, p1d, temp1d, cond1d, condtemp1d, salt1d);
 flbbcd1d = FLBBCD(t1d, chla1d, cdom1d, bb1d);
