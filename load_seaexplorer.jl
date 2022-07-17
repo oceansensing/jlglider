@@ -30,6 +30,9 @@ mutable struct SeaExplorer
     nav::Array{NAV};
     ctd::Array{LEGATO};
     flbbcd::Array{FLBBCD};
+    nav1d::NAV;
+    ctd1d::LEGATO;
+    flbbcd1d::FLBBCD;
 end
 
 function missing2nan(varin)
@@ -71,7 +74,7 @@ ad2cplist_raw = Glob.glob(ad2cproot_raw * "*", scidir);
 legatolist_raw = Glob.glob(legatoroot_raw * "*", scidir);
 
 # initiate variables 
-global time1d = [];
+global t1d = [];
 global lon1d = [];
 global lat1d = [];
 global z1d = [];
@@ -104,7 +107,7 @@ for i = 1:length(pldlist_raw)
     z = missing2nan(df.NAV_DEPTH);
 
     # concatinate NAV data into 1D arrays
-    global time1d = cat(time1d, t, dims=1);
+    global t1d = cat(t1d, t, dims=1);
     global lon1d = cat(lon1d, lon, dims=1);
     global lat1d = cat(lat1d, lat, dims=1);
     global z1d = cat(z1d, z, dims=1);
@@ -139,5 +142,9 @@ for i = 1:length(pldlist_raw)
     push!(flbbcd, FLBBCD(t, chla, cdom, bb700));
 end
 
+nav1d = NAV(t1d, z1d, lon1d, lat1d);
+ctd1d = LEGATO(t1d, p1d, temp1d, cond1d, condtemp1d, salt1d);
+flbbcd1d = FLBBCD(t1d, chla1d, cdom1d, bb1d);
+
 # combinating NAV, CTD, and FLBBCD data into one glider data structure
-glider = SeaExplorer(nav, ctd, flbbcd);
+glider = SeaExplorer(nav, ctd, flbbcd, nav1d, ctd1d, flbbcd1d);
