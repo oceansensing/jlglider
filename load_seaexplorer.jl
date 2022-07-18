@@ -48,7 +48,7 @@ flbbcd = FLBBCD[];
 #glider = SeaExplorer[];
 
 # setting src and data directory paths
-srcdir = "/Users/gong/Research/jlglider/";
+srcdir = "/Users/gong/GitHub/jlglider/";
 dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
 
 # define dataset loading parameters
