@@ -174,4 +174,4 @@ datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffi
 navdir = datadir * "nav/";
 scidir = datadir * "science/";
 
-glider = load_data(glidername, mission, navdir, scidir);
+glider = load_SEdata(glidername, mission, navdir, scidir);
