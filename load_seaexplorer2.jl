@@ -7,13 +7,6 @@ import TranscodingStreams, CodecZlib
 import GZip
 
 # creating glider data types
-mutable struct NAV
-    t::Array{DateTime};
-    z::Array{AbstractFloat};
-    lon::Array{AbstractFloat};
-    lat::Array{AbstractFloat};
-end
-
 mutable struct NAV_RT
     t::Array{DateTime};
     z::Array{AbstractFloat};
@@ -38,6 +31,69 @@ mutable struct NAV_RT
 end
 
 mutable struct PLD_RT
+    t::Array{DateTime};
+    z::Array{AbstractFloat};
+    lon::Array{AbstractFloat};
+    lat::Array{AbstractFloat};
+    nav_resource::Array{AbstractFloat};
+    ad2cp_time::Array{AbstractFloat};
+    ad2cp_heading::Array{AbstractFloat};
+    ad2cp_pitch::Array{AbstractFloat};
+    ad2cp_roll::Array{AbstractFloat};
+    ad2cp_pressure::Array{AbstractFloat};
+    ad2cp_alt::Array{AbstractFloat};
+    ad2cp_v1_ch1::Array{AbstractFloat};
+    ad2cp_v2_ch1::Array{AbstractFloat};
+    ad2cp_v3_ch1::Array{AbstractFloat};
+    ad2cp_v4_ch1::Array{AbstractFloat};
+    ad2cp_v1_ch2::Array{AbstractFloat};
+    ad2cp_v2_ch2::Array{AbstractFloat};
+    ad2cp_v3_ch2::Array{AbstractFloat};
+    ad2cp_v4_ch2::Array{AbstractFloat};
+    ad2cp_v1_ch3::Array{AbstractFloat};
+    ad2cp_v2_ch3::Array{AbstractFloat};
+    ad2cp_v3_ch3::Array{AbstractFloat};
+    ad2cp_v4_ch3::Array{AbstractFloat};
+    ad2cp_v1_ch4::Array{AbstractFloat};
+    ad2cp_v2_ch4::Array{AbstractFloat};
+    ad2cp_v3_ch4::Array{AbstractFloat};
+    ad2cp_v4_ch4::Array{AbstractFloat};
+    ad2cp_v1_ch5::Array{AbstractFloat};
+    ad2cp_v2_ch5::Array{AbstractFloat};
+    ad2cp_v3_ch5::Array{AbstractFloat};
+    ad2cp_v4_ch5::Array{AbstractFloat};
+    ad2cp_v1_ch6::Array{AbstractFloat};
+    ad2cp_v2_ch6::Array{AbstractFloat};
+    ad2cp_v3_ch6::Array{AbstractFloat};
+    ad2cp_v4_ch6::Array{AbstractFloat};
+    flbbcd_chl_count::Array{AbstractFloat};
+    flbbcd_chl_scaled::Array{AbstractFloat};
+    flbbcd_bb_700_count::Array{AbstractFloat};
+    flbbcd_bb_700_scaled::Array{AbstractFloat};
+    flbbcd_cdom_count::Array{AbstractFloat};
+    flbbcd_cdom_scaled::Array{AbstractFloat};
+    legato_conductivity::Array{AbstractFloat};
+    legato_temperature::Array{AbstractFloat};
+    legato_pressure::Array{AbstractFloat};
+    legato_salinity::Array{AbstractFloat};
+    legato_condtemp::Array{AbstractFloat};
+    mr1000g_t1_avg::Array{AbstractFloat};
+    mr1000g_t2_avg::Array{AbstractFloat};
+    mr1000g_sh1_std::Array{AbstractFloat};
+    mr1000g_sh2_std::Array{AbstractFloat};
+    mr1000g_press_avg::Array{AbstractFloat};
+    mr1000g_incly_avg::Array{AbstractFloat};
+    mr1000g_eps1::Array{AbstractFloat};
+    mr1000g_qc1::Array{AbstractFloat};
+    mr1000g_eps2::Array{AbstractFloat};
+    mr1000g_qc2::Array{AbstractFloat};
+end
+
+mutable struct NAV
+    t::Array{DateTime};
+    z::Array{AbstractFloat};
+    lon::Array{AbstractFloat};
+    lat::Array{AbstractFloat};
 end
 
 mutable struct LEGATO
@@ -177,14 +233,66 @@ function load_SEAdata_rt(glidername::String, mission::String, navdir::String, sc
         Altitude1d = cat(Altitude1d, Altitude, dims=1);
 
         push!(nav_rt, NAV_RT(t, z, lon, lat, NavState, SecurityLevel, Heading, Declination, Pitch, Roll, DeadReckoning, DesiredH, BallastCmd, BallastPos, LinCmd, LinPos, AngCmd, AngPos, Voltage, Altitude));
-        push!(pld_rt, PLD_RT());
     end
+    nav1d_rt = NAV_RT(t1d, z1d, lon1d, lat1d, NavState1d, SecurityLevel1d, Heading1d, Declination1d, Pitch1d, Roll1d, DeadReckoning1d, DesiredH1d, BallastCmd1d, BallastPos1d, LinCmd1d, LinPos1d, AngCmd1d, AngPos1d, Voltage1d, Altitude1d);
 
     # initiate PLD_RT 1-D variables
     t1d = [];
     z1d = [];
     lon1d = [];
     lat1d = [];
+    nav_resource1d = [];
+    ad2cp_time1d = [];
+    ad2cp_heading1d = [];
+    ad2cp_pitch1d = [];
+    ad2cp_roll1d = [];
+    ad2cp_pressure1d = [];
+    ad2cp_alt1d = [];
+    ad2cp_v1_ch1_1d = [];
+    ad2cp_v2_ch1_1d = [];
+    ad2cp_v3_ch1_1d = [];
+    ad2cp_v4_ch1_1d = [];
+    ad2cp_v1_ch2_1d = [];
+    ad2cp_v2_ch2_1d = [];
+    ad2cp_v3_ch2_1d = [];
+    ad2cp_v4_ch2_1d = [];
+    ad2cp_v1_ch3_1d = [];
+    ad2cp_v2_ch3_1d = [];
+    ad2cp_v3_ch3_1d = [];
+    ad2cp_v4_ch3_1d = [];
+    ad2cp_v1_ch4_1d = [];
+    ad2cp_v2_ch4_1d = [];
+    ad2cp_v3_ch4_1d = [];
+    ad2cp_v4_ch4_1d = [];
+    ad2cp_v1_ch5_1d = [];
+    ad2cp_v2_ch5_1d = [];
+    ad2cp_v3_ch5_1d = [];
+    ad2cp_v4_ch5_1d = [];
+    ad2cp_v1_ch6_1d = [];
+    ad2cp_v2_ch6_1d = [];
+    ad2cp_v3_ch6_1d = [];
+    ad2cp_v4_ch6_1d = [];
+    flbbcd_chl_count_1d = [];
+    flbbcd_chl_scaled_1d = [];
+    flbbcd_bb_700_count_1d =[];
+    flbbcd_bb_700_scaled_1d = [];
+    flbbcd_cdom_count_1d = [];
+    flbbcd_cdom_scaled_1d = [];
+    legato_conductivity_1d = [];
+    legato_temperature_1d = [];
+    legato_pressure_1d = [];
+    legato_salinity_1d = [];
+    legato_condtemp_1d = [];
+    mr1000g_t1_avg_1d = [];
+    mr1000g_t2_avg_1d = [];
+    mr1000g_sh1_std_1d = [];
+    mr1000g_sh2_std_1d = [];
+    mr1000g_press_avg_1d = [];
+    mr1000g_incly_avg_1d = [];
+    mr1000g_eps1_1d = [];
+    mr1000g_qc1_1d = [];
+    mr1000g_eps2_1d = [];
+    mr1000g_qc2_1d = [];
 
     # loop through the list of realtime payload (pld) data files
     for i = 1:length(pldlist_rt)
@@ -192,10 +300,10 @@ function load_SEAdata_rt(glidername::String, mission::String, navdir::String, sc
         pldfilepath = scidir * pldroot_rt * string(i) * ".gz"; 
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
+    
+        push!(pld_rt, PLD_RT(t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt, ad2cp_v1_ch1, ad2cp_v2_ch1, ad2cp_v3_ch1, ad2cp_v4_ch1, ad2cp_v1_ch2, ad2cp_v2_ch2, ad2cp_v3_ch2, ad2cp_v4_ch2, ad2cp_v1_ch3, ad2cp_v2_ch3, ad2cp_v3_ch3, ad2cp_v4_ch3, ad2cp_v1_ch4, ad2cp_v2_ch4, ad2cp_v3_ch4, ad2cp_v4_ch4, ad2cp_v1_ch5, ad2cp_v2_ch5, ad2cp_v3_ch5, ad2cp_v4_ch5, ad2cp_v1_ch6, ad2cp_v2_ch6, ad2cp_v3_ch6, ad2cp_v4_ch6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2));    
     end
-
-    nav1d_rt = NAV_RT(t1d, z1d, lon1d, lat1d, NavState1d, SecurityLevel1d, Heading1d, Declination1d, Pitch1d, Roll1d, DeadReckoning1d, DesiredH1d, BallastCmd1d, BallastPos1d, LinCmd1d, LinPos1d, AngCmd1d, AngPos1d, Voltage1d, Altitude1d);
-    pld1d_rt = PLD_RT();
+    pld1d_rt = PLD_RT(t1d, z1d, lon1d, lat1d, nav_resource1d, ad2cp_time1d, ad2cp_heading1d, ad2cp_pitch1d, ad2cp_roll1d, ad2cp_pressure1d, ad2cp_alt1d, ad2cp_v1_ch1_1d, ad2cp_v2_ch1_1d, ad2cp_v3_ch1_1d, ad2cp_v4_ch1_1d, ad2cp_v1_ch2_1d, ad2cp_v2_ch2_1d, ad2cp_v3_ch2_1d, ad2cp_v4_ch2_1d, ad2cp_v1_ch3_1d, ad2cp_v2_ch3_1d, ad2cp_v3_ch3_1d, ad2cp_v4_ch3_1d, ad2cp_v1_ch4_1d, ad2cp_v2_ch4_1d, ad2cp_v3_ch4_1d, ad2cp_v4_ch4_1d, ad2cp_v1_ch5_1d, ad2cp_v2_ch5_1d, ad2cp_v3_ch5_1d, ad2cp_v4_ch5_1d, ad2cp_v1_ch6_1d, ad2cp_v2_ch6_1d, ad2cp_v3_ch6_1d, ad2cp_v4_ch6_1d, flbbcd_chl_count_1d, flbbcd_chl_scaled_1d, flbbcd_bb_700_count_1, flbbcd_bb_700_scaled_1d, flbbcd_cdom_count_1d, flbbcd_cdom_scaled_1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d, mr1000g_t1_avg_1d, mr1000g_t2_avg_1d, mr1000g_sh1_std_1d, mr1000g_sh2_std_1d, mr1000g_press_avg_1d, mr1000g_incly_avg_1d, mr1000g_eps1_1d, mr1000g_qc1_1d, mr1000g_eps2_1d, mr1000g_qc2_1d);
 
     # combinating NAV_RT and PLD_RT data into one glider data structure
     gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
