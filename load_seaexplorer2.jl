@@ -14,6 +14,32 @@ mutable struct NAV
     lat::Array{AbstractFloat};
 end
 
+mutable struct NAV_RT
+    t::Array{DateTime};
+    z::Array{AbstractFloat};
+    lon::Array{AbstractFloat};
+    lat::Array{AbstractFloat};
+    NavState::Array{Int64};
+    SecurityLevel::Array{Int64};
+    Heading::Array{AbstractFloat};
+    Declination::Array{Int64};
+    Pitch::Array{AbstractFloat};
+    Roll::Array{AbstractFloat};
+    DeadReckoning::Array{Int64};
+    DesiredH::Array{Int64};
+    BallastCmd::Array{Int64};
+    BallastPos::Array{Float64};
+    LinCmd::Array{Float64};
+    LinPos::Array{Float64};
+    AngCmd::Array{Int64};
+    AngPos::Array{Float64};
+    Voltage::Array{Float64};
+    Altitude::Array{Float64};
+end
+
+mutable struct PLD_RT
+end
+
 mutable struct LEGATO
     t::Array{DateTime};
     p::Array{AbstractFloat};
@@ -50,12 +76,134 @@ mutable struct SeaExplorer
     flbbcd1d::FLBBCD;
 end
 
+mutable struct SeaExplorerRT
+    nav::Array{NAV_RT};
+    pld::Array{PLD_RT};
+    nav1d::Array{NAV_RT};
+    pld1d::Array{PLD_RT};
+end
+
 # define a function that converts missings in an array to NaN
 function missing2nan(varin)
     varout = Float64.(collect(Missings.replace(varin, NaN)));
 end
 
-function load_SEdata(glidername::String, mission::String, navdir::String, scidir::String)
+function load_SEAdata_rt(glidername::String, mission::String, navdir::String, scidir::String)
+    nav_rt = NAV_RT[];
+    pld_rt = PLD_RT[];
+
+    missionroot = glidername * "." * mission;
+    gliroot_rt = missionroot * "." * "gli.sub.";
+    pldroot_rt = missionroot * "." * "pld1.sub.";
+
+    glilist_rt = Glob.glob(gliroot_rt * "*", navdir);
+    pldlist_rt = Glob.glob(pldroot_rt * "*", scidir);
+
+    # time data format
+    timeformat = "dd/mm/yyyy HH:MM:SS.sss"
+    
+    # initiate NAV_RT 1-D variables
+    t1d = [];
+    z1d = [];
+    lon1d = [];
+    lat1d = [];
+    NavState1d = [];
+    SecurityLevel1d = [];
+    Heading1d = [];
+    Declination1d = [];
+    Pitch1d = [];
+    Roll1d = [];
+    DeadReckoning1d = [];
+    DesiredH1d = [];
+    BallastCmd1d = [];
+    BallastPos1d = [];
+    LinCmd1d = [];
+    LinPos1d = [];
+    AngCmd1d = [];
+    AngPos1d = [];
+    Voltage1d = [];
+    Altitude1d = [];    
+
+    # loop through the list of realtime navigation (nav) data files
+    for i = 1:length(glilist_rt)
+        display(i)
+        navfilepath = navdir * gliroot_rt * string(i) * ".gz"; 
+        print(navfilepath * "\n")
+        df = CSV.read(navfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
+
+        t = DateTime.(df.Timestamp, timeformat);
+        z = df.Depth;
+        navlon = df.Lon;
+        navlat = df.Lat;
+        lon = trunc.(navlon ./ 100) + (navlon .- trunc.(navlon ./ 100)*100) / 60;
+        lat = trunc.(navlat ./ 100) + (navlat .- trunc.(navlat ./ 100)*100) / 60;
+
+        NavState = df.NavState;
+        SecurityLevel = df.SecurityLevel;
+        Heading = df.Heading;
+        Declination = df.Declination;
+        Pitch = df.Pitch;
+        Roll = df.Roll;
+        DeadReckoning = df.DeadReckoning;
+        DesiredH = df.DesiredH;
+        BallastCmd = df.BallastCmd;
+        BallastPos = df.BallastPos;
+        LinCmd = df.LinCmd;
+        LinPos = df.LinPos;
+        AngCmd = df.AngCmd;
+        AngPos = df.AngPos;
+        Voltage = df.Voltage;
+        Altitude = df.Altitude;
+
+        gt1d = cat(gt1d, t, dims=1);
+        gz1d = cat(gz1d, z, dims=1);
+        glon1d = cat(glon1d, lon, dims=1);
+        glat1d = cat(glat1d, lat, dims=1);
+        NavState1d = cat(NavState1d, NavState, dims=1);
+        SecurityLevel1d = cat(SecurityLevel1d, SecurityLevel, dims=1);
+        Heading1d = cat(Heading1d, Heading, dims=1);
+        Declination1d = cat(Declination1d, Declination, dims=1);
+        Pitch1d = cat(Pitch1d, Pitch, dims=1);
+        Roll1d = cat(Roll1d, Roll, dims=1);
+        DeadReckoning1d = cat(DeadReckoning1d, DeadReckoning, dims=1);
+        DesiredH1d = cat(DesiredH1d, DesiredH, dims=1);
+        BallastCmd1d = cat(BallastCmd1d, BallastCmd, dims=1);
+        BallastPos1d = cat(BallastPos1d, BallastPos, dims=1);
+        LinCmd1d = cat(LinCmd1d, LinCmd, dims=1);
+        LinPos1d = cat(LinPos1d, LinPos, dims=1);
+        AngCmd1d = cat(AngCmd1d, AngCmd, dims=1);
+        AngPos1d = cat(AngPos1d, AngPos, dims=1);
+        Voltage1d = cat(Voltage1d, Voltage, dims=1);
+        Altitude1d = cat(Altitude1d, Altitude, dims=1);
+
+        push!(nav_rt, NAV_RT(t, z, lon, lat, NavState, SecurityLevel, Heading, Declination, Pitch, Roll, DeadReckoning, DesiredH, BallastCmd, BallastPos, LinCmd, LinPos, AngCmd, AngPos, Voltage, Altitude));
+        push!(pld_rt, PLD_RT());
+    end
+
+    # initiate PLD_RT 1-D variables
+    t1d = [];
+    z1d = [];
+    lon1d = [];
+    lat1d = [];
+
+    # loop through the list of realtime payload (pld) data files
+    for i = 1:length(pldlist_rt)
+        display(i)
+        pldfilepath = scidir * pldroot_rt * string(i) * ".gz"; 
+        print(pldfilepath * "\n")
+        df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
+    end
+
+    nav1d_rt = NAV_RT(t1d, z1d, lon1d, lat1d, NavState1d, SecurityLevel1d, Heading1d, Declination1d, Pitch1d, Roll1d, DeadReckoning1d, DesiredH1d, BallastCmd1d, BallastPos1d, LinCmd1d, LinPos1d, AngCmd1d, AngPos1d, Voltage1d, Altitude1d);
+    pld1d_rt = PLD_RT();
+
+    # combinating NAV_RT and PLD_RT data into one glider data structure
+    gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
+
+    return gliderRT
+end
+
+function load_SEAdata_raw(glidername::String, mission::String, navdir::String, scidir::String)
 
     # initilized data strucctures
     nav = NAV[];
@@ -64,48 +212,39 @@ function load_SEdata(glidername::String, mission::String, navdir::String, scidir
     ad2cp = AD2CP[];
     #glider = SeaExplorer[];
 
+    # time data format
+    timeformat = "dd/mm/yyyy HH:MM:SS.sss"
+
     # set directory paths
     missionroot = glidername * "." * mission;
-    gliroot = missionroot * "." * "gli.sub.";
-    pldroot_rt = missionroot * "." * "pld1.sub.";
     pldroot_raw = missionroot * "." * "pld1.raw.";
     ad2cproot_raw = missionroot * "." * "ad2cp.raw.";
     legatoroot_raw = missionroot * "." * "legato.raw.";
 
     # load data file lists
-    glilist = Glob.glob(gliroot * "*", navdir);
-    pldlist_rt = Glob.glob(pldroot_rt * "*", scidir);
     pldlist_raw = Glob.glob(pldroot_raw * "*", scidir);
     ad2cplist_raw = Glob.glob(ad2cproot_raw * "*", scidir);
     legatolist_raw = Glob.glob(legatoroot_raw * "*", scidir);
 
-    # initiate variables 
+    # initiate NAV 1-D variables 
     t1d = [];
     lon1d = [];
     lat1d = [];
     z1d = [];
 
+    # initiate Legato 1-D variables
     temp1d = [];
     condtemp1d = [];
     cond1d = [];
     salt1d = [];
     p1d = [];
 
+    # initiate FLBBCD 1-D variables
     chla1d = [];
     cdom1d = [];
     bb1d = [];
 
-    timeformat = "dd/mm/yyyy HH:MM:SS.sss"
-
-    # loope through the list of navigation (nav) data files
-    for i = 1:length(glilist)
-        display(i)
-        navfilepath = navdir * gliroot * string(i); 
-        print(navfilepath * "\n")
-        #CodecZlib.GzipDecompressor()
-        fh = Gzip.open(navfilepath)
-        close(fh)
-    end
+    # initiate ADCP 1-d variables
 
     # loop through the list of payload (pld) data files
     for i = 1:length(pldlist_raw)
@@ -128,6 +267,7 @@ function load_SEdata(glidername::String, mission::String, navdir::String, scidir
         lon1d = cat(lon1d, lon, dims=1);
         lat1d = cat(lat1d, lat, dims=1);
         z1d = cat(z1d, z, dims=1);
+
 
         # change missings in LEGATO data to NaN
         p = missing2nan(df.LEGATO_PRESSURE);
@@ -191,4 +331,5 @@ datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffi
 navdir = datadir * "nav/";
 scidir = datadir * "science/";
 
-glider = load_SEdata(glidername, mission, navdir, scidir);
+glider = load_SEAdata_raw(glidername, mission, navdir, scidir);
+glider_rt = load_SEAdata_rt(glidername, mission, navdir, scidir);
