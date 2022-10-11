@@ -114,22 +114,46 @@ end
 
 mutable struct AD2CP
     t::Array{DateTime};
-    alt::Array{AbstractFloat};
     heading::Array{AbstractFloat};
     pitch::Array{AbstractFloat};
-    pressure::Array{AbstractFloat};
     roll::Array{AbstractFloat};
-    v1_cn2::Array{AbstractFloat};
-    v1_cn3::Array{AbstractFloat};
+    p::Array{AbstractFloat};
+    alt::Array{AbstractFloat};
+    v1_ch1::Array{AbstractFloat};
+    v2_ch1::Array{AbstractFloat};
+    v3_ch1::Array{AbstractFloat};
+    v4_ch1::Array{AbstractFloat};
+    v1_ch2::Array{AbstractFloat};
+    v2_ch2::Array{AbstractFloat};
+    v3_ch2::Array{AbstractFloat};
+    v4_ch2::Array{AbstractFloat};
+    v1_ch3::Array{AbstractFloat};
+    v2_ch3::Array{AbstractFloat};
+    v3_ch3::Array{AbstractFloat};
+    v4_ch3::Array{AbstractFloat};
+    v1_ch4::Array{AbstractFloat};
+    v2_ch4::Array{AbstractFloat};
+    v3_ch4::Array{AbstractFloat};
+    v4_ch4::Array{AbstractFloat};
+    v1_ch5::Array{AbstractFloat};
+    v2_ch5::Array{AbstractFloat};
+    v3_ch5::Array{AbstractFloat};
+    v4_ch5::Array{AbstractFloat};
+    v1_ch6::Array{AbstractFloat};
+    v2_ch6::Array{AbstractFloat};
+    v3_ch6::Array{AbstractFloat};
+    v4_ch6::Array{AbstractFloat};
 end
 
 mutable struct SeaExplorer
     nav::Array{NAV};
     ctd::Array{LEGATO};
     flbbcd::Array{FLBBCD};
+    ad2cp::Array{AD2CP}
     nav1d::NAV;
     ctd1d::LEGATO;
-    flbbcd1d::FLBBCD;
+    flbbcd1d::FLBBCD
+    ad2cp1d::AD2CP;
 end
 
 mutable struct SeaExplorerRT
@@ -236,6 +260,7 @@ function load_SEAdata_rt(glidername::String, mission::String, navdir::String, sc
     end
     nav1d_rt = NAV_RT(t1d, z1d, lon1d, lat1d, NavState1d, SecurityLevel1d, Heading1d, Declination1d, Pitch1d, Roll1d, DeadReckoning1d, DesiredH1d, BallastCmd1d, BallastPos1d, LinCmd1d, LinPos1d, AngCmd1d, AngPos1d, Voltage1d, Altitude1d);
 
+
     # initiate PLD_RT 1-D variables
     t1d = [];
     z1d = [];
@@ -300,7 +325,17 @@ function load_SEAdata_rt(glidername::String, mission::String, navdir::String, sc
         pldfilepath = scidir * pldroot_rt * string(i) * ".gz"; 
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
-    
+
+        # extract location data from data frame
+        t = DateTime.(df.PLD_REALTIMECLOCK, timeformat);
+        navlon = df.NAV_LONGITUDE;
+        navlat = df.NAV_LATITUDE;
+        lon = trunc.(navlon ./ 100) + (navlon .- trunc.(navlon ./ 100)*100) / 60;
+        lat = trunc.(navlat ./ 100) + (navlat .- trunc.(navlat ./ 100)*100) / 60;
+        lon = missing2nan(lon);
+        lat = missing2nan(lat);
+        z = missing2nan(df.NAV_DEPTH);
+        
         push!(pld_rt, PLD_RT(t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt, ad2cp_v1_ch1, ad2cp_v2_ch1, ad2cp_v3_ch1, ad2cp_v4_ch1, ad2cp_v1_ch2, ad2cp_v2_ch2, ad2cp_v3_ch2, ad2cp_v4_ch2, ad2cp_v1_ch3, ad2cp_v2_ch3, ad2cp_v3_ch3, ad2cp_v4_ch3, ad2cp_v1_ch4, ad2cp_v2_ch4, ad2cp_v3_ch4, ad2cp_v4_ch4, ad2cp_v1_ch5, ad2cp_v2_ch5, ad2cp_v3_ch5, ad2cp_v4_ch5, ad2cp_v1_ch6, ad2cp_v2_ch6, ad2cp_v3_ch6, ad2cp_v4_ch6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2));    
     end
     pld1d_rt = PLD_RT(t1d, z1d, lon1d, lat1d, nav_resource1d, ad2cp_time1d, ad2cp_heading1d, ad2cp_pitch1d, ad2cp_roll1d, ad2cp_pressure1d, ad2cp_alt1d, ad2cp_v1_ch1_1d, ad2cp_v2_ch1_1d, ad2cp_v3_ch1_1d, ad2cp_v4_ch1_1d, ad2cp_v1_ch2_1d, ad2cp_v2_ch2_1d, ad2cp_v3_ch2_1d, ad2cp_v4_ch2_1d, ad2cp_v1_ch3_1d, ad2cp_v2_ch3_1d, ad2cp_v3_ch3_1d, ad2cp_v4_ch3_1d, ad2cp_v1_ch4_1d, ad2cp_v2_ch4_1d, ad2cp_v3_ch4_1d, ad2cp_v4_ch4_1d, ad2cp_v1_ch5_1d, ad2cp_v2_ch5_1d, ad2cp_v3_ch5_1d, ad2cp_v4_ch5_1d, ad2cp_v1_ch6_1d, ad2cp_v2_ch6_1d, ad2cp_v3_ch6_1d, ad2cp_v4_ch6_1d, flbbcd_chl_count_1d, flbbcd_chl_scaled_1d, flbbcd_bb_700_count_1, flbbcd_bb_700_scaled_1d, flbbcd_cdom_count_1d, flbbcd_cdom_scaled_1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d, mr1000g_t1_avg_1d, mr1000g_t2_avg_1d, mr1000g_sh1_std_1d, mr1000g_sh2_std_1d, mr1000g_press_avg_1d, mr1000g_incly_avg_1d, mr1000g_eps1_1d, mr1000g_qc1_1d, mr1000g_eps2_1d, mr1000g_qc2_1d);
@@ -353,6 +388,36 @@ function load_SEAdata_raw(glidername::String, mission::String, navdir::String, s
     bb1d = [];
 
     # initiate ADCP 1-d variables
+    ad2cp_time1d = [];
+    ad2cp_heading1d = [];
+    ad2cp_pitch1d = [];
+    ad2cp_roll1d = [];
+    ad2cp_pressure1d = [];
+    ad2cp_alt1d = [];
+    ad2cp_v1_ch1_1d = [];
+    ad2cp_v2_ch1_1d = [];
+    ad2cp_v3_ch1_1d = [];
+    ad2cp_v4_ch1_1d = [];
+    ad2cp_v1_ch2_1d = [];
+    ad2cp_v2_ch2_1d = [];
+    ad2cp_v3_ch2_1d = [];
+    ad2cp_v4_ch2_1d = [];
+    ad2cp_v1_ch3_1d = [];
+    ad2cp_v2_ch3_1d = [];
+    ad2cp_v3_ch3_1d = [];
+    ad2cp_v4_ch3_1d = [];
+    ad2cp_v1_ch4_1d = [];
+    ad2cp_v2_ch4_1d = [];
+    ad2cp_v3_ch4_1d = [];
+    ad2cp_v4_ch4_1d = [];
+    ad2cp_v1_ch5_1d = [];
+    ad2cp_v2_ch5_1d = [];
+    ad2cp_v3_ch5_1d = [];
+    ad2cp_v4_ch5_1d = [];
+    ad2cp_v1_ch6_1d = [];
+    ad2cp_v2_ch6_1d = [];
+    ad2cp_v3_ch6_1d = [];
+    ad2cp_v4_ch6_1d = [];    
 
     # loop through the list of payload (pld) data files
     for i = 1:length(pldlist_raw)
@@ -375,7 +440,6 @@ function load_SEAdata_raw(glidername::String, mission::String, navdir::String, s
         lon1d = cat(lon1d, lon, dims=1);
         lat1d = cat(lat1d, lat, dims=1);
         z1d = cat(z1d, z, dims=1);
-
 
         # change missings in LEGATO data to NaN
         p = missing2nan(df.LEGATO_PRESSURE);
@@ -401,19 +465,53 @@ function load_SEAdata_raw(glidername::String, mission::String, navdir::String, s
         cdom1d = cat(cdom1d, cdom, dims=1);
         bb1d = cat(bb1d, bb700, dims=1);
 
+        # changing missing in AD2CP to NaN
+        ad2cp_time = missing2nan(df.AD2CP_TIME)
+        ad2cp_heading = missing2nan(df.AD2CP_HEADING)
+        ad2cp_pitch = missing2nan(df.AD2CP_PITCH)
+        ad2cp_roll = missing2nan(df.AD2CP_ROLL)
+        ad2cp_pressure = missing2nan(df.AD2CP_PRESSURE)
+        ad2cp_alt = missing2nan(df.AD2CP_ALT)
+        ad2cp_v1_ch1 = missing2nan(df.AD2CP_V1_CH1)
+        ad2cp_v2_ch1 = missing2nan(df.AD2CP_V2_CH1)
+        ad2cp_v3_ch1 = missing2nan(df.AD2CP_V3_CH1)
+        ad2cp_v4_ch1 = missing2nan(df.AD2CP_V4_CH1)
+        ad2cp_v1_ch2 = missing2nan(df.AD2CP_V1_CH2)
+        ad2cp_v2_ch2 = missing2nan(df.AD2CP_V2_CH2)
+        ad2cp_v3_ch2 = missing2nan(df.AD2CP_V3_CH2)
+        ad2cp_v4_ch2 = missing2nan(df.AD2CP_V4_CH2)
+        ad2cp_v1_ch3 = missing2nan(df.AD2CP_V1_CH3)
+        ad2cp_v2_ch3 = missing2nan(df.AD2CP_V2_CH3)
+        ad2cp_v3_ch3 = missing2nan(df.AD2CP_V3_CH3)
+        ad2cp_v4_ch3 = missing2nan(df.AD2CP_V4_CH3)
+        ad2cp_v1_ch4 = missing2nan(df.AD2CP_V1_CH4)
+        ad2cp_v2_ch4 = missing2nan(df.AD2CP_V2_CH4)
+        ad2cp_v3_ch4 = missing2nan(df.AD2CP_V3_CH4)
+        ad2cp_v4_ch4 = missing2nan(df.AD2CP_V4_CH4)
+        ad2cp_v1_ch5 = missing2nan(df.AD2CP_V1_CH5)
+        ad2cp_v2_ch5 = missing2nan(df.AD2CP_V2_CH5)
+        ad2cp_v3_ch5 = missing2nan(df.AD2CP_V3_CH5)
+        ad2cp_v4_ch5 = missing2nan(df.AD2CP_V4_CH5)
+        ad2cp_v1_ch6 = missing2nan(df.AD2CP_V1_CH6)
+        ad2cp_v2_ch6 = missing2nan(df.AD2CP_V2_CH6)
+        ad2cp_v3_ch6 = missing2nan(df.AD2CP_V3_CH6)
+        ad2cp_v4_ch6 = missing2nan(df.AD2CP_V4_CH6)
+            
         # create profile data structure (organized by yo's) for NAV, CTD, and FLBBCD data
         push!(nav, NAV(t, z, lon, lat));
         push!(ctd, LEGATO(t, p, temp, cond, condtemp, salt));
         push!(flbbcd, FLBBCD(t, chla, cdom, bb700));
+        push!(ad2cp, AD2CP(ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt, ad2cp_v1_ch1, ad2cp_v2_ch1, ad2cp_v3_ch1, ad2cp_v4_ch1, ad2cp_v1_ch2, ad2cp_v2_ch2, ad2cp_v3_ch2, ad2cp_v4_ch2, ad2cp_v1_ch3, ad2cp_v2_ch3, ad2cp_v3_ch3, ad2cp_v4_ch3, ad2cp_v1_ch4, ad2cp_v2_ch4, ad2cp_v3_ch4, ad2cp_v4_ch4, ad2cp_v1_ch5, ad2cp_v2_ch5, ad2cp_v3_ch5, ad2cp_v4_ch5, ad2cp_v1_ch6, ad2cp_v2_ch6, ad2cp_v3_ch6, ad2cp_v4_ch6));
     end
 
     # storing 1d data into NAV, CTD, and FLBBCD data structures
     nav1d = NAV(t1d, z1d, lon1d, lat1d);
     ctd1d = LEGATO(t1d, p1d, temp1d, cond1d, condtemp1d, salt1d);
     flbbcd1d = FLBBCD(t1d, chla1d, cdom1d, bb1d);
+    ad2cp1d = AD2CP(ad2cp_time1d, ad2cp_heading1d, ad2cp_pitch1d, ad2cp_roll1d, ad2cp_pressure1d, ad2cp_alt1d, ad2cp_v1_ch1_1d, ad2cp_v2_ch1_1d, ad2cp_v3_ch1_1d, ad2cp_v4_ch1_1d, ad2cp_v1_ch2_1d, ad2cp_v2_ch2_1d, ad2cp_v3_ch2_1d, ad2cp_v4_ch2_1d, ad2cp_v1_ch3_1d, ad2cp_v2_ch3_1d, ad2cp_v3_ch3_1d, ad2cp_v4_ch3_1d, ad2cp_v1_ch4_1d, ad2cp_v2_ch4_1d, ad2cp_v3_ch4_1d, ad2cp_v4_ch4_1d, ad2cp_v1_ch5_1d, ad2cp_v2_ch5_1d, ad2cp_v3_ch5_1d, ad2cp_v4_ch5_1d, ad2cp_v1_ch6_1d, ad2cp_v2_ch6_1d, ad2cp_v3_ch6_1d, ad2cp_v4_ch6_1d);
 
     # combinating NAV, CTD, and FLBBCD data into one glider data structure
-    glider = SeaExplorer(nav, ctd, flbbcd, nav1d, ctd1d, flbbcd1d);
+    glider = SeaExplorer(nav, ctd, flbbcd, ad2cp, nav1d, ctd1d, flbbcd1d, ad2cp1d);
 
     return glider
 end
