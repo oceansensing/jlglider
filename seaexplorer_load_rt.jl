@@ -2,7 +2,7 @@
 # gong@vims.edu 20221021
 
 import seaexplorer_functions: load_NAV_rt, load_PLD_rt
-import seaexplorer_types: NAV_RT, PLD_RT
+#import seaexplorer_types: NAV_RT, PLD_RT
 
 # setting src and data directory paths
 srcdir = "/Users/gong/GitHub/jlglider/";

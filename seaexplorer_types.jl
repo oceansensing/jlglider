@@ -5,6 +5,7 @@ module seaexplorer_types
 using Dates
 
 mutable struct NAV_RT
+    yo::Array{Int64};
     t::Array{DateTime};
     z::Array{AbstractFloat};
     lon::Array{AbstractFloat};
@@ -28,6 +29,7 @@ mutable struct NAV_RT
 end
 
 mutable struct PLD_RT
+    yo::Array{Int64};
     t::Array{DateTime};
     z::Array{AbstractFloat};
     lon::Array{AbstractFloat};
