@@ -20,8 +20,8 @@ hchla = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = chla, seriestype=:sca
 hbb700 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = bb700, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
 hcdom = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = cdom, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
 
-norsephysplot = Plots.plot(htemp, hsalt, heps1, heps2, layout = l8out4, size=(800,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "SEA064 TKE EPS1" "SEA064 TKE EPS2"]);
-norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(800,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
+norsephysplot = Plots.plot(htemp, hsalt, heps1, heps2, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "SEA064 TKE EPS1" "SEA064 TKE EPS2"]);
+norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
 
 Plots.savefig(norsephysplot, "norse_sea064_physics.html")
 Plots.savefig(norseoptcplot, "norse_sea064_optics.html")
