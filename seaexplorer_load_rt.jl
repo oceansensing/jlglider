@@ -7,7 +7,8 @@ import seaexplorer_functions: load_NAV_rt, load_PLD_rt
 # setting src and data directory paths
 srcdir = "/Users/gong/GitHub/jlglider/";
 #dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
-dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
+#dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
+dataroot = "/Users/gong/Research/sea064/";
 
 # define dataset loading parameters
 #project = "maracoos"
@@ -22,7 +23,8 @@ glidername = "sea064"
 mission = "37"
 
 # define data load location
-datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
+#datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
+datadir = dataroot;
 navdir = datadir * "realtime/";
 scidir = datadir * "realtime/";
 
