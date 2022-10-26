@@ -10,21 +10,21 @@ t2 = Dates.DateTime(2022,10,24,12,0,0);
 l8out4 = @layout([a; b; c; d])
 l8out3 = @layout([a; b; c; d])
 
-htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
-hsalt = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = salt, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
+htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 6), colorbar = false)
+hsalt = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = salt, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(34.6, 35), colorbar = true)
 
 heps1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(eps1), seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
 heps2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(eps2), seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
 
-hchla = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = chla, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
-hbb700 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = bb700, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
-hcdom = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = cdom, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
+hchla = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = chla, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(0.0, 0.6))
+hbb700 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = bb700, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(0.0, 0.01))
+hcdom = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = cdom, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 0.5))
 
 norsephysplot = Plots.plot(htemp, hsalt, heps1, heps2, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "SEA064 TKE EPS1" "SEA064 TKE EPS2"]);
 norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
 
-Plots.savefig(norsephysplot, "norse_sea064_physics.html")
-Plots.savefig(norseoptcplot, "norse_sea064_optics.html")
+Plots.savefig(norsephysplot, "norse_sea064_physics.html");
+#Plots.savefig(norseoptcplot, "norse_sea064_optics.html");
 
 #norseplot = Plots.plot(htemp, hsalt, layout = l8out, size=(1300,1300), framestyle=:box, legend=:outertopright, title=["temperature" "salinity"]);
 #Plots.savefig(norseplot, "norse_temp_salt.html")
