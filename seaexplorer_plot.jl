@@ -9,11 +9,15 @@ figoutdir = "/Users/gong/Research/sea064/figures/"
 t1 = Dates.DateTime(2022,10,21,12,0,0);
 t2 = Dates.DateTime(2022,10,24,12,0,0);
 
+l8out5 = @layout([a; b; c; d; e])
 l8out4 = @layout([a; b; c; d])
-l8out3 = @layout([a; b; c; d])
+l8out3 = @layout([a; b; c])
 
 htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 6), colorbar = false)
+#Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
+
 hsalt = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = salt, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(34.6, 35), colorbar = true)
+hsigma0 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = sigma0, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(27.4, 28.1), colorbar = true)
 
 heps1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(eps1), seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
 heps2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(eps2), seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="")
@@ -22,7 +26,7 @@ hchla = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = chla, seriestype=:sca
 hbb700 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = bb700, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(0.0, 0.01))
 hcdom = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = cdom, seriestype=:scatter, c=:jet, markersize = 3, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 0.5))
 
-norsephysplot = Plots.plot(htemp, hsalt, heps1, heps2, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "SEA064 TKE EPS1" "SEA064 TKE EPS2"]);
+norsephysplot = Plots.plot(htemp, hsalt, hsigma0, heps1, heps2, layout = l8out5, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "TKE EPS1" "TKE EPS2"]);
 norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
 
 Plots.savefig(norsephysplot, figoutdir * "norse_sea064_physics.html");

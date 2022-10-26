@@ -54,6 +54,14 @@ function cleanSalt(varin)
     return varout;
 end
 
+function cleanPress(varin)
+    varout = deepcopy(varin);
+    badind = findall((varin .>= 7500.0) .|| (varin .< 0.0));
+    varout[badind] .= NaN;
+    varout = convert(Vector{Float64}, varout);
+    return varout;
+end
+
 function cleanFLBBCDchl(varin)
     varout = deepcopy(varin);
     badind = findall((varin .>= 50.0) .|| (varin .<= -1.0));
