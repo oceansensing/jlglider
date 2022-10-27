@@ -62,6 +62,14 @@ function cleanPress(varin)
     return varout;
 end
 
+function clean9999(varin)
+    varout = deepcopy(varin);
+    badind = findall(varin .>= 7500.0);
+    varout[badind] .= NaN;
+    varout = convert(Vector{Float64}, varout);
+    return varout;
+end
+
 function cleanFLBBCDchl(varin)
     varout = deepcopy(varin);
     badind = findall((varin .>= 50.0) .|| (varin .<= -1.0));
