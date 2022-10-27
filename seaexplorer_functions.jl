@@ -388,6 +388,9 @@ function load_PLD_rt(glidername::String, mission::String, scidir::String, allfla
         mr1000g_eps2 = df."MR1000G-RDL_EPS2";
         mr1000g_qc2 = df."MR1000G-RDL_QC2";
 
+        tmpvar = Array{Float64,1}(undef, length(ad2cp_alt));
+        tmpvar .= NaN;
+
         if allflag == 1
             ad2cp_Unorth = df.AD2CP_Unorth_c;
             ad2cp_Ueast = df.AD2CP_Ueast_c;
@@ -395,11 +398,11 @@ function load_PLD_rt(glidername::String, mission::String, scidir::String, allfla
             ad2cp_Udir = df.AD2CP_Udir_c;
             ad2cp_qf = df.AD2CP_QF_c;
         else
-            ad2cp_Unorth = [];
-            ad2cp_Ueast = [];
-            ad2cp_Utot = [];
-            ad2cp_Udir = [];
-            ad2cp_qf = [];
+            ad2cp_Unorth = tmpvar;
+            ad2cp_Ueast = tmpvar;
+            ad2cp_Utot = tmpvar;
+            ad2cp_Udir = tmpvar;
+            ad2cp_qf = tmpvar;
         end
 
         yo1d = cat(yo1d, yo[1], dims = 1);
@@ -460,14 +463,12 @@ function load_PLD_rt(glidername::String, mission::String, scidir::String, allfla
         mr1000g_eps2_1d = cat(mr1000g_eps2_1d, mr1000g_eps2, dims = 1);
         mr1000g_qc2_1d = cat(mr1000g_qc2_1d, mr1000g_qc2, dims = 1);
 
-        if allflag == 1
-            ad2cp_Unorth_1d = cat(ad2cp_Unorth_1d, ad2cp_Unorth, dims = 1);
-            ad2cp_Ueast_1d = cat(ad2cp_Ueast_1d, ad2cp_Ueast, dims = 1);
-            ad2cp_Utot_1d = cat(ad2cp_Utot_1d, ad2cp_Utot, dims = 1);
-            ad2cp_Udir_1d = cat(ad2cp_Udir_1d, ad2cp_Udir, dims = 1);
-            ad2cp_qf_1d = cat(ad2cp_qf_1d, ad2cp_qf, dims = 1);
-        end
-
+        ad2cp_Unorth_1d = cat(ad2cp_Unorth_1d, ad2cp_Unorth, dims = 1);
+        ad2cp_Ueast_1d = cat(ad2cp_Ueast_1d, ad2cp_Ueast, dims = 1);
+        ad2cp_Utot_1d = cat(ad2cp_Utot_1d, ad2cp_Utot, dims = 1);
+        ad2cp_Udir_1d = cat(ad2cp_Udir_1d, ad2cp_Udir, dims = 1);
+        ad2cp_qf_1d = cat(ad2cp_qf_1d, ad2cp_qf, dims = 1);
+        
         push!(pld_rt, PLD_RT(yo, t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt,  ad2cp_v1_cn1, ad2cp_v2_cn1, ad2cp_v3_cn1, ad2cp_v4_cn1, ad2cp_v1_cn2, ad2cp_v2_cn2, ad2cp_v3_cn2, ad2cp_v4_cn2, ad2cp_v1_cn3, ad2cp_v2_cn3, ad2cp_v3_cn3, ad2cp_v4_cn3, ad2cp_v1_cn4, ad2cp_v2_cn4, ad2cp_v3_cn4, ad2cp_v4_cn4, ad2cp_v1_cn5, ad2cp_v2_cn5, ad2cp_v3_cn5, ad2cp_v4_cn5, ad2cp_v1_cn6, ad2cp_v2_cn6, ad2cp_v3_cn6, ad2cp_v4_cn6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2, ad2cp_Unorth, ad2cp_Ueast, ad2cp_Utot, ad2cp_Udir, ad2cp_qf));    
     end #for
     pld1d_rt = PLD_RT(yo1d, t1d, z1d, lon1d, lat1d, nav_resource1d, ad2cp_time1d, ad2cp_heading1d, ad2cp_pitch1d, ad2cp_roll1d, ad2cp_pressure1d, ad2cp_alt1d, ad2cp_v1_cn1_1d, ad2cp_v2_cn1_1d, ad2cp_v3_cn1_1d, ad2cp_v4_cn1_1d, ad2cp_v1_cn2_1d, ad2cp_v2_cn2_1d, ad2cp_v3_cn2_1d, ad2cp_v4_cn2_1d, ad2cp_v1_cn3_1d, ad2cp_v2_cn3_1d, ad2cp_v3_cn3_1d, ad2cp_v4_cn3_1d, ad2cp_v1_cn4_1d, ad2cp_v2_cn4_1d, ad2cp_v3_cn4_1d, ad2cp_v4_cn4_1d, ad2cp_v1_cn5_1d, ad2cp_v2_cn5_1d, ad2cp_v3_cn5_1d, ad2cp_v4_cn5_1d, ad2cp_v1_cn6_1d, ad2cp_v2_cn6_1d, ad2cp_v3_cn6_1d, ad2cp_v4_cn6_1d, flbbcd_chl_count_1d, flbbcd_chl_scaled_1d, flbbcd_bb_700_count_1d, flbbcd_bb_700_scaled_1d, flbbcd_cdom_count_1d, flbbcd_cdom_scaled_1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d, mr1000g_t1_avg_1d, mr1000g_t2_avg_1d, mr1000g_sh1_std_1d, mr1000g_sh2_std_1d, mr1000g_press_avg_1d, mr1000g_incly_avg_1d, mr1000g_eps1_1d, mr1000g_qc1_1d, mr1000g_eps2_1d, mr1000g_qc2_1d, ad2cp_Unorth_1d, ad2cp_Ueast_1d, ad2cp_Utot_1d, ad2cp_Udir_1d, ad2cp_qf_1d);

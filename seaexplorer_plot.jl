@@ -20,10 +20,10 @@ htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:sca
 #Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
 hsalt = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = salt, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(34.6, 35), colorbar = true)
 hsigma0 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = sigma0, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(27.4, 28.1), colorbar = false)
-hUeast = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = ad2cp_Ueast, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.4, 0.4), colorbar = false)
-hUnorth = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = ad2cp_Unorth, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.4, 0.4), colorbar = false)
+hUeast = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = ad2cp_Ueast, seriestype=:scatter, c=:vik, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.4, 0.4), colorbar = false)
+hUnorth = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = ad2cp_Unorth, seriestype=:scatter, c=:vik, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.4, 0.4), colorbar = false)
 
-hMReps1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(mr_eps1), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = true, label="")
+hMReps1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(mr_eps1), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMReps2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(mr_eps2), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMRqc1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = mr_qc1, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMRqc2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = mr_qc2, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
