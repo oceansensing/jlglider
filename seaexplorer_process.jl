@@ -1,6 +1,6 @@
 #include("seaexplorer_load_rt.jl")
 using NaNMath
-import seaexplorer_functions: cleanEPS, cleanTemp, cleanSalt, cleanPress, cleanFLBBCDchl, cleanFLBBCDbb700, cleanFLBBCDcdom
+import seaexplorer_functions: cleanEPS, cleanTemp, cleanSalt, cleanPress, clean9999, cleanFLBBCDchl, cleanFLBBCDbb700, cleanFLBBCDcdom
 import gsw_c2po: sigma0_from_t_sp
 
 eps1 = cleanEPS(sea064pld1d.mr1000g_eps1);

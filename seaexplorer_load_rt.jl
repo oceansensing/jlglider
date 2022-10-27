@@ -28,5 +28,5 @@ datadir = dataroot;
 navdir = datadir * "realtime/";
 scidir = datadir * "realtime/";
 
-(sea064nav, sea064nav1d) = load_NAV_rt(glidername, mission, navdir);
-(sea064pld, sea064pld1d) = load_PLD_rt(glidername, mission, scidir);
+(sea064nav, sea064nav1d) = load_NAV_rt(glidername, mission, navdir, 1);
+(sea064pld, sea064pld1d) = load_PLD_rt(glidername, mission, scidir, 1);

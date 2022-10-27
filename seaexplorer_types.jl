@@ -86,6 +86,11 @@ mutable struct PLD_RT
     mr1000g_qc1::Array{AbstractFloat};
     mr1000g_eps2::Array{AbstractFloat};
     mr1000g_qc2::Array{AbstractFloat};
+    ad2cp_Unorth::Array{AbstractFloat};
+    ad2cp_Ueast::Array{AbstractFloat};
+    ad2cp_Utot::Array{AbstractFloat};
+    ad2cp_Udir::Array{AbstractFloat};
+    ad2cp_qf::Array{AbstractFloat};
 end
 
 mutable struct NAV
