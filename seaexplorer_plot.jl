@@ -16,7 +16,7 @@ l8out3 = @layout([a; b; c])
 
 ms = 2;
 
-htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 6), colorbar = false)
+htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:scatter, c=:thermal, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 6), colorbar = false)
 #Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
 hsalt = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = salt, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(34.6, 35), colorbar = true)
 hsigma0 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = sigma0, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(27.4, 28.1), colorbar = false)
