@@ -70,6 +70,14 @@ function clean9999(varin)
     return varout;
 end
 
+function cleanAD2CP(varin)
+    varout = deepcopy(varin);
+    badind = findall(varin .<= -9000.0);
+    varout[badind] .= NaN;
+    varout = convert(Vector{Float64}, varout);
+    return varout;
+end
+
 function cleanFLBBCDchl(varin)
     varout = deepcopy(varin);
     badind = findall((varin .>= 50.0) .|| (varin .<= -1.0));

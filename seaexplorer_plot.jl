@@ -18,12 +18,13 @@ ms = 2;
 
 htemp = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = temp, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 6), colorbar = false)
 #Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
-
 hsalt = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = salt, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(34.6, 35), colorbar = true)
 hsigma0 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = sigma0, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(27.4, 28.1), colorbar = false)
+hUeast = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = ad2cp_Ueast, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.4, 0.4), colorbar = false)
+hUnorth = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = ad2cp_Unorth, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.4, 0.4), colorbar = false)
 
-hMReps1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(eps1), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = true, label="")
-hMReps2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(eps2), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
+hMReps1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(mr_eps1), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = true, label="")
+hMReps2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(mr_eps2), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMRqc1 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = mr_qc1, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMRqc2 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = mr_qc2, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMRsh1std = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = log10.(mr_sh1_std), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
@@ -33,7 +34,7 @@ hchla = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = chla, seriestype=:sca
 hbb700 = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = bb700, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0.0, 0.01))
 hcdom = Plots.plot(sea064pld1d.t, -sea064pld1d.z, zcolor = cdom, seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 0.5))
 
-norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hMReps1, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "TKE EPS1"]);
+norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hMReps1, hUeast, hUnorth, layout = l8out6, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "TKE EPS1" "U (east)" "V (north)"]);
 norseMRplot = Plots.plot(hMReps1, hMReps2, hMRqc1, hMRqc2, hMRsh1std, hMRsh2std, layout = l8out6, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["TKE EPS1" "TKE EPS2" "QC1" "QC2" "Shear 1 STDDEV" "Shear 2 STDDEV"]);
 
 #norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
