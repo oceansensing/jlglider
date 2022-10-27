@@ -110,9 +110,9 @@ function load_NAV_rt(glidername::String, mission::String, navdir::String, allfla
     allindx = findall(glilist_suffix .== "all");
 
     if allflag == 1
-        glilist = glilist_rt[allindx];
+        glilist_rt = glilist_rt[allindx];
     else
-        glilist = glilist_rt[yolist];
+        glilist_rt = glilist_rt[yolist];
     end
 
     #Glob.glob("SEA064.37.pld1.sub.*", navdir);
