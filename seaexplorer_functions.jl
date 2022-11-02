@@ -10,14 +10,6 @@ function missing2nan(varin)
     varout = Float64.(collect(Missings.replace(varin, NaN)));
 end
 
-function cleanAD2CP(varin)
-    if typeof(collect(varin)) != Vector{Float64}
-        varout = parse.(Float64, varin);
-    else
-        varout = varin;
-    end
-end
-
 function cleanAD2CPtime(varin, varalt)
     varout = copy(varin);
     badtind = findall(varin .== "00000000 00:00:00")
@@ -71,12 +63,20 @@ function clean9999(varin)
 end
 
 function cleanAD2CP(varin)
-    varout = deepcopy(varin);
-    badind = findall(varin .<= -9000.0);
+    if typeof(collect(varin)) != Vector{Float64}
+        varout = parse.(Float64, varin);
+    else
+        varout = varin;
+    end
+    #varout = deepcopy(varin);
+    badind = findall(varout .<= -9000.0);
     varout[badind] .= NaN;
-    varout = convert(Vector{Float64}, varout);
+    #varout = convert(Vector{Float64}, varout);
     return varout;
 end
+
+#function cleanAD2CP(varin)
+#end
 
 function cleanFLBBCDchl(varin)
     varout = deepcopy(varin);
@@ -102,25 +102,27 @@ function cleanFLBBCDcdom(varin)
     return varout;
 end
 
-function load_NAV_rt(glidername::String, mission::String, navdir::String, allflag::Int)
+function load_NAV_rt(gliderSN::Int, mission::String, navdir::String, allflag::Int)
     nav_rt = NAV_RT[];
 
-    missionroot = uppercase(glidername) * "." * mission;
-    gliroot_rt = missionroot * "." * "gli.sub.";
-    glilist_rt = Glob.glob(gliroot_rt * "*", navdir);
+    #missionroot = uppercase(glidername) * "." * mission;
+    #gliroot_rt = missionroot * "." * "gli.sub.";
+    #glilist_rt = Glob.glob(gliroot_rt * "*", navdir);
+
+    glilist = Glob.glob( "*" * string(gliderSN, pad=3) * ".gli.sub.*", navdir);
 
     # separating '.all' from '.###' files
     glilist_suffix =[];
-    for i = 1:length(glilist_rt)
-        glilist_suffix = push!(glilist_suffix, glilist_rt[i][end-2:end]);
+    for i = 1:length(glilist)
+        glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
     end
     yolist = findall(glilist_suffix .!= "all");
     allindx = findall(glilist_suffix .== "all");
 
     if allflag == 1
-        glilist_rt = glilist_rt[allindx];
+        glilist = glilist[allindx];
     else
-        glilist_rt = glilist_rt[yolist];
+        glilist = glilist[yolist];
     end
 
     #Glob.glob("SEA064.37.pld1.sub.*", navdir);
@@ -152,8 +154,8 @@ function load_NAV_rt(glidername::String, mission::String, navdir::String, allfla
     Altitude1d = [];    
 
     # loop through the list of realtime navigation (nav) data files
-    for i = 1:length(glilist_rt)
-        yostring = glilist_rt[i][end-2:end];
+    for i = 1:length(glilist)
+        yostring = glilist[i][end-2:end];
 
         if allflag == 1
             yo = parse.(Int, glilist_suffix[yolist]);
@@ -161,8 +163,12 @@ function load_NAV_rt(glidername::String, mission::String, navdir::String, allfla
             yo = [parse(Int, yostring)];
         end
 
+        # load nav files, handle .gz if they are compressed
         #navfilepath = navdir * gliroot_rt * string(i, pad=3); 
-        navfilepath = navdir * gliroot_rt * yostring; 
+        navfilepath = navdir * gliroot_rt * yostring * ".gz"; 
+        if isfile(navfilepath) != true
+            navfilepath = navdir * gliroot_rt * yostring; 
+        end
         print(navfilepath * "\n")
         df = CSV.read(navfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
@@ -321,8 +327,12 @@ function load_PLD_rt(glidername::String, mission::String, scidir::String, allfla
             yo = [parse(Int, yostring)];
         end
 
-        pldfilepath = scidir * pldroot_rt * yostring; 
+        # load science files, handle .gz if they are compressed
         #pldfilepath = scidir * pldroot_rt * string(i, pad=3); 
+        pldfilepath = scidir * pldroot_rt * yostring * ".gz";
+        if isfile(pldfilepath) != true
+            pldfilepath = scidir * pldroot_rt * yostring;
+        end
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
