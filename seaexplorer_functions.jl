@@ -86,7 +86,7 @@ end
 
 function cleanFLBBCDchl(varin)
     varout = deepcopy(varin);
-    badind = findall((varin .>= 50.0) .|| (varin .<= -1.0));
+    badind = findall((varin .>= 50.0) .|| (varin .<= 0.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
     return varout;

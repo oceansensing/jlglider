@@ -16,6 +16,7 @@ t2 = Dates.DateTime(2022,11,30,12,0,0);
 
 tind = findall(t1 .<= sea064pld1d.t .<= t2);
 
+l8out7 = @layout([a; b; c; d; e; f; g])
 l8out6 = @layout([a; b; c; d; e; f])
 l8out5 = @layout([a; b; c; d; e])
 l8out4 = @layout([a; b; c; d])
@@ -23,12 +24,27 @@ l8out3 = @layout([a; b; c])
 
 ms = 2;
 
-htemp = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = temp[tind], seriestype=:scatter, c=:thermal, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(3, 8.2), colorbar = false)
+if mission == 38 # LBE
+    clims_temp = (3, 8.2);
+    clims_salt = (35, 35.2);
+    clims_sigma0 = (27.2, 27.9);
+    clims_spice0 = (0.5, 1.0);
+    clims_uv = (-0.6, 0.6);
+elseif mission == 37 # Jan Mayen
+    clims_temp = (-0.5, 6.0);
+    clims_salt = (34.6, 35.0);
+    clims_sigma0 = (27.4, 28.1);
+    clims_spice0 = (0.5, 1.0);
+    clims_uv = (-0.4, 0.4);
+end
+
+htemp = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = temp[tind], seriestype=:scatter, c=:thermal, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_temp, colorbar = false)
 #Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
-hsalt = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = salt[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(35, 35.2), colorbar = true)
-hsigma0 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = sigma0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(27.2, 27.9), colorbar = false)
-hUeast = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = ad2cp_Ueast[tind], seriestype=:scatter, c=:vik, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.6, 0.6), colorbar = false)
-hUnorth = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = ad2cp_Unorth[tind], seriestype=:scatter, c=:vik, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.6, 0.6), colorbar = false)
+hsalt = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = salt[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_salt, colorbar = true)
+hsigma0 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = sigma0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_sigma0, colorbar = false)
+hspice0 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = spice0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_spice0, colorbar = false)
+hUeast = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = ad2cp_Ueast[tind], seriestype=:scatter, c=:vik, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_uv, colorbar = false)
+hUnorth = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = ad2cp_Unorth[tind], seriestype=:scatter, c=:vik, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_uv, colorbar = false)
 
 hMReps1 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(mr_eps1[tind]), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-12, -6))
 hMReps2 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(mr_eps2[tind]), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-12, -6))
@@ -37,11 +53,11 @@ hMRqc2 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = mr_qc2[t
 hMRsh1std = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(mr_sh1_std[tind]), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 hMRsh2std = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(mr_sh2_std[tind]), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="")
 
-hchla = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = chla[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0.0, 0.6))
-hbb700 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = bb700[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0.0, 0.01))
-hcdom = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = cdom[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-0.5, 0.5))
+hchla = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = chla[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 0.6))
+hbb700 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(bb700[tind] .+ 0.0001), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-5, -3))
+hcdom = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = cdom[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 1.0))
 
-norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hMReps1, hUeast, hUnorth, layout = l8out6, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "TKE EPS1" "U (east)" "V (north)"]);
+norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hspice0, hMReps1, hUeast, hUnorth, layout = l8out7, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "Spice0" "TKE EPS1" "U (east)" "V (north)"]);
 norseMRplot = Plots.plot(hMReps1, hMReps2, hMRsh1std, hMRsh2std, hMRqc1, hMRqc2, layout = l8out6, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["TKE EPS1" "TKE EPS2" "Shear 1 STDDEV" "Shear 2 STDDEV" "QC1" "QC2"]);
 
 norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
