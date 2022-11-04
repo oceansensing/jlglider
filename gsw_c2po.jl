@@ -18,4 +18,11 @@ function sigma0_from_t_sp(t, sp, p, lon, lat)
     return sigma0
 end
 
+function spice0_from_t_sp(t, sp, p, lon, lat)
+    saltA = gsw_sa_from_sp.(sp, p, lon, lat);
+    ctemp = gsw_ct_from_t.(saltA, t, p);
+    spice0 = gsw_spiciness0.(saltA, ctemp);
+    return spice0
+end
+
 end
