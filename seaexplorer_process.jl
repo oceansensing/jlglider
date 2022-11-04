@@ -3,6 +3,7 @@ using NaNMath
 import seaexplorer_functions: cleanEPS, cleanTemp, cleanSalt, cleanPress, cleanAD2CP, clean9999, cleanFLBBCDchl, cleanFLBBCDbb700, cleanFLBBCDcdom
 import gsw_c2po: sigma0_from_t_sp
 
+#t = cleanTime(sea064pld1d.t);
 p = cleanPress(sea064pld1d.legato_pressure);
 temp = cleanTemp(sea064pld1d.legato_temperature);
 salt = cleanSalt(sea064pld1d.legato_salinity);

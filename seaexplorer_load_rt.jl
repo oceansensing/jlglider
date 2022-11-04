@@ -19,8 +19,8 @@ project = "norse"
 deploydate = "20221021"
 suffix = "deployment"
 
-glidername = "sea064"
-mission = "37"
+gliderSN = 64
+mission = 38
 
 # define data load location
 #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
@@ -28,5 +28,5 @@ datadir = dataroot;
 navdir = datadir * "realtime/";
 scidir = datadir * "realtime/";
 
-(sea064nav, sea064nav1d) = load_NAV_rt(glidername, mission, navdir, 0);
-(sea064pld, sea064pld1d) = load_PLD_rt(glidername, mission, scidir, 0);
+(sea064nav, sea064nav1d) = load_NAV_rt(gliderSN, mission, navdir, 1);
+(sea064pld, sea064pld1d) = load_PLD_rt(gliderSN, mission, scidir, 1);

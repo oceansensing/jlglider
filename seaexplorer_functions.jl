@@ -10,6 +10,12 @@ function missing2nan(varin)
     varout = Float64.(collect(Missings.replace(varin, NaN)));
 end
 
+function cleanTime(varin)
+    badtind = findall(varin .<= Dates.DateTime(2022,10,21,12,0,0));
+    varout = varin;
+    varout[badtind] .= NaN;
+end
+
 function cleanAD2CPtime(varin, varalt)
     varout = copy(varin);
     badtind = findall(varin .== "00000000 00:00:00")
@@ -66,7 +72,7 @@ function cleanAD2CP(varin)
     if typeof(collect(varin)) != Vector{Float64}
         varout = parse.(Float64, varin);
     else
-        varout = varin;
+        varout = convert.(Float64, varin);
     end
     #varout = deepcopy(varin);
     badind = findall(varout .<= -9000.0);
@@ -102,27 +108,61 @@ function cleanFLBBCDcdom(varin)
     return varout;
 end
 
-function load_NAV_rt(gliderSN::Int, mission::String, navdir::String, allflag::Int)
+function load_NAV_rt(gliderSN::Int, mission::Int, navdir::String, allflag::Int)
     nav_rt = NAV_RT[];
 
     #missionroot = uppercase(glidername) * "." * mission;
     #gliroot_rt = missionroot * "." * "gli.sub.";
     #glilist_rt = Glob.glob(gliroot_rt * "*", navdir);
 
-    glilist = Glob.glob( "*" * string(gliderSN, pad=3) * ".gli.sub.*", navdir);
+    glilist = Glob.glob( "*" * string(gliderSN; pad=3) * "." * string(mission) * ".gli.sub.*", navdir);
 
     # separating '.all' from '.###' files
-    glilist_suffix =[];
+    #glilist_suffix = [];
+    yos = [];
+    yolist = [];
+    allindx = 0;
     for i = 1:length(glilist)
-        glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
+        suffix2 = glilist[i][end-1:end]
+        fnlen = length(glilist[i]) - length(navdir);
+        if suffix2 == "gz"
+            if fnlen == 22  # sea064.37.gli.sub.1.gz
+                yo = parse(Int,glilist[i][end-3:end-2]);
+            elseif fnlen == 23 # sea064.37.gli.sub.10.gz
+                yo = parse(Int,glilist[i][end-4:end-2]);
+            elseif fnlen == 24 # sea064.37.gli.sub.100.gz
+                yo = parse(Int,glilist[i][end-5:end-2]);
+            elseif fnlen == 25 # sea064.37.gli.sub.1000.gz
+                yo = parse(Int,glilist[i][end-6:end-2]);
+            end
+            yos = push!(yos, yo);
+            yolist = push!(yolist, glilist[i]);
+        elseif (suffix2 != "gz" && suffix2 != "ll")
+            if fnlen == 19  # sea064.37.gli.sub.1
+                yo = parse(Int,glilist[i][end:end]);
+            elseif fnlen == 20 # sea064.37.gli.sub.10
+                yo = parse(Int,glilist[i][end-1:end]);
+            elseif fnlen == 21 # sea064.37.gli.sub.100
+                yo = parse(Int,glilist[i][end-2:end]);
+            elseif fnlen == 22 # sea064.37.gli.sub.1000
+                yo = parse(Int,glilist[i][end-3:end]);
+            end
+            yos = push!(yos, yo);
+            yolist = push!(yolist, glilist[i]);
+        elseif suffix2 == "ll"
+            if fnlen == 21 # SEA064.37.gli.sub.all
+                allindx = i;
+            end
+        end
+        #glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
     end
-    yolist = findall(glilist_suffix .!= "all");
-    allindx = findall(glilist_suffix .== "all");
+    #yolist = findall(glilist_suffix .!= "all");
+    #allindx = findall(glilist_suffix .== "all");
 
     if allflag == 1
-        glilist = glilist[allindx];
+        glilist = [glilist[allindx]];
     else
-        glilist = glilist[yolist];
+        glilist = yolist;
     end
 
     #Glob.glob("SEA064.37.pld1.sub.*", navdir);
@@ -155,20 +195,24 @@ function load_NAV_rt(gliderSN::Int, mission::String, navdir::String, allflag::In
 
     # loop through the list of realtime navigation (nav) data files
     for i = 1:length(glilist)
-        yostring = glilist[i][end-2:end];
+        #yostring = glilist[i][end-2:end];
 
         if allflag == 1
-            yo = parse.(Int, glilist_suffix[yolist]);
+        #    yo = parse.(Int, glilist_suffix[yolist]);
+            yo = yos;
         else
-            yo = [parse(Int, yostring)];
+        #    yo = [parse(Int, yostring)];
+            yo = [yos[i]];
         end
 
         # load nav files, handle .gz if they are compressed
-        #navfilepath = navdir * gliroot_rt * string(i, pad=3); 
-        navfilepath = navdir * gliroot_rt * yostring * ".gz"; 
-        if isfile(navfilepath) != true
-            navfilepath = navdir * gliroot_rt * yostring; 
-        end
+        ##navfilepath = navdir * gliroot_rt * string(i, pad=3); 
+        #navfilepath = navdir * gliroot_rt * yostring * ".gz"; 
+        #if isfile(navfilepath) != true
+        #    navfilepath = navdir * gliroot_rt * yostring; 
+        #end
+
+        navfilepath = glilist[i];
         print(navfilepath * "\n")
         df = CSV.read(navfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
@@ -196,7 +240,7 @@ function load_NAV_rt(gliderSN::Int, mission::String, navdir::String, allflag::In
         Voltage = df.Voltage;
         Altitude = df.Altitude;
 
-        yo1d = cat(yo1d, yo[1], dims=1);
+        yo1d = cat(yo1d, yo, dims=1);
         t1d = cat(t1d, t, dims=1);
         z1d = cat(z1d, z, dims=1);
         lon1d = cat(lon1d, lon, dims=1);
@@ -228,25 +272,73 @@ function load_NAV_rt(gliderSN::Int, mission::String, navdir::String, allflag::In
     return nav_rt, nav1d_rt
 end
 
-function load_PLD_rt(glidername::String, mission::String, scidir::String, allflag::Int)
+function load_PLD_rt(gliderSN::Int, mission::Int, scidir::String, allflag::Int)
     pld_rt = PLD_RT[];
 
-    missionroot = uppercase(glidername) * "." * mission;
-    pldroot_rt = missionroot * "." * "pld1.sub.";
-    pldlist_rt = Glob.glob(pldroot_rt * "*", scidir);
+    #missionroot = uppercase(glidername) * "." * mission;
+    #pldroot_rt = missionroot * "." * "pld1.sub.";
+    #pldlist_rt = Glob.glob(pldroot_rt * "*", scidir);
 
-    pldlist_suffix =[];
-    for i = 1:length(pldlist_rt)
-        pldlist_suffix = push!(pldlist_suffix, pldlist_rt[i][end-2:end]);
+    pldlist = Glob.glob( "*" * string(gliderSN; pad=3) * "." * string(mission) * ".pld1.sub.*", scidir);
+
+    #pldlist_suffix =[];
+    #for i = 1:length(pldlist_rt)
+    #    pldlist_suffix = push!(pldlist_suffix, pldlist_rt[i][end-2:end]);
+    #end
+    #yolist = findall(pldlist_suffix .!= "all");
+    #allindx = findall(pldlist_suffix .== "all");
+
+    yos = [];
+    yolist = [];
+    allindx = 0;
+    for i = 1:length(pldlist)
+        suffix2 = pldlist[i][end-1:end]
+        fnlen = length(pldlist[i]) - length(scidir);
+        if suffix2 == "gz"
+            if fnlen == 22+1  # sea064.37.pld1.sub.1.gz
+                yo = parse(Int,pldlist[i][end-3:end-2]);
+            elseif fnlen == 23+1 # sea064.37.pld1.sub.10.gz
+                yo = parse(Int,pldlist[i][end-4:end-2]);
+            elseif fnlen == 24+1 # sea064.37.pld1.sub.100.gz
+                yo = parse(Int,pldlist[i][end-5:end-2]);
+            elseif fnlen == 25+1 # sea064.37.pld1.sub.1000.gz
+                yo = parse(Int,pldlist[i][end-6:end-2]);
+            end
+            yos = push!(yos, yo);
+            yolist = push!(yolist, pldlist[i]);
+        elseif (suffix2 != "gz" && suffix2 != "ll")
+            if fnlen == 19+1  # sea064.37.pld1.sub.1
+                yo = parse(Int,pldlist[i][end:end]);
+            elseif fnlen == 20+1 # sea064.37.pld1.sub.10
+                yo = parse(Int,pldlist[i][end-1:end]);
+            elseif fnlen == 21+1 # sea064.37.pld1.sub.100
+                yo = parse(Int,pldlist[i][end-2:end]);
+            elseif fnlen == 22+1 # sea064.37.pld1.sub.1000
+                yo = parse(Int,pldlist[i][end-3:end]);
+            end
+            yos = push!(yos, yo);
+            yolist = push!(yolist, pldlist[i]);
+        elseif suffix2 == "ll"
+            if fnlen == 21+1 # SEA064.37.pld1.sub.all
+                allindx = i;
+            end
+        end
+        #glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
     end
-    yolist = findall(pldlist_suffix .!= "all");
-    allindx = findall(pldlist_suffix .== "all");
+    #yolist = findall(glilist_suffix .!= "all");
+    #allindx = findall(glilist_suffix .== "all");
 
     if allflag == 1
-        pldlist_rt = pldlist_rt[allindx];
+        pldlist = [pldlist[allindx]];
     else
-        pldlist_rt = pldlist_rt[yolist];
+        pldlist = yolist;
     end
+
+    #if allflag == 1
+    #    pldlist_rt = pldlist_rt[allindx];
+    #else
+    #    pldlist_rt = pldlist_rt[yolist];
+    #end
 
     # time data format
     timeformat = "dd/mm/yyyy HH:MM:SS.sss"
@@ -317,22 +409,26 @@ function load_PLD_rt(glidername::String, mission::String, scidir::String, allfla
     ad2cp_qf_1d = [];
 
     # loop through the list of realtime payload (pld) data files
-    for i = 1:length(pldlist_rt)
-        yostring = pldlist_rt[i][end-2:end];
+    for i = 1:length(pldlist)
+        #yostring = pldlist[i][end-2:end];
 
         # separating '.all' from '.###' files
         if allflag == 1
-            yo = parse.(Int, pldlist_suffix[yolist]);
+        #    yo = parse.(Int, pldlist_suffix[yolist]);
+            yo = yos
         else
-            yo = [parse(Int, yostring)];
+        #    yo = [parse(Int, yostring)];
+            yo = [yos[i]];
         end
 
         # load science files, handle .gz if they are compressed
-        #pldfilepath = scidir * pldroot_rt * string(i, pad=3); 
-        pldfilepath = scidir * pldroot_rt * yostring * ".gz";
-        if isfile(pldfilepath) != true
-            pldfilepath = scidir * pldroot_rt * yostring;
-        end
+        ##pldfilepath = scidir * pldroot_rt * string(i, pad=3); 
+        #pldfilepath = scidir * pldroot_rt * yostring * ".gz";
+        #if isfile(pldfilepath) != true
+        #    pldfilepath = scidir * pldroot_rt * yostring;
+        #end
+
+        pldfilepath = pldlist[i];
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
