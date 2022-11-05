@@ -18,6 +18,8 @@ end
 p = cleanPress(sea064pld1d.legato_pressure);
 temp = cleanTemp(sea064pld1d.legato_temperature);
 salt = cleanSalt(sea064pld1d.legato_salinity);
+saltA = gsw_sa_from_sp.(salt, p, lon, lat);
+ctemp = gsw_ct_from_t.(saltA, temp, p);
 sigma0 = sigma0_from_t_sp(temp, salt, p, lon, lat);
 spice0 = spice0_from_t_sp(temp, salt, p, lon, lat);
 

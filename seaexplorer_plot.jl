@@ -26,12 +26,14 @@ l8out3 = @layout([a; b; c])
 ms = 2;
 
 if mission == 38 # LBE
+    region = "LBE";
     clims_temp = (3, 8.2);
     clims_salt = (35, 35.2);
     clims_sigma0 = (27.2, 27.9);
     clims_spice0 = (0.5, 1.0);
     clims_uv = (-0.6, 0.6);
 elseif mission == 37 # Jan Mayen
+    region = "JM";
     clims_temp = (-0.5, 6.0);
     clims_salt = (34.6, 35.0);
     clims_sigma0 = (27.4, 28.1);
@@ -59,19 +61,22 @@ hchla = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = chla[tind
 hbb700 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(bb700[tind] .+ 0.0001), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-5, -3))
 hcdom = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = cdom[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 1.0))
 
-norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hspice0, hMReps1, hUeast, hUnorth, layout = l8out7, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "Spice0" "TKE EPS1" "U (east)" "V (north)"]);
-norseMRplot = Plots.plot(hN2, hMReps1, hMReps2, hMRsh1std, hMRsh2std, hMRqc1, hMRqc2, layout = l8out7, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["N2" "TKE EPS1" "TKE EPS2" "Shear 1 STDDEV" "Shear 2 STDDEV" "QC1" "QC2"]);
+hTS = Plots.plot(saltA[tind], ctemp[tind], zcolor = spice0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_spice0, xlims=(35.1, 35.4), ylim=(4, 9), colorbar = false);
 
-norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
+norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hspice0, hMReps1, hUeast, hUnorth, layout = l8out7, size=(1200,1500), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "Spice0" "TKE EPS1" "U (east)" "V (north)"]);
+norseMRplot = Plots.plot(hN2, hMReps1, hMReps2, hMRsh1std, hMRsh2std, hMRqc1, hMRqc2, layout = l8out7, size=(1200,1500), framestyle=:box, legend=:outertopright, title=["N2" "TKE EPS1" "TKE EPS2" "Shear 1 STDDEV" "Shear 2 STDDEV" "QC1" "QC2"]);
+norseTSplot = Plots.plot(hTS, size=(1000,1000), framestyle=:box, title="CT vs SA");
+norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1200,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
 
-Plots.savefig(norsephysplot, figoutdir * "norse_sea064_LBE_physics.html");
-Plots.savefig(norseMRplot, figoutdir * "norse_sea064_LBE_MR.html");
+Plots.savefig(norsephysplot, figoutdir * "norse_sea064_" * region * "_physics.html");
+Plots.savefig(norseMRplot, figoutdir * "norse_sea064_" * region * "_MR.html");
+Plots.savefig(norseTSplot, figoutdir * "norse_sea064_" * region * "_TS.html");
 
 #gr()
 #norseEPS1plot = Plots.plot(hMReps1, size = (1000,800), framestyle=:box, markersize = 3, title="SEA064 RT EPS1")
 #Plots.savefig(norseEPS1plot, figoutdir * "norse_sea064_MReps1.png");
 
-Plots.savefig(norseoptcplot, figoutdir * "norse_sea064_LBE_optics.html");
+Plots.savefig(norseoptcplot, figoutdir * "norse_sea064_" * region * "_optics.html");
 
 #norseplot = Plots.plot(htemp, hsalt, layout = l8out, size=(1300,1300), framestyle=:box, legend=:outertopright, title=["temperature" "salinity"]);
 #Plots.savefig(norseplot, "norse_temp_salt.html")
