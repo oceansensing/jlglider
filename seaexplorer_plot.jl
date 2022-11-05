@@ -6,13 +6,25 @@ plotly()
 
 figoutdir = "/Users/gong/Research/sea064/figures/"
 
-# Jan Mayen
-#t1 = Dates.DateTime(2022,10,21,12,0,0);
-#t2 = Dates.DateTime(2022,10,31,12,0,0);
-
-# Lofoten Basin Eddy
-t1 = Dates.DateTime(2022,11,03,12,0,0);
-t2 = Dates.DateTime(2022,11,30,12,0,0);
+if mission == 38 # LBE
+    region = "LBE"
+    clims_temp = (3, 8.2);
+    clims_salt = (35, 35.2);
+    clims_sigma0 = (27.2, 27.9);
+    clims_spice0 = (0.5, 1.0);
+    clims_uv = (-0.6, 0.6);
+    t1 = Dates.DateTime(2022,11,02,12,0,0);
+    t2 = Dates.DateTime(2022,11,30,12,0,0);
+elseif mission == 37 # Jan Mayen
+    region = "JM"
+    clims_temp = (-0.5, 6.0);
+    clims_salt = (34.6, 35.0);
+    clims_sigma0 = (27.4, 28.1);
+    clims_spice0 = (-0.1, 0.55);
+    clims_uv = (-0.4, 0.4);
+    t1 = Dates.DateTime(2022,10,21,12,0,0);
+    t2 = Dates.DateTime(2022,10,31,12,0,0);
+end
 
 tind = findall(t1 .<= sea064pld1d.t .<= t2);
 tindmid = findall((t1 .<= tmid .<= t2) .&& (zmid .<= -2.0));
@@ -24,22 +36,6 @@ l8out4 = @layout([a; b; c; d])
 l8out3 = @layout([a; b; c])
 
 ms = 2;
-
-if mission == 38 # LBE
-    region = "LBE";
-    clims_temp = (3, 8.2);
-    clims_salt = (35, 35.2);
-    clims_sigma0 = (27.2, 27.9);
-    clims_spice0 = (0.5, 1.0);
-    clims_uv = (-0.6, 0.6);
-elseif mission == 37 # Jan Mayen
-    region = "JM";
-    clims_temp = (-0.5, 6.0);
-    clims_salt = (34.6, 35.0);
-    clims_sigma0 = (27.4, 28.1);
-    clims_spice0 = (0.5, 1.0);
-    clims_uv = (-0.4, 0.4);
-end
 
 saltAi = 34.6:0.005:35.6;
 ctempi = -0.5:0.1:10;

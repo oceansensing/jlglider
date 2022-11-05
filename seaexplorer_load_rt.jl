@@ -19,8 +19,13 @@ project = "norse"
 deploydate = "20221021"
 suffix = "deployment"
 
-gliderSN = 64
-mission = 38
+if (@isdefined gliderSN) != true
+    gliderSN = 64
+end
+
+if (@isdefined mission) != true
+    mission = 38
+end
 
 # define data load location
 #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
