@@ -1,14 +1,30 @@
 #include("seaexplorer_load_rt.jl")
-using NaNMath
+using NaNMath, GibbsSeaWater
 import seaexplorer_functions: cleanEPS, cleanTemp, cleanSalt, cleanPress, cleanAD2CP, clean9999, cleanFLBBCDchl, cleanFLBBCDbb700, cleanFLBBCDcdom
-import gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp
+import gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
+
+lon = sea064pld1d.lon;
+lat = sea064pld1d.lat;
+t = sea064pld1d.t;
+
+badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< DateTime(2020,1,1,0,0,0)));
+if isempty(badind) != true
+    lon[badind] .= NaN;
+    lat[badind] .= NaN;
+    t[badind] .= t[badind[end]+1];
+end
 
 #t = cleanTime(sea064pld1d.t);
 p = cleanPress(sea064pld1d.legato_pressure);
 temp = cleanTemp(sea064pld1d.legato_temperature);
 salt = cleanSalt(sea064pld1d.legato_salinity);
-sigma0 = sigma0_from_t_sp(temp, salt, p, NaNMath.mean(sea064pld1d.lon), NaNMath.mean(sea064pld1d.lat));
-spice0 = spice0_from_t_sp(temp, salt, p, NaNMath.mean(sea064pld1d.lon), NaNMath.mean(sea064pld1d.lat));
+sigma0 = sigma0_from_t_sp(temp, salt, p, lon, lat);
+spice0 = spice0_from_t_sp(temp, salt, p, lon, lat);
+
+n2, pmid = N2_from_t_sp(temp, salt, p, lon, lat);
+zmid = gsw_z_from_p.(pmid, lat[2:end], 0, 0);
+tmid = t[1:end-1] .+ Second(15);
+
 mr_eps1 = cleanEPS(sea064pld1d.mr1000g_eps1);
 mr_eps2 = cleanEPS(sea064pld1d.mr1000g_eps2);
 mr_qc1 = clean9999(sea064pld1d.mr1000g_qc1);
