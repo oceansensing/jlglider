@@ -41,6 +41,13 @@ elseif mission == 37 # Jan Mayen
     clims_uv = (-0.4, 0.4);
 end
 
+saltAi = 34.6:0.005:35.6;
+ctempi = -0.5:0.1:10;
+ssaltA = repeat(reshape(saltAi, 1, :), length(ctempi), 1);
+cctemp = repeat(ctempi, 1, length(saltAi));
+ssigma0 = gsw_sigma0.(ssaltA, cctemp);
+sspice0 = gsw_spiciness0.(ssaltA, cctemp);
+
 htemp = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = temp[tind], seriestype=:scatter, c=:thermal, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_temp, colorbar = false)
 #Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
 hsalt = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = salt[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_salt, colorbar = true)
@@ -61,7 +68,10 @@ hchla = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = chla[tind
 hbb700 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(bb700[tind] .+ 0.0001), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-5, -3))
 hcdom = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = cdom[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 1.0))
 
-hTS = Plots.plot(saltA[tind], ctemp[tind], zcolor = spice0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_spice0, xlims=(35.1, 35.4), ylim=(4, 9), colorbar = false);
+
+hTS = Plots.plot(saltA[tind], ctemp[tind], zcolor = sigma0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=clims_sigma0, xlims=(35.1, 35.4), ylim=(4, 9), colorbar = false)
+Plots.contour!(saltAi, ctempi, ssigma0, contour_labels=true, linecolor = :black, seriescolor = :black)
+Plots.contour!(saltAi, ctempi, sspice0, contour_labels=true, linecolor = :black, seriescolor = :black)
 
 norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hspice0, hMReps1, hUeast, hUnorth, layout = l8out7, size=(1200,1500), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "Spice0" "TKE EPS1" "U (east)" "V (north)"]);
 norseMRplot = Plots.plot(hN2, hMReps1, hMReps2, hMRsh1std, hMRsh2std, hMRqc1, hMRqc2, layout = l8out7, size=(1200,1500), framestyle=:box, legend=:outertopright, title=["N2" "TKE EPS1" "TKE EPS2" "Shear 1 STDDEV" "Shear 2 STDDEV" "QC1" "QC2"]);
