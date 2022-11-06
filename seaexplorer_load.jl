@@ -1,7 +1,7 @@
 # loading realtime SeaExplorer data from NORSE
 # gong@vims.edu 20221021
 
-import seaexplorer_functions: load_NAV_rt, load_PLD_rt
+import seaexplorer_functions: load_NAV, load_PLD
 #import seaexplorer_types: NAV_RT, PLD_RT
 
 # setting src and data directory paths
@@ -31,7 +31,7 @@ end
 #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
 datadir = dataroot;
 navdir = datadir * "realtime/";
-scidir = datadir * "realtime/";
+scidir = datadir * "delayed/";
 
-(sea064nav, sea064nav1d) = load_NAV_rt(gliderSN, mission, navdir, 1);
-(sea064pld, sea064pld1d) = load_PLD_rt(gliderSN, mission, scidir, 1);
+(sea064nav, sea064nav1d) = load_NAV(gliderSN, mission, navdir, 0);
+(sea064pld, sea064pld1d) = load_PLD(gliderSN, mission, scidir, 2); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files

@@ -1,4 +1,4 @@
-mission = 38;
-include("seaexplorer_load_rt.jl");
+mission = 37;
+include("seaexplorer_load.jl");
 include("seaexplorer_process.jl");
 include("seaexplorer_plot.jl")

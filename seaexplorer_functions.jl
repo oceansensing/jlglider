@@ -108,7 +108,7 @@ function cleanFLBBCDcdom(varin)
     return varout;
 end
 
-function load_NAV_rt(gliderSN::Int, mission::Int, navdir::String, allflag::Int)
+function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
     nav_rt = NAV_RT[];
 
     #missionroot = uppercase(glidername) * "." * mission;
@@ -127,13 +127,13 @@ function load_NAV_rt(gliderSN::Int, mission::Int, navdir::String, allflag::Int)
         fnlen = length(glilist[i]) - length(navdir);
         if suffix2 == "gz"
             if fnlen == 22  # sea064.37.gli.sub.1.gz
-                yo = parse(Int,glilist[i][end-3:end-2]);
+                yo = parse(Int,glilist[i][end-3:end-3]);
             elseif fnlen == 23 # sea064.37.gli.sub.10.gz
-                yo = parse(Int,glilist[i][end-4:end-2]);
+                yo = parse(Int,glilist[i][end-4:end-3]);
             elseif fnlen == 24 # sea064.37.gli.sub.100.gz
-                yo = parse(Int,glilist[i][end-5:end-2]);
+                yo = parse(Int,glilist[i][end-5:end-3]);
             elseif fnlen == 25 # sea064.37.gli.sub.1000.gz
-                yo = parse(Int,glilist[i][end-6:end-2]);
+                yo = parse(Int,glilist[i][end-6:end-3]);
             end
             yos = push!(yos, yo);
             yolist = push!(yolist, glilist[i]);
@@ -159,7 +159,7 @@ function load_NAV_rt(gliderSN::Int, mission::Int, navdir::String, allflag::Int)
     #yolist = findall(glilist_suffix .!= "all");
     #allindx = findall(glilist_suffix .== "all");
 
-    if allflag == 1
+    if dataflag == 1
         glilist = [glilist[allindx]];
     else
         glilist = yolist;
@@ -197,7 +197,7 @@ function load_NAV_rt(gliderSN::Int, mission::Int, navdir::String, allflag::Int)
     for i = 1:length(glilist)
         #yostring = glilist[i][end-2:end];
 
-        if allflag == 1
+        if dataflag == 1
         #    yo = parse.(Int, glilist_suffix[yolist]);
             yo = yos;
         else
@@ -272,14 +272,20 @@ function load_NAV_rt(gliderSN::Int, mission::Int, navdir::String, allflag::Int)
     return nav_rt, nav1d_rt
 end
 
-function load_PLD_rt(gliderSN::Int, mission::Int, scidir::String, allflag::Int)
+function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
     pld_rt = PLD_RT[];
+
+    if dataflag < 2
+        datatype = "sub"
+    else
+        datatype = "raw"
+    end
 
     #missionroot = uppercase(glidername) * "." * mission;
     #pldroot_rt = missionroot * "." * "pld1.sub.";
     #pldlist_rt = Glob.glob(pldroot_rt * "*", scidir);
 
-    pldlist = Glob.glob( "*" * string(gliderSN; pad=3) * "." * string(mission) * ".pld1.sub.*", scidir);
+    pldlist = Glob.glob("*" * string(gliderSN; pad=3) * "." * string(mission) * ".pld1." * datatype * ".*", scidir);
 
     #pldlist_suffix =[];
     #for i = 1:length(pldlist_rt)
@@ -296,13 +302,13 @@ function load_PLD_rt(gliderSN::Int, mission::Int, scidir::String, allflag::Int)
         fnlen = length(pldlist[i]) - length(scidir);
         if suffix2 == "gz"
             if fnlen == 22+1  # sea064.37.pld1.sub.1.gz
-                yo = parse(Int,pldlist[i][end-3:end-2]);
+                yo = parse(Int,pldlist[i][end-3:end-3]);
             elseif fnlen == 23+1 # sea064.37.pld1.sub.10.gz
-                yo = parse(Int,pldlist[i][end-4:end-2]);
+                yo = parse(Int,pldlist[i][end-4:end-3]);
             elseif fnlen == 24+1 # sea064.37.pld1.sub.100.gz
-                yo = parse(Int,pldlist[i][end-5:end-2]);
+                yo = parse(Int,pldlist[i][end-5:end-3]);
             elseif fnlen == 25+1 # sea064.37.pld1.sub.1000.gz
-                yo = parse(Int,pldlist[i][end-6:end-2]);
+                yo = parse(Int,pldlist[i][end-6:end-3]);
             end
             yos = push!(yos, yo);
             yolist = push!(yolist, pldlist[i]);
@@ -328,13 +334,13 @@ function load_PLD_rt(gliderSN::Int, mission::Int, scidir::String, allflag::Int)
     #yolist = findall(glilist_suffix .!= "all");
     #allindx = findall(glilist_suffix .== "all");
 
-    if allflag == 1
+    if dataflag == 1
         pldlist = [pldlist[allindx]];
     else
         pldlist = yolist;
     end
 
-    #if allflag == 1
+    #if dataflag == 1
     #    pldlist_rt = pldlist_rt[allindx];
     #else
     #    pldlist_rt = pldlist_rt[yolist];
@@ -413,7 +419,7 @@ function load_PLD_rt(gliderSN::Int, mission::Int, scidir::String, allflag::Int)
         #yostring = pldlist[i][end-2:end];
 
         # separating '.all' from '.###' files
-        if allflag == 1
+        if dataflag == 1
         #    yo = parse.(Int, pldlist_suffix[yolist]);
             yo = yos
         else
@@ -497,7 +503,7 @@ function load_PLD_rt(gliderSN::Int, mission::Int, scidir::String, allflag::Int)
         tmpvar = Array{Float64,1}(undef, length(ad2cp_alt));
         tmpvar .= NaN;
 
-        if allflag == 1
+        if dataflag == 1
             ad2cp_Unorth = df.AD2CP_Unorth_c;
             ad2cp_Ueast = df.AD2CP_Ueast_c;
             ad2cp_Utot = df.AD2CP_Utot_c;
