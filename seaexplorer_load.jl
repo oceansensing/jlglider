@@ -15,7 +15,7 @@ dataroot = "/Users/gong/Research/sea064/";
 #deploydate = "20220311"
 #suffix = "data"
 
-project = "norse"
+projectname = "norse"
 deploydate = "20221021"
 suffix = "deployment"
 
