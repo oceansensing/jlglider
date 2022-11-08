@@ -18,10 +18,11 @@ end
 p = cleanPress(sea064pld1d.legato_pressure);
 temp = cleanTemp(sea064pld1d.legato_temperature);
 salt = cleanSalt(sea064pld1d.legato_salinity);
-saltA = gsw_sa_from_sp.(salt, p, lon, lat);
-ctemp = gsw_ct_from_t.(saltA, temp, p);
+saltA = cleanSalt(gsw_sa_from_sp.(salt, p, lon, lat));
+ctemp = cleanTemp(gsw_ct_from_t.(saltA, temp, p));
 sigma0 = sigma0_from_t_sp(temp, salt, p, lon, lat);
 spice0 = spice0_from_t_sp(temp, salt, p, lon, lat);
+sndspd = gsw_sound_speed.(saltA, ctemp, p);
 
 n2, pmid = N2_from_t_sp(temp, salt, p, lon, lat);
 zmid = gsw_z_from_p.(pmid, lat[2:end], 0, 0);
