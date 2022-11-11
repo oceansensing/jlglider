@@ -8,12 +8,12 @@ figoutdir = "/Users/gong/Research/sea064/figures/"
 
 if mission == 38 # LBE
     region = "LBE"
-    lims_temp = (4.5, 8.0);
-    lims_salt = (35.15, 35.4);
-    lims_sigma0 = (27.25, 27.9);
-    lims_spice0 = (0.5, 1.0);
+    lims_temp = (0.0, 8.0);
+    lims_salt = (35.10, 35.4);
+    lims_sigma0 = (27.2, 28.1);
+    lims_spice0 = (-0.05, 1.05);
     lims_uv = (-0.6, 0.6);
-    lims_sndspd = (1470, 1485);
+    lims_sndspd = (1462, 1485);
     t1 = Dates.DateTime(2022,11,02,12,0,0);
     t2 = Dates.DateTime(2022,11,30,12,0,0);
 elseif mission == 37 # Jan Mayen
