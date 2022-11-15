@@ -7,8 +7,8 @@ import seaexplorer_functions: load_NAV, load_PLD
 # setting src and data directory paths
 srcdir = "/Users/gong/GitHub/jlglider/";
 #dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
-#dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
-dataroot = "/Users/gong/Research/sea064/";
+dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
+#dataroot = "/Users/gong/Research/sea064/";
 
 # define dataset loading parameters
 #project = "maracoos"
