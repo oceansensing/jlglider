@@ -8,9 +8,9 @@ figoutdir = "/Users/gong/Research/sea064/figures/"
 
 if mission == 38 # LBE
     region = "LBE"
-    lims_temp = (0.0, 8.0);
-    lims_salt = (35.10, 35.4);
-    lims_sigma0 = (27.2, 28.1);
+    lims_temp = (-0.2, 8.0);
+    lims_salt = (35.05, 35.4);
+    lims_sigma0 = (27.2, 28.12);
     lims_spice0 = (-0.05, 1.05);
     lims_uv = (-0.6, 0.6);
     lims_sndspd = (1462, 1485);
@@ -49,7 +49,7 @@ sspice0 = gsw_spiciness0.(ssaltA, cctemp);
 
 htemp = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = ctemp[tind], seriestype=:scatter, c=:thermal, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_temp, colorbar = false)
 #Plots.contour!(sea064pld1d.t, -sea064pld1d.z, sigma0);
-hsalt = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = saltA[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_salt, colorbar = false)
+hsalt = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = saltA[tind], seriestype=:scatter, c=:haline, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_salt, colorbar = false)
 hsigma0 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = sigma0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_sigma0, colorbar = true)
 hspice0 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = spice0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_spice0, colorbar = false)
 hsndspd = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = sndspd[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_sndspd, colorbar = false)
