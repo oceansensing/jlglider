@@ -33,7 +33,7 @@ datadir = dataroot;
 navdir = datadir * "realtime/";
 
 if mission < 38
-    scidir = datadir * "delayed/";
+    scidir = datadir * "realtime/";
 else
     scidir = datadir * "realtime/";
 end
