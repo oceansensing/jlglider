@@ -66,46 +66,35 @@ hMRqc2 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = mr_qc2[t
 hMRsh1std = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(mr_sh1_std[tind]), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", colorbar = true, size=ps, framestyle=:box, title="Shear 1 std. dev.")
 hMRsh2std = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(mr_sh2_std[tind]), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", colorbar = true, size=ps, framestyle=:box, title="Shear 2 std. dev.")
 
-hchla = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = chla[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 0.6))
-hbb700 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(bb700[tind] .+ 0.0001), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-5, -3))
-hcdom = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = cdom[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 1.0))
-
+hchla = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = chla[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 0.6), colorbar = true, size=ps, framestyle=:box, title="Chlorophyll-a Fluorescence")
+hbb700 = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = log10.(bb700[tind] .+ 0.0001), seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(-5, -3), colorbar = true, size=ps, framestyle=:box, title="Backscattering (700 nm)")
+hcdom = Plots.plot(sea064pld1d.t[tind], -sea064pld1d.z[tind], zcolor = cdom[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=(0, 1.0), colorbar = true, size=ps, framestyle=:box, title="CDOM Fluorescence")
 
 hTS = Plots.plot(saltA[tind], ctemp[tind], zcolor = sigma0[tind], seriestype=:scatter, c=:jet, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_sigma0, xlims=lims_salt, ylims=lims_temp, colorbar = false, size=(1000,1000), framestyle=:box, title="CT vs SA")
 Plots.contour!(saltAi, ctempi, ssigma0, contour_labels=true, seriescolor = :black)
 #Plots.contour!(saltAi, ctempi, sspice0, contour_labels=true, seriescolor = :black)
-
 
 #norsephysplot = Plots.plot(htemp, hsalt, hsigma0, hspice0, hsndspd, hMReps1, hUeast, hUnorth, layout = l8out8, size=(1500,1700), framestyle=:box, legend=:outertopright, title=["Temperature" "Salinity" "Sigma0" "Spice0" "Sound Speed" "TKE EPS1" "U (east)" "V (north)"]);
 #norseMRplot = Plots.plot(hN2, hMReps1, hMReps2, hMRsh1std, hMRsh2std, hMRqc1, hMRqc2, layout = l8out7, size=(1500,1500), framestyle=:box, legend=:outertopright, title=["N2" "TKE EPS1" "TKE EPS2" "Shear 1 STDDEV" "Shear 2 STDDEV" "QC1" "QC2"]);
 #norseTSplot = Plots.plot(hTS, size=(1000,1000), framestyle=:box, title="CT vs SA");
 #norseoptcplot = Plots.plot(htemp, hchla, hbb700, hcdom, layout = l8out4, size=(1500,1000), framestyle=:box, legend=:outertopright, title=["Temperature" "Chlorophyll-a" "BB 700" "CDOM"]);
 
-Plots.savefig(htemp, figoutdir * "norse_sea064_" * region * "_ctemp.html")
-Plots.savefig(hsalt, figoutdir * "norse_sea064_" * region * "_saltA.html")
-Plots.savefig(hsigma0, figoutdir * "norse_sea064_" * region * "_sigma0.html")
-Plots.savefig(hspice0, figoutdir * "norse_sea064_" * region * "_spice0.html")
-Plots.savefig(hsndspd, figoutdir * "norse_sea064_" * region * "_sndspd.html")
-Plots.savefig(hUeast, figoutdir * "norse_sea064_" * region * "_U.html")
-Plots.savefig(hUnorth, figoutdir * "norse_sea064_" * region * "_V.html")
-Plots.savefig(hN2, figoutdir * "norse_sea064_" * region * "_N2.html")
-Plots.savefig(hMReps1, figoutdir * "norse_sea064_" * region * "_eps1.html")
-Plots.savefig(hMReps2, figoutdir * "norse_sea064_" * region * "_eps2.html")
-Plots.savefig(hMRsh1std, figoutdir * "norse_sea064_" * region * "_sh1stddev.html")
-Plots.savefig(hMRsh2std, figoutdir * "norse_sea064_" * region * "_sh2stddev.html")
+Plots.savefig(htemp, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_ctemp.html")
+Plots.savefig(hsalt, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_saltA.html")
+Plots.savefig(hsigma0, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_sigma0.html")
+Plots.savefig(hspice0, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_spice0.html")
+Plots.savefig(hsndspd, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_sndspd.html")
+Plots.savefig(hUeast, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_AD2CP_U.html")
+Plots.savefig(hUnorth, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_AD2CP_V.html")
+Plots.savefig(hTS, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_TS.html");
+Plots.savefig(hN2, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_RBR_N2.html")
+Plots.savefig(hMReps1, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_MR1000G_eps1.html")
+Plots.savefig(hMReps2, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_MR1000G_eps2.html")
+Plots.savefig(hMRsh1std, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_MR1000G_sh1stddev.html")
+Plots.savefig(hMRsh2std, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_MR1000G_sh2stddev.html")
+Plots.savefig(hchla, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_FLBBCD_chla.html")
+Plots.savefig(hbb700, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_FLBBCD_bb700.html")
+Plots.savefig(hcdom, figoutdir * "norse_sea064_M" * string(mission, pad=3) * "_" * region * "_FLBBCD_cdom.html")
 
 #Plots.savefig(norsephysplot, figoutdir * "norse_sea064_" * region * "_physics.html");
 #Plots.savefig(norseMRplot, figoutdir * "norse_sea064_" * region * "_MR.html");
-Plots.savefig(hTS, figoutdir * "norse_sea064_" * region * "_TS.html");
-
-#gr()
-#norseEPS1plot = Plots.plot(hMReps1, size = (1000,800), framestyle=:box, markersize = 3, title="SEA064 RT EPS1")
-#Plots.savefig(norseEPS1plot, figoutdir * "norse_sea064_MReps1.png");
-
-#Plots.savefig(norseoptcplot, figoutdir * "norse_sea064_" * region * "_optics.html");
-
-#norseplot = Plots.plot(htemp, hsalt, layout = l8out, size=(1300,1300), framestyle=:box, legend=:outertopright, title=["temperature" "salinity"]);
-#Plots.savefig(norseplot, "norse_temp_salt.html")
-
-#pFLUOR = Plots.plot(Dates.Date.(flt), flz, zcolor = flv, seriestype=:scatter, c=:algae, markersize = 3, markerstrokewidth = 0, legend = false, label="Chl-a Fluorescence");
-#Plots.plot!(Dates.Date.([t1 t2]),[0 0], label="")
