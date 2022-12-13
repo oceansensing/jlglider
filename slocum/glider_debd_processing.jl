@@ -13,14 +13,20 @@ mutable struct SensorList
 end
 
 # specifying data directory
-dbd_dir = "/path/to/glider/data/DBD/";
-ebd_dir = "/path/to/glider/data/EBD/";
+#dbd_dir = "/path/to/glider/data/DBD/";
+#ebd_dir = "/path/to/glider/data/EBD/";
 
-sbd_dir = "/path/to/glider/data/SBD/";
-tbd_dir = "/path/to/glider/data/TBD/";
+#sbd_dir = "/path/to/glider/data/SBD/";
+#tbd_dir = "/path/to/glider/data/TBD/";
+
+dbd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
+ebd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
+
+sbd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
+tbd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
 
 # specifying cache directory
-cac_dir = "/Users/gong/GitHub/data_processing/cache/";
+cac_dir = "/Users/gong/GitHub/jlglider/slocum/cache/";
 #cache_path_dbd = "/Users/gong/GitHub/data_processing/cache/be93efad.cac";
 #cache_path_ebd = "/Users/gong/GitHub/data_processing/cache/2804f449.cac";
 
