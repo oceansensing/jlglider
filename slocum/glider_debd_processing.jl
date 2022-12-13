@@ -19,16 +19,15 @@ end
 #sbd_dir = "/path/to/glider/data/SBD/";
 #tbd_dir = "/path/to/glider/data/TBD/";
 
-dbd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
-ebd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
+dbd_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
+ebd_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
 
-sbd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
-tbd_dir = "/Users/gong/Research/electa-20221105-passengers-data/";
+sbd_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
+tbd_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
 
 # specifying cache directory
-cac_dir = "/Users/gong/GitHub/jlglider/slocum/cache/";
-#cache_path_dbd = "/Users/gong/GitHub/data_processing/cache/be93efad.cac";
-#cache_path_ebd = "/Users/gong/GitHub/data_processing/cache/2804f449.cac";
+#cac_dir = "/Users/gong/GitHub/jlglider/slocum/cache/";
+cac_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
 
 # obtaining the paths to all cache and glider data files
 cac_path1 = Glob.glob("*.cac", cac_dir);
