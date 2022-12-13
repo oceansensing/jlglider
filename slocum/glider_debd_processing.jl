@@ -27,7 +27,7 @@ tbd_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
 
 # specifying cache directory
 #cac_dir = "/Users/gong/GitHub/jlglider/slocum/cache/";
-cac_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/";
+cac_dir = "/Users/gong/GitHub/jlglider/slocum/electa-20221105-passengers-data/cache/";
 
 # obtaining the paths to all cache and glider data files
 cac_path1 = Glob.glob("*.cac", cac_dir);
