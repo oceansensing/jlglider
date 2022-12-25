@@ -10,6 +10,8 @@ mutable struct SensorList
     nbytes::Array{Int}
     name::Array{String}
     unit::Array{String}
+    filename::String
+    cacname::String
 end
 
 # specifying data directory
@@ -61,6 +63,7 @@ ndbdheaderlines = 14;
 dbdheader = Array{String}(undef,ndatafiles,ndbdheaderlines);
 ndbdsensors = Array{Int}(undef,ndatafiles);
 dbdcacname = Array{String}(undef,ndatafiles);
+dbdfilename = Array{String}(undef,ndatafiles);
 cacind = Array{Int}(undef,ndatafiles);
 
 # extract the header array for all the data files (dbdheader), the number of sensors for each data file (ndbdsensors), and the CAC name associated with each data file (dbdcacname)
@@ -76,6 +79,7 @@ for i = 1:ndatafiles
     # determine the number of DBD sensors & the cache file name for the DBD file
     ndbdsensors[i] = parse(Int64, dbdheader[i,10][end-4:end]);
     dbdcacname[i] = dbdheader[i,13][end-7:end];
+    dbdfilename[i] = dbdheader[i,6][19:end];
 
     # calculate the index of dbdcacname in the list of cache files
     cacind[i] = findall(dbdcacname[i] .== cac_list)[1];
@@ -116,7 +120,7 @@ for i = 1:ndatafiles
     name = cacarray[:,6];
     unit = cacarray[:,7];
 
-    push!(sensorlist,SensorList(transmitted, sensnum, indexnum, nbytes, name, unit));
+    push!(sensorlist,SensorList(transmitted, sensnum, indexnum, nbytes, name, unit, dbdfilename[i], dbdcacname[i]));
 end 
 
 #mutable struct data_struct
