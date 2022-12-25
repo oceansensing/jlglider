@@ -52,78 +52,85 @@ tbd_path1 = Glob.glob("*.tbd", tbd_dir);
 tbd_path2 = Glob.glob("*.TBD", tbd_dir);
 tbd_path = [tbd_path1; tbd_path2];
 
-# number of data files
-ndatafiles = length(dbd_path);
+dbd_path = ebd_path;
 
-# extracting list of cache files (using comprehension)
-cac_list = [cac_path[i][end-11:end-4] for i in 1:length(cac_path)];
+function load_sensorlist(cac_path, dbd_path)
+        
+    # number of data files
+    ndatafiles = length(dbd_path);
 
-# extract the header of the dbd files
-ndbdheaderlines = 14;
-dbdheader = Array{String}(undef,ndatafiles,ndbdheaderlines);
-ndbdsensors = Array{Int}(undef,ndatafiles);
-dbdcacname = Array{String}(undef,ndatafiles);
-dbdfilename = Array{String}(undef,ndatafiles);
-cacind = Array{Int}(undef,ndatafiles);
+    # extracting list of cache files (using comprehension)
+    cac_list = [cac_path[i][end-11:end-4] for i in 1:length(cac_path)];
 
-# extract the header array for all the data files (dbdheader), the number of sensors for each data file (ndbdsensors), and the CAC name associated with each data file (dbdcacname)
-for i = 1:ndatafiles
-    #display(ndbdsensors)
-    dbdio = open(dbd_path[i], "r")
-    #display(dbd_path[i])
-    for j = 1:ndbdheaderlines
-        dbdheader[i,j] = readline(dbdio);
+    # extract the header of the dbd files
+    ndbdheaderlines = 14;
+    dbdheader = Array{String}(undef,ndatafiles,ndbdheaderlines);
+    ndbdsensors = Array{Int}(undef,ndatafiles);
+    dbdcacname = Array{String}(undef,ndatafiles);
+    dbdfilename = Array{String}(undef,ndatafiles);
+    cacind = Array{Int}(undef,ndatafiles);
+
+    # extract the header array for all the data files (dbdheader), the number of sensors for each data file (ndbdsensors), and the CAC name associated with each data file (dbdcacname)
+    for i = 1:ndatafiles
+        #display(ndbdsensors)
+        dbdio = open(dbd_path[i], "r")
+        #display(dbd_path[i])
+        for j = 1:ndbdheaderlines
+            dbdheader[i,j] = readline(dbdio);
+        end
+        close(dbdio)
+
+        # determine the number of DBD sensors & the cache file name for the DBD file
+        ndbdsensors[i] = parse(Int64, dbdheader[i,10][end-4:end]);
+        dbdcacname[i] = dbdheader[i,13][end-7:end];
+        dbdfilename[i] = dbdheader[i,6][19:end];
+
+        # calculate the index of dbdcacname in the list of cache files
+        cacind[i] = findall(dbdcacname[i] .== cac_list)[1];
     end
-    close(dbdio)
 
-    # determine the number of DBD sensors & the cache file name for the DBD file
-    ndbdsensors[i] = parse(Int64, dbdheader[i,10][end-4:end]);
-    dbdcacname[i] = dbdheader[i,13][end-7:end];
-    dbdfilename[i] = dbdheader[i,6][19:end];
+    # construct sensorlist
+    sensorlist = SensorList[];
+    for i = 1:ndatafiles
+        display(i)
+        # load each line in the cache file
+        cacdata = Array{String}(undef,ndbdsensors[i]);
+        cacarray = Array{String}(undef,ndbdsensors[i],7);
+        open(cac_path[cacind][i], "r") do cacio
+            cacdata = readlines(cacio, keep = false);
+        end
 
-    # calculate the index of dbdcacname in the list of cache files
-    cacind[i] = findall(dbdcacname[i] .== cac_list)[1];
+        # split the strings into arrays of values for each sensor
+        cacdataarr = split.(cacdata," ", keepempty=false);
+
+        # construct 2-D string array of dbd header
+        for j = 1:length(cacdataarr)
+            cacarray[j,:] = cacdataarr[j];
+        end
+
+        # change T to true and F to false in transmitted boolean array
+        cacarray[:,2] = replace(x -> x=="T" ? "true" : "false", cacarray[:,2]);
+        transmitted = parse.(Bool, cacarray[:,2]);
+
+        # sensor number
+        sensnum = parse.(Int, cacarray[:,3]);
+
+        # sensor index number
+        indexnum = parse.(Int, cacarray[:,4]);
+
+        # number of bytes per entry
+        nbytes = parse.(Int, cacarray[:,5]);
+
+        name = cacarray[:,6];
+        unit = cacarray[:,7];
+
+        push!(sensorlist,SensorList(transmitted, sensnum, indexnum, nbytes, name, unit, dbdfilename[i], dbdcacname[i]));
+    end 
+    return sensorlist
 end
-
-# construct sensorlist
-sensorlist = SensorList[];
-for i = 1:ndatafiles
-    display(i)
-    # load each line in the cache file
-    cacdata = Array{String}(undef,ndbdsensors[i]);
-    cacarray = Array{String}(undef,ndbdsensors[i],7);
-    open(cac_path[cacind][i], "r") do cacio
-        cacdata = readlines(cacio, keep = false);
-    end
-
-    # split the strings into arrays of values for each sensor
-    cacdataarr = split.(cacdata," ", keepempty=false);
-
-    # construct 2-D string array of dbd header
-    for j = 1:length(cacdataarr)
-        cacarray[j,:] = cacdataarr[j];
-    end
-
-    # change T to true and F to false in transmitted boolean array
-    cacarray[:,2] = replace(x -> x=="T" ? "true" : "false", cacarray[:,2]);
-    transmitted = parse.(Bool, cacarray[:,2]);
-
-    # sensor number
-    sensnum = parse.(Int, cacarray[:,3]);
-
-    # sensor index number
-    indexnum = parse.(Int, cacarray[:,4]);
-
-    # number of bytes per entry
-    nbytes = parse.(Int, cacarray[:,5]);
-
-    name = cacarray[:,6];
-    unit = cacarray[:,7];
-
-    push!(sensorlist,SensorList(transmitted, sensnum, indexnum, nbytes, name, unit, dbdfilename[i], dbdcacname[i]));
-end 
-
 #mutable struct data_struct
 #    eval(Symbol(sensorlist[1].name[1], "::Array{Float64}"))
 #end
+
+sensorlist = load_sensorlist(cac_path, ebd_path);
 
