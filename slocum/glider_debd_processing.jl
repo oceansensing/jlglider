@@ -52,7 +52,7 @@ tbd_path1 = Glob.glob("*.tbd", tbd_dir);
 tbd_path2 = Glob.glob("*.TBD", tbd_dir);
 tbd_path = [tbd_path1; tbd_path2];
 
-dbd_path = ebd_path;
+#dbd_path = ebd_path;
 
 function load_sensorlist(cac_path, dbd_path)
         
@@ -69,6 +69,7 @@ function load_sensorlist(cac_path, dbd_path)
     dbdcacname = Array{String}(undef,ndatafiles);
     dbdfilename = Array{String}(undef,ndatafiles);
     cacind = Array{Int}(undef,ndatafiles);
+    sensor_list_factored = Array{Int}(undef,ndatafiles);
 
     # extract the header array for all the data files (dbdheader), the number of sensors for each data file (ndbdsensors), and the CAC name associated with each data file (dbdcacname)
     for i = 1:ndatafiles
@@ -84,6 +85,8 @@ function load_sensorlist(cac_path, dbd_path)
         ndbdsensors[i] = parse(Int64, dbdheader[i,10][end-4:end]);
         dbdcacname[i] = dbdheader[i,13][end-7:end];
         dbdfilename[i] = dbdheader[i,6][19:end];
+
+        sensor_list_factored[i] = parse(Int64, dbdheader[i,14][26:end]);
 
         # calculate the index of dbdcacname in the list of cache files
         cacind[i] = findall(dbdcacname[i] .== cac_list)[1];
@@ -132,5 +135,5 @@ end
 #    eval(Symbol(sensorlist[1].name[1], "::Array{Float64}"))
 #end
 
-sensorlist = load_sensorlist(cac_path, ebd_path);
+sensorlist = load_sensorlist(cac_path, dbd_path);
 
