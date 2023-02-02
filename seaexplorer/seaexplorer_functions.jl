@@ -29,7 +29,7 @@ function cleanAD2CPtime(varin, varalt)
 end
 
 function cleanEPS(epsin)
-    epsout = deepcopy(epsin);
+    epsout = missing2nan(deepcopy(epsin));
     badind = findall((epsin .>= 1e-4) .|| (epsin .<= 1e-13));
     epsout[badind] .= NaN;
     epsout = convert(Vector{Float64}, epsout)
@@ -37,7 +37,7 @@ function cleanEPS(epsin)
 end
 
 function cleanTemp(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall((varin .>= 100.0) .|| (varin .<= -3));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
@@ -45,7 +45,7 @@ function cleanTemp(varin)
 end
 
 function cleanSalt(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall((varin .>= 42.0) .|| (varin .<= 1.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
@@ -53,7 +53,7 @@ function cleanSalt(varin)
 end
 
 function cleanPress(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall((varin .>= 7500.0) .|| (varin .< 0.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
@@ -61,7 +61,7 @@ function cleanPress(varin)
 end
 
 function clean9999(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall(varin .>= 7500.0);
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
@@ -85,7 +85,7 @@ end
 #end
 
 function cleanFLBBCDchl(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall((varin .>= 50.0) .|| (varin .<= 0.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
@@ -93,7 +93,7 @@ function cleanFLBBCDchl(varin)
 end
 
 function cleanFLBBCDbb700(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall((varin .>= 1.0) .|| (varin .<= -1.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
@@ -101,7 +101,7 @@ function cleanFLBBCDbb700(varin)
 end
 
 function cleanFLBBCDcdom(varin)
-    varout = deepcopy(varin);
+    varout = missing2nan(deepcopy(varin));
     badind = findall((varin .>= 50.0) .|| (varin .<= -2.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
