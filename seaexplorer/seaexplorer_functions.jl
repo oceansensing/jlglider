@@ -4,6 +4,7 @@
 module seaexplorer_functions
 
 using Glob, DataFrames, CSV, Dates, Missings
+
 import seaexplorer_types: NAV_RT, PLD_RT
 
 function missing2nan(varin)
@@ -16,14 +17,19 @@ function cleanTime(varin)
     varout[badtind] .= NaN;
 end
 
-function cleanAD2CPtime(varin, varalt)
-    varout = copy(varin);
-    badtind = findall(varin .== "00000000 00:00:00")
-    if length(badtind) > 0
-        for i = 1:length(badtind)
-            tstr = varalt[badtind[i]];
-            varout[badtind[i]] = tstr[4:5] * tstr[1:2] * tstr[9:10] * " " * tstr[12:19]
+function cleanAD2CPtime(varin, varalt; systime = 1)
+
+    if systime != 1
+        varout = collect(copy(varin));
+        badtind = findall(varin .== "00000000 00:00:00")
+        if length(badtind) > 0
+            for i = 1:length(badtind)
+                tstr = varalt[badtind[i]];
+                varout[badtind[i]] = tstr[4:5] * tstr[1:2] * tstr[9:10] * " " * tstr[12:19]
+            end
         end
+    elseif systime == 1
+        varout = collect(varalt);
     end
     return varout
 end
@@ -158,6 +164,9 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
     end
     #yolist = findall(glilist_suffix .!= "all");
     #allindx = findall(glilist_suffix .== "all");
+    yosi = sortperm(Int.(yos));
+    yos = yos[yosi];
+    yolist = yolist[yosi];
 
     if dataflag == 1
         glilist = [glilist[allindx]];
@@ -333,6 +342,9 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
     end
     #yolist = findall(glilist_suffix .!= "all");
     #allindx = findall(glilist_suffix .== "all");
+    yosi = sortperm(Int.(yos));
+    yos = yos[yosi];
+    yolist = yolist[yosi];
 
     if dataflag == 1
         pldlist = [pldlist[allindx]];
