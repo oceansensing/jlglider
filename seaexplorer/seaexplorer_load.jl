@@ -2,6 +2,7 @@
 # gong@vims.edu 20221021
 
 import seaexplorer_functions: load_NAV, load_PLD
+import seaexplorer_functions: missing2nan, cleanTime, cleanAD2CPtime, cleanEPS, cleanTemp, cleanSalt, cleanPress, clean9999, cleanAD2CP, cleanFLBBCDchl, cleanFLBBCDbb700, cleanFLBBCDcdom
 #import seaexplorer_types: NAV_RT, PLD_RT
 
 # setting src and data directory paths
@@ -24,7 +25,7 @@ if (@isdefined gliderSN) != true
 end
 
 if (@isdefined mission) != true
-    mission = 38
+    mission = 37
 end
 
 # define data load location
