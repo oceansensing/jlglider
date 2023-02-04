@@ -1,6 +1,8 @@
 # loading realtime SeaExplorer data from NORSE
 # gong@vims.edu 20221021
 
+using Glob, DataFrames, CSV, Dates, Missings
+
 import seaexplorer_functions: load_NAV, load_PLD
 import seaexplorer_functions: missing2nan, cleanTime, cleanAD2CPtime, cleanEPS, cleanTemp, cleanSalt, cleanPress, clean9999, cleanAD2CP, cleanFLBBCDchl, cleanFLBBCDbb700, cleanFLBBCDcdom
 #import seaexplorer_types: NAV_RT, PLD_RT

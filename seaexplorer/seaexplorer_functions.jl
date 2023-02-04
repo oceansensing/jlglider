@@ -8,7 +8,28 @@ using Glob, DataFrames, CSV, Dates, Missings
 import seaexplorer_types: NAV_RT, PLD_RT
 
 function missing2nan(varin)
-    varout = Float64.(collect(Missings.replace(varin, NaN)));
+    varin = collect(varin);
+    if typeof(varin) == Vector{Union{Missing,Int64}}
+        varout = Array{Float64}(undef,size(collect(varin)));
+        varintypes = typeof.(varin);
+        notmissind = findall(varintypes .!= Missing);
+        missind = findall(varintypes .== Missing); 
+        if isempty(notmissind) != true  
+            varout[notmissind] .= Float64.(varin[notmissind]);
+        end
+        if isempty(missind) != true
+            varout[missind] .= NaN;
+        end
+    elseif typeof(varin) == Vector{Union{Missing,Float64}}
+        varout = Float64.(collect(Missings.replace(varin, NaN)));
+    elseif typeof(varin) == Vector{Missing}
+        varout = Array{Float64}(undef,size(collect(varin)));
+        varout .= NaN; 
+    else
+        varout = varin;
+    end
+
+    return varout
 end
 
 function cleanTime(varin)
@@ -75,6 +96,7 @@ function clean9999(varin)
 end
 
 function cleanAD2CP(varin)
+    varin = missing2nan(varin);
     if typeof(collect(varin)) != Vector{Float64}
         varout = parse.(Float64, varin);
     else
@@ -460,12 +482,13 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
         lon = missing2nan(lon);
         lat = missing2nan(lat);
         nav_resource = df.NAV_RESOURCE;
-        ad2cp_time = DateTime.(cleanAD2CPtime(collect(df.AD2CP_TIME), collect(df.PLD_REALTIMECLOCK)), ad2cptimeformat) .+ Dates.Year(2000);
-        ad2cp_heading = df.AD2CP_HEADING;
-        ad2cp_pitch = df.AD2CP_PITCH;
-        ad2cp_roll = df.AD2CP_ROLL;
-        ad2cp_pressure = df.AD2CP_PRESSURE;
-        ad2cp_alt = df.AD2CP_ALT;
+        #ad2cp_time = DateTime.(cleanAD2CPtime(collect(df.AD2CP_TIME), collect(df.PLD_REALTIMECLOCK)), ad2cptimeformat) .+ Dates.Year(2000);
+        ad2cp_time = t;
+        ad2cp_heading = missing2nan(df.AD2CP_HEADING);
+        ad2cp_pitch = missing2nan(df.AD2CP_PITCH);
+        ad2cp_roll = missing2nan(df.AD2CP_ROLL);
+        ad2cp_pressure = missing2nan(df.AD2CP_PRESSURE);
+        ad2cp_alt = missing2nan(df.AD2CP_ALT);
         ad2cp_v1_cn1 = cleanAD2CP(df.AD2CP_V1_CN1);
         ad2cp_v2_cn1 = cleanAD2CP(df.AD2CP_V2_CN1);
         ad2cp_v3_cn1 = cleanAD2CP(df.AD2CP_V3_CN1);
@@ -490,37 +513,37 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
         ad2cp_v2_cn6 = cleanAD2CP(df.AD2CP_V2_CN6);
         ad2cp_v3_cn6 = cleanAD2CP(df.AD2CP_V3_CN6);
         ad2cp_v4_cn6 = cleanAD2CP(df.AD2CP_V4_CN6);
-        flbbcd_chl_count = df.FLBBCD_CHL_COUNT;
-        flbbcd_chl_scaled = df.FLBBCD_CHL_SCALED;
-        flbbcd_bb_700_count = df.FLBBCD_BB_700_COUNT;
-        flbbcd_bb_700_scaled = df.FLBBCD_BB_700_SCALED;
-        flbbcd_cdom_count = df.FLBBCD_CDOM_COUNT;
-        flbbcd_cdom_scaled = df.FLBBCD_CDOM_SCALED;
-        legato_conductivity = df.LEGATO_CONDUCTIVITY;
-        legato_temperature = df.LEGATO_TEMPERATURE;
-        legato_pressure = df.LEGATO_PRESSURE;
-        legato_salinity = df.LEGATO_SALINITY;
-        legato_condtemp = df.LEGATO_CONDTEMP;
-        mr1000g_t1_avg = df."MR1000G-RDL_T1_AVG";
-        mr1000g_t2_avg = df."MR1000G-RDL_T2_AVG";
-        mr1000g_sh1_std = df."MR1000G-RDL_SH1_STD";
-        mr1000g_sh2_std = df."MR1000G-RDL_SH2_STD";
-        mr1000g_press_avg = df."MR1000G-RDL_PRESS_AVG";
-        mr1000g_incly_avg = df."MR1000G-RDL_INCLY_AVG";
-        mr1000g_eps1 = df."MR1000G-RDL_EPS1";
-        mr1000g_qc1 = df."MR1000G-RDL_QC1";
-        mr1000g_eps2 = df."MR1000G-RDL_EPS2";
-        mr1000g_qc2 = df."MR1000G-RDL_QC2";
+        flbbcd_chl_count = missing2nan(df.FLBBCD_CHL_COUNT);
+        flbbcd_chl_scaled = missing2nan(df.FLBBCD_CHL_SCALED);
+        flbbcd_bb_700_count = missing2nan(df.FLBBCD_BB_700_COUNT);
+        flbbcd_bb_700_scaled = missing2nan(df.FLBBCD_BB_700_SCALED);
+        flbbcd_cdom_count = missing2nan(df.FLBBCD_CDOM_COUNT);
+        flbbcd_cdom_scaled = missing2nan(df.FLBBCD_CDOM_SCALED);
+        legato_conductivity = missing2nan(df.LEGATO_CONDUCTIVITY);
+        legato_temperature = missing2nan(df.LEGATO_TEMPERATURE);
+        legato_pressure = missing2nan(df.LEGATO_PRESSURE);
+        legato_salinity = missing2nan(df.LEGATO_SALINITY);
+        legato_condtemp = missing2nan(df.LEGATO_CONDTEMP);
+        mr1000g_t1_avg = missing2nan(df."MR1000G-RDL_T1_AVG");
+        mr1000g_t2_avg = missing2nan(df."MR1000G-RDL_T2_AVG");
+        mr1000g_sh1_std = missing2nan(df."MR1000G-RDL_SH1_STD");
+        mr1000g_sh2_std = missing2nan(df."MR1000G-RDL_SH2_STD");
+        mr1000g_press_avg = missing2nan(df."MR1000G-RDL_PRESS_AVG");
+        mr1000g_incly_avg = missing2nan(df."MR1000G-RDL_INCLY_AVG");
+        mr1000g_eps1 = missing2nan(df."MR1000G-RDL_EPS1");
+        mr1000g_qc1 = missing2nan(df."MR1000G-RDL_QC1");
+        mr1000g_eps2 = missing2nan(df."MR1000G-RDL_EPS2");
+        mr1000g_qc2 = missing2nan(df."MR1000G-RDL_QC2");
 
         tmpvar = Array{Float64,1}(undef, length(ad2cp_alt));
         tmpvar .= NaN;
 
         if dataflag == 1
-            ad2cp_Unorth = df.AD2CP_Unorth_c;
-            ad2cp_Ueast = df.AD2CP_Ueast_c;
-            ad2cp_Utot = df.AD2CP_Utot_c;
-            ad2cp_Udir = df.AD2CP_Udir_c;
-            ad2cp_qf = df.AD2CP_QF_c;
+            ad2cp_Unorth = missing2nan(df.AD2CP_Unorth_c);
+            ad2cp_Ueast = missing2nan(df.AD2CP_Ueast_c);
+            ad2cp_Utot = missing2nan(df.AD2CP_Utot_c);
+            ad2cp_Udir = missing2nan(df.AD2CP_Udir_c);
+            ad2cp_qf = missing2nan(df.AD2CP_QF_c);
         else
             ad2cp_Unorth = tmpvar;
             ad2cp_Ueast = tmpvar;
