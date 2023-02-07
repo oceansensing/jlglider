@@ -73,7 +73,7 @@ end
 
 function cleanSalt(varin)
     varout = missing2nan(deepcopy(varin));
-    badind = findall((varin .>= 42.0) .|| (varin .<= 1.0));
+    badind = findall((varin .>= 42.0) .|| (varin .<= 5.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
     return varout;
