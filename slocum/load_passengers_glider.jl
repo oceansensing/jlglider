@@ -10,7 +10,6 @@ end
 
 # specify valid data time period
 datadir = "/Users/gong/Research/electa-20221103-passengers";
-figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
 t0 = DateTime("2022-10-01");
 tN = DateTime("2022-12-01");
 trange = datetime2unix.([t0; tN]);

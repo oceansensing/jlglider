@@ -4,6 +4,8 @@ using GLMakie, ColorSchemes
 # plot CTD data using Makie
 # the plotting code will be refactored into a function of its own in the next revision
 
+figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
+
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 
 # setting x and y axes for plotting
