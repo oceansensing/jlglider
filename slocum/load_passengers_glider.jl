@@ -1,14 +1,16 @@
 using PyCall, Dates, NaNMath, GibbsSeaWater
-using Plots, Interpolations
+using GLMakie, Interpolations, ColorSchemes
 
 dbdreader = pyimport("dbdreader");
 
-function pyrol2jlcol(invar::Matrix{Float64})
+# define function for converting from python row major to julia column major
+function pyrow2jlcol(invar::Matrix{Float64})
     return reverse(rotr90(invar), dims = 2);
 end
 
 # specify valid data time period
 datadir = "/Users/gong/Research/electa-20221103-passengers";
+figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
 t0 = DateTime("2022-10-01");
 tN = DateTime("2022-12-01");
 trange = datetime2unix.([t0; tN]);
@@ -27,39 +29,56 @@ ebdvars = debdElecta.parameterNames["sci"];
 
 # load CTD data from raw glider DBD & EBD files
 #tctd, cond, temp, pres, m_de_oil_vol = debdElecta.get_CTD_sync("m_de_oil_vol");
-sci_m_present_time = pyrol2jlcol(debdElecta.get("sci_m_present_time"));
-sci_water_temp = pyrol2jlcol(debdElecta.get("sci_water_temp"));
-sci_water_cond = pyrol2jlcol(debdElecta.get("sci_water_cond"));
-sci_water_pressure = pyrol2jlcol(debdElecta.get("sci_water_pressure")); 
+sci_m_present_time = pyrow2jlcol(debdElecta.get("sci_m_present_time"));
+sci_water_temp = pyrow2jlcol(debdElecta.get("sci_water_temp"));
+sci_water_cond = pyrow2jlcol(debdElecta.get("sci_water_cond"));
+sci_water_pressure = pyrow2jlcol(debdElecta.get("sci_water_pressure")); 
 
-# QC loaded data by time and values
-tempind = findall((trange[1] .<= sci_water_temp[:,1] .<= trange[end]) .& (sci_water_temp[:,2] .> 0.0));
+# QC loaded data by time and values, create interpolation function for T,C,P
+tempind = findall((trange[1] .<= sci_water_temp[:,1] .<= trange[end]) .& (40.0 .>= sci_water_temp[:,2] .>= 0.0));
 tempraw = sci_water_temp[tempind,:];
-tempfunc = linear_interpolation(tempraw[:,1], tempraw[:,2]);
+tempfunc = linear_interpolation(tempraw[:,1], tempraw[:,2], extrapolation_bc=Line());
 
-condind = findall((trange[1] .<= sci_water_cond[:,1] .<= trange[end]) .& (sci_water_cond[:,2] .> 0.0001));
+condind = findall((trange[1] .<= sci_water_cond[:,1] .<= trange[end]) .& (100.0 .>= sci_water_cond[:,2] .>= 0.01));
 condraw = sci_water_cond[condind,:];
-condfunc = linear_interpolation(condraw[:,1], condraw[:,2]);
+condfunc = linear_interpolation(condraw[:,1], condraw[:,2], extrapolation_bc=Line());
 
-presind = findall((trange[1] .<= sci_water_pressure[:,1] .<= trange[end]) .& (sci_water_pressure[:,2] .> 0.0001));
+presind = findall((trange[1] .<= sci_water_pressure[:,1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[:,2] .>= 0.01));
 presraw = sci_water_pressure[presind,:];
-presfunc = linear_interpolation(presraw[:,1], presraw[:,2]);
+presfunc = linear_interpolation(presraw[:,1], presraw[:,2], extrapolation_bc=Line());
 
 # build a common timeline (not necessary if data is of good quality and CTD data all has the same length)
 tall = unique(union(tempraw[:,1], condraw[:,1], presraw[:,1]));
 tind = findall(trange[1] .<= tall .<= trange[end]);
-tctd = tall[tind];
-t1 = floor(NaNMath.minimum(tctd));
-t2 = ceil(NaNMath.maximum(tctd));
+
+t1 = floor(NaNMath.minimum(tall[tind]));
+t2 = ceil(NaNMath.maximum(tall[tind]));
 tt = collect(t1:1.0:t2);
 
 # extract common time values for all CTD parameters
-temp = tempfunc(tctd);
-cond = condfunc(tctd);
-pres = presfunc(tctd);
+dtctd_fit = unix2datetime.(tall[tind]);
+temp_fit = tempfunc(tall[tind]);
+cond_fit = condfunc(tall[tind]);
+pres_fit = presfunc(tall[tind]);
+tctd_fit = deepcopy(tall[tind]);
+
+gind = findall((30.0 .>= temp_fit .>= 15.0) .& (7.0 .>= cond_fit .>= 4.0) .& (50.0 .>= pres_fit .>= 0.0));
+dtctd = dtctd_fit[gind];
+tctd = tctd_fit[gind];
+temp = temp_fit[gind];
+cond = cond_fit[gind];
+pres = pres_fit[gind];
+
+si = sortperm(tctd);
+tctd = tctd[si];
+dtctd = dtctd[si];
+temp = temp[si];
+cond = cond[si];
+pres = pres[si];
 
 # calculate derived values from CTD data
 gsw = GibbsSeaWater;
+zz = gsw.gsw_z_from_p.(pres*10, 38.13, 0.0, 0.0);
 salt = gsw.gsw_sp_from_c.(cond*10, temp, pres*10);
 saltA = gsw.gsw_sa_from_sp.(salt, pres*10, -60.69, 38.13);
 ctemp = gsw.gsw_ct_from_t.(saltA, temp, pres*10);
@@ -69,3 +88,111 @@ spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
 sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
 # plot CTD data
+pint = 1;
+#hctemp = scatter(dtctd[1:pint:end], z[1:pint:end], zcolor=ctemp[1:pint:end], legend=false, title="PASSENGERS Glider Electa Conservative Temperature", clims=(18, 26), size = (1200, 800), colorbar = true, markersize = 2.5, markerstrokewidth = -1, framestyle=:box, seriescolor=:thermal)
+#hsaltA = scatter(dtctd[1:pint:end], z[1:pint:end], zcolor=saltA[1:pint:end], legend=false, title="PASSENGERS Glider Electa Absolute Salinity", clims=(36, 37.2), size = (1200, 800), colorbar = true, markersize = 2.5, markerstrokewidth = -1, framestyle=:box, seriescolor=:haline)
+#Plots.savefig(hctemp, figoutdir * "PASSENGERS_electa_ctemp.png");
+#Plots.savefig(hsaltA, figoutdir * "PASSENGERS_electa_saltA.png");
+
+td = dtctd[1:pint:end];
+t = tctd[1:pint:end]; 
+y = zz[1:pint:end];
+
+# plotting conservative temperature
+z = ctemp[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = "PASSENGERS VIMS Glider Electa Conservative Temperature",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(t, y, color=z, colormap=:thermal, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = false)
+fig
+save(figoutdir * "PASSENGERS_electa_ctemp.png", fig)
+
+# plotting absolute salinity
+z = saltA[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = "PASSENGERS VIMS Glider Electa Absolute Salinity",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(t, y, color=z, colormap=:haline, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :haline, flipaxis = false)
+fig
+save(figoutdir * "PASSENGERS_electa_saltA.png", fig)
+
+# plotting sigma0
+z = sigma0[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = "PASSENGERS VIMS Glider Electa Potential Density",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(t, y, color=z, colormap=:dense, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = false)
+fig
+save(figoutdir * "PASSENGERS_electa_sigma0.png", fig)
+
+# plotting spice0
+z = spice0[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = "PASSENGERS VIMS Glider Electa Spiciness0",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(t, y, color=z, colormap=:balance, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
+fig
+save(figoutdir * "PASSENGERS_electa_spice0.png", fig)
+
+# plotting sound speed
+z = sndspd[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = "PASSENGERS VIMS Glider Electa Sound Speed",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(t, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * "PASSENGERS_electa_soundspeed.png", fig)
+
+
+# plotting sound speed
+x = saltA[1:pint:end]; 
+y = ctemp[1:pint:end];
+z = sndspd[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = (1000, 1000))
+ax = Axis(fig[1, 1],
+    title = "PASSENGERS VIMS Glider Electa T/S",
+    xlabel = "Absolute Salinity",
+    ylabel = "Conservative Temperature"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=2, colorrange=(zmin, zmax))
+#ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sound Speed")
+fig
+save(figoutdir * "PASSENGERS_electa_TS.png", fig)
