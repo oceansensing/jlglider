@@ -1,6 +1,5 @@
 using PyCall
 using NaNMath, GibbsSeaWater, Dates, Interpolations
-using GLMakie, ColorSchemes
 
 dbdreader = pyimport("dbdreader");
 
