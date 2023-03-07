@@ -1,13 +1,12 @@
 using NaNMath, GibbsSeaWater, Dates, Interpolations
 using GLMakie, ColorSchemes
 
-# plot CTD data
-pint = 1;
-#hctemp = scatter(dtctd[1:pint:end], z[1:pint:end], zcolor=ctemp[1:pint:end], legend=false, title="PASSENGERS Glider Electa Conservative Temperature", clims=(18, 26), size = (1200, 800), colorbar = true, markersize = 2.5, markerstrokewidth = -1, framestyle=:box, seriescolor=:thermal)
-#hsaltA = scatter(dtctd[1:pint:end], z[1:pint:end], zcolor=saltA[1:pint:end], legend=false, title="PASSENGERS Glider Electa Absolute Salinity", clims=(36, 37.2), size = (1200, 800), colorbar = true, markersize = 2.5, markerstrokewidth = -1, framestyle=:box, seriescolor=:haline)
-#Plots.savefig(hctemp, figoutdir * "PASSENGERS_electa_ctemp.png");
-#Plots.savefig(hsaltA, figoutdir * "PASSENGERS_electa_saltA.png");
+# plot CTD data using Makie
+# the plotting code will be refactored into a function of its own in the next revision
 
+pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+
+# setting x and y axes for plotting
 td = dtctd[1:pint:end];
 t = tctd[1:pint:end]; 
 y = zz[1:pint:end];
@@ -92,8 +91,7 @@ Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * "PASSENGERS_electa_soundspeed.png", fig)
 
-
-# plotting sound speed
+# plotting T/S diagram
 x = saltA[1:pint:end]; 
 y = ctemp[1:pint:end];
 z = sndspd[1:pint:end];
