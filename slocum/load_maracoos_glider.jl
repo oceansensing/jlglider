@@ -12,9 +12,24 @@ function pyrow2jlcol(invar::Matrix{Float64})
     return reverse(rotr90(invar), dims = 2);
 end
 
+# https://discourse.julialang.org/t/indices-of-intersection-of-two-arrays/23043/20
+function intersectalajulia2(a,b)
+    ia = findall(in(b), a)
+    ib = findall(in(view(a,ia)), b)
+    return unique(view(a,ia)), ia, ib[indexin(view(a,ia), view(b,ib))]
+end
+
+function intersectalajulia4(a,b)
+    ab=intersect(a,b)
+    ia = [findall(==(e), a) for e in ab]
+    ib = [findall(==(e), b) for e in ab]
+    return hcat(ab, ia,ib)
+end
+
 # specify valid data time period
-rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
-datadir = rootdir * "/electa-20230320-maracoos/from-glider/electa-from-glider-20230326T113106";
+rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
+datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230326T145137/";
+cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
 t0 = DateTime("2023-03-21");
 tN = DateTime("2023-04-21");
 trange = datetime2unix.([t0; tN]);
@@ -28,7 +43,7 @@ trange = datetime2unix.([t0; tN]);
 #ebdElecta = dbdreader.MultiDBD(datadir * "/EBD/0*.ebd", cacheDir = datadir * "/cache/");
 
 #debdElecta = dbdreader.MultiDBD(pattern = datadir * "/[DE]BD/0*.[de]bd", complement_files = true, cacheDir = datadir * "/cache/");
-dataElecta = dbdreader.MultiDBD(pattern = datadir * "/*.[st]bd", complement_files = true, cacheDir = datadir * "/cache/");
+dataElecta = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
 engvars = dataElecta.parameterNames["eng"];
 scivars = dataElecta.parameterNames["sci"];
 
@@ -66,8 +81,16 @@ sortedchlaind = sortperm(chlaraw[:,1]);
 chlaraw = chlaraw[sortedchlaind,:];
 chlafunc = linear_interpolation(chlaraw[:,1], chlaraw[:,2], extrapolation_bc=Line()); 
 
+# find common glider values
+tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
+tctdT = intersectalajulia2(tctd, tempraw[:,1])[3];
+tctdC = intersectalajulia2(tctd, condraw[:,1])[3];
+tctdP = intersectalajulia2(tctd, presraw[:,1])[3];
+
+tpuck = chlaraw[:,1];
+
 # build a common timeline (not necessary if data is of good quality and CTD data all has the same length)
-tall = unique(union(tempraw[:,1], condraw[:,1], presraw[:,1], chlaraw[:,1]));
+tall = unique(union(tempraw[:,1], condraw[:,1], presraw[:,1]));
 tind = findall(trange[1] .<= tall .<= trange[end]);
 
 t1 = floor(NaNMath.minimum(tall[tind]));
@@ -83,28 +106,47 @@ chla_fit = chlafunc(tall[tind]);
 tctd_fit = deepcopy(tall[tind]);
 
 gind = findall((30.0 .>= temp_fit .>= 0.0) .& (7.0 .>= cond_fit .>= 3.0) .& (50.0 .>= pres_fit .>= 0.0) .& (20.0 .>= chla_fit .>= 0));
-dtctd = dtctd_fit[gind];
-tctd = tctd_fit[gind];
-temp = temp_fit[gind];
-cond = cond_fit[gind];
-pres = pres_fit[gind];
-chla = chla_fit[gind];
+dtctdf = dtctd_fit[gind];
+tctdf = tctd_fit[gind];
+tempf = temp_fit[gind];
+condf = cond_fit[gind];
+presf = pres_fit[gind];
+chlaf = chla_fit[gind];
 
-si = sortperm(tctd);
-tctd = tctd[si];
-dtctd = dtctd[si];
-temp = temp[si];
-cond = cond[si];
-pres = pres[si];
-chla = chla[si];
+si = sortperm(tctdf);
+tctdf = tctdf[si];
+dtctdf = dtctdf[si];
+tempf = tempf[si];
+condf = condf[si];
+presf = presf[si];
+chlaf = chlaf[si];
 
 # calculate derived values from CTD data
 gsw = GibbsSeaWater;
-zz = gsw.gsw_z_from_p.(pres*10, 38.13, 0.0, 0.0);
-salt = gsw.gsw_sp_from_c.(cond*10, temp, pres*10);
-saltA = gsw.gsw_sa_from_sp.(salt, pres*10, -60.69, 38.13);
-ctemp = gsw.gsw_ct_from_t.(saltA, temp, pres*10);
-rho = gsw.gsw_rho.(saltA, ctemp, pres*10);
-sigma0 = gsw.gsw_sigma0.(saltA, ctemp);
-spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
-sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
+
+llon = -73.4;
+llat = 38.0;
+
+# raw values from the sensor
+ttraw = tctd; 
+ppraw = presraw[tctdP,2];
+zzraw = gsw.gsw_z_from_p.(ppraw*10, llat, 0.0, 0.0); 
+ttempraw = tempraw[tctdT,2];
+ccondraw = condraw[tctdC,2];
+ssaltraw = gsw.gsw_sp_from_c.(ccondraw*10, ttempraw, ppraw*10);
+saltAraw= gsw.gsw_sa_from_sp.(ssaltraw, ppraw*10, llon, llat);
+ctempraw = gsw.gsw_ct_from_t.(saltAraw, ttempraw, ppraw*10);
+rhoraw = gsw.gsw_rho.(saltAraw, ctempraw, ppraw*10);
+sigma0raw = gsw.gsw_sigma0.(saltAraw, ctempraw);
+spice0raw = gsw.gsw_spiciness0.(saltAraw, ctempraw);
+sndspdraw = gsw.gsw_sound_speed.(saltAraw, ctempraw, ppraw*10);
+
+# values fitted to a 1 second time grid
+zzf = gsw.gsw_z_from_p.(presf*10, llat, 0.0, 0.0);
+saltf = gsw.gsw_sp_from_c.(condf*10, tempf, presf*10);
+saltAf = gsw.gsw_sa_from_sp.(saltf, presf*10, llon, llat);
+ctempf = gsw.gsw_ct_from_t.(saltAf, tempf, presf*10);
+rhof = gsw.gsw_rho.(saltAf, ctempf, presf*10);
+sigma0f = gsw.gsw_sigma0.(saltAf, ctempf);
+spice0f = gsw.gsw_spiciness0.(saltAf, ctempf);
+sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);

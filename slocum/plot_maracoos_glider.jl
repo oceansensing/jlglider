@@ -13,12 +13,15 @@ glider = "electa";
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 
 # setting x and y axes for plotting
-td = dtctd[1:pint:end];
-t = tctd[1:pint:end]; 
-y = zz[1:pint:end];
+td = dtctdf[1:pint:end];
+xf = tctdf[1:pint:end]; 
+yf = zzf[1:pint:end];
+
+x = tctd;
+y = zzraw;
 
 # plotting conservative temperature
-z = ctemp[1:pint:end];
+z = ctempraw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
 fig = Figure(resolution = (1200, 800))
@@ -27,14 +30,14 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(t, y, color=z, colormap=:thermal, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Makie.scatter!(x, y, color=z, colormap=:thermal, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)
 
 # plotting absolute salinity
-z = saltA[1:pint:end];
+z = saltAraw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
 fig = Figure(resolution = (1200, 800))
@@ -43,14 +46,14 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(t, y, color=z, colormap=:haline, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Makie.scatter!(x, y, color=z, colormap=:haline, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :haline, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_saltA.png", fig)
 
 # plotting sigma0
-z = sigma0[1:pint:end];
+z = sigma0raw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
 fig = Figure(resolution = (1200, 800))
@@ -59,14 +62,14 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(t, y, color=z, colormap=:dense, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Makie.scatter!(x, y, color=z, colormap=:dense, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_sigma0.png", fig)
 
 # plotting spice0
-z = spice0[1:pint:end];
+z = spice0raw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
 fig = Figure(resolution = (1200, 800))
@@ -75,14 +78,14 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(t, y, color=z, colormap=:balance, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Makie.scatter!(x, y, color=z, colormap=:balance, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_spice0.png", fig)
 
 # plotting sound speed
-z = sndspd[1:pint:end];
+z = sndspdraw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
 fig = Figure(resolution = (1200, 800))
@@ -91,32 +94,32 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(t, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_soundspeed.png", fig)
 
-# plotting Chl-a
-z = chla[1:pint:end];
-zmin = NaNMath.minimum(z);
-zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1200, 800))
-ax = Axis(fig[1, 1],
-    title = mission * " " * glider * " Chl-a Concentration",
-    xlabel = "Time",
-    ylabel = "Depth"
-)
-Makie.scatter!(t, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-fig
-save(figoutdir * mission * "_" * glider * "_chla.png", fig)
+## plotting Chl-a
+#z = chlaraw[1:pint:end,2];
+#zmin = NaNMath.minimum(z);
+#zmax = NaNMath.maximum(z); 
+#fig = Figure(resolution = (1200, 800))
+#ax = Axis(fig[1, 1],
+#    title = mission * " " * glider * " Chl-a Concentration",
+#    xlabel = "Time",
+#    ylabel = "Depth"
+#)
+#Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+#ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+#Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+#fig
+#save(figoutdir * mission * "_" * glider * "_chla.png", fig)
 
 # plotting T/S diagram
-x = saltA[1:pint:end]; 
-y = ctemp[1:pint:end];
-z = sigma0[1:pint:end];
+x = saltAraw[1:pint:end]; 
+y = ctempraw[1:pint:end];
+z = sigma0raw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
 fig = Figure(resolution = (1000, 1000))
