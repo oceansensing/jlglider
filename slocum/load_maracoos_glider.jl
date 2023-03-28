@@ -7,6 +7,24 @@ using NaNMath, GibbsSeaWater, Dates, Interpolations
 
 dbdreader = pyimport("dbdreader");
 
+mutable struct gliderStruct
+    t::Array{DateTime}
+    p::Array{Float64}
+    z::Array{Float64}
+    lon::Array{Float64}
+    lat::Array{Float64}
+    temp::Array{Float64}
+    cond::Array{Float64}
+    salt::Array{Float64}
+    ctemp::Array{Float64}
+    saltA::Array{Float64}
+    sigma0::Array{Float64}
+    spice0::Array{Float64}
+    sndspd::Array{Float64}
+    castnum::Int
+    qflag::Int
+end
+
 # define function for converting an array from python row major to julia column major
 function pyrow2jlcol(invar::Matrix{Float64})
     return reverse(rotr90(invar), dims = 2);
@@ -28,7 +46,7 @@ end
 
 # specify valid data time period
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
-datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230327T195902/";
+datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230328T023607/";
 cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
 t0 = DateTime("2023-03-21");
 tN = DateTime("2023-04-21");
@@ -150,3 +168,5 @@ rhof = gsw.gsw_rho.(saltAf, ctempf, presf*10);
 sigma0f = gsw.gsw_sigma0.(saltAf, ctempf);
 spice0f = gsw.gsw_spiciness0.(saltAf, ctempf);
 sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);
+
+gliderData = gliderStruct[];
