@@ -31,7 +31,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:thermal, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
+ax.xticks = (xf[1]:86400*2:xf[end], string.(Date.(td[1]:Day(2):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)

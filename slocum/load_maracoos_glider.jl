@@ -46,7 +46,7 @@ end
 
 # specify valid data time period
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
-datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230401T191326/";
+datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230401T210720/";
 cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
 t0 = DateTime("2023-03-21");
 tN = DateTime("2023-04-21");
