@@ -46,7 +46,7 @@ end
 
 # specify valid data time period
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
-datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230330T024146/";
+datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230401T191326/";
 cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
 t0 = DateTime("2023-03-21");
 tN = DateTime("2023-04-21");
@@ -73,6 +73,7 @@ sci_water_cond = pyrow2jlcol(dataElecta.get("sci_water_cond"));
 sci_water_pressure = pyrow2jlcol(dataElecta.get("sci_water_pressure"));
 sci_flbbcd_chlor_units = pyrow2jlcol(dataElecta.get("sci_flbbcd_chlor_units"));
 sci_bsipar_par = pyrow2jlcol(dataElecta.get("sci_bsipar_par"));
+
 m_num_tot_inflections = pyrow2jlcol(dataElecta.get("m_tot_num_inflections")); 
 
 # QC loaded data by time and values, create interpolation function for T,C,P
