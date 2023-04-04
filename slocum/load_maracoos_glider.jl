@@ -3,7 +3,7 @@
 #
 
 using PyCall
-using NaNMath, GibbsSeaWater, Dates, Interpolations
+using Glob, NaNMath, GibbsSeaWater, Dates, Interpolations
 
 dbdreader = pyimport("dbdreader");
 
@@ -44,13 +44,21 @@ function intersectalajulia4(a,b)
     return hcat(ab, ia,ib)
 end
 
-# specify valid data time period
-rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
-datadir = rootdir * "electa-20230320-maracoos/from-glider/electa-from-glider-20230401T210720/";
-cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
-t0 = DateTime("2023-03-21");
-tN = DateTime("2023-04-21");
-trange = datetime2unix.([t0; tN]);
+if @isdefined datadir == false
+    # setup directories
+    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
+    fromgliderdir = rootdir * "electa-20230320-maracoos/from-glider/"; 
+    datadirpath = Glob.glob("electa-from-glider*.zip", fromgliderdir)[1];
+    datadir = fromgliderdir * "electa-from-glider-20230404T113550/";
+    cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
+end
+
+if @isdefined trange == false
+    # specify valid data time period
+    t0 = DateTime("2023-03-21");
+    tN = DateTime("2023-04-21");
+    trange = datetime2unix.([t0; tN]);
+end
 
 # setup glider data loading using dbdreader
 #dbdSylvia = dbdreader.DBD("/Users/gong/GitHub/sylvia-20180501-maracoos/data/DBD/01740010.DBD", cacheDir="/Users/gong/GitHub/sylvia-20180501-maracoos/data/cache/");

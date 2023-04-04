@@ -4,13 +4,16 @@ using GLMakie, ColorSchemes
 # plot CTD data using Makie
 # the plotting code will be refactored into a function of its own in the next revision
 
-#figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
-rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
-figoutdir = rootdir * "/electa-20230320-maracoos/figures/";
-mission = "MARACOOS";
-glider = "electa";
+if @isdefined figoutdir == false
+    #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
+    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
+    figoutdir = rootdir * "/electa-20230320-maracoos/figures/";
+    mission = "MARACOOS";
+    glider = "electa";
+end
 
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+iday = 3; # day intervals for plotting
 
 # setting x and y axes for plotting
 td = dtctdf[1:pint:end];
@@ -31,7 +34,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:thermal, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400*2:xf[end], string.(Date.(td[1]:Day(2):td[end])))
+ax.xticks = (xf[1]:86400*iday:xf[end], string.(DateTime.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)
@@ -47,7 +50,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:haline, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
+ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :haline, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_saltA.png", fig)
@@ -63,7 +66,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:dense, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
+ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_sigma0.png", fig)
@@ -79,7 +82,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:balance, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
+ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_spice0.png", fig)
@@ -95,7 +98,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400:xf[end], string.(Date.(td[1]:Day(1):td[end])))
+ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_soundspeed.png", fig)
