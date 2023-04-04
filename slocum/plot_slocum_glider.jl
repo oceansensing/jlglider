@@ -4,7 +4,7 @@ using GLMakie, ColorSchemes
 # plot CTD data using Makie
 # the plotting code will be refactored into a function of its own in the next revision
 
-if @isdefined figoutdir == false
+if (@isdefined figoutdir) == false
     #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
     rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
     figoutdir = rootdir * "/electa-20230320-maracoos/figures/";

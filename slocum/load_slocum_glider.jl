@@ -44,7 +44,7 @@ function intersectalajulia4(a,b)
     return hcat(ab, ia,ib)
 end
 
-if @isdefined datadir == false
+if (@isdefined datadir) == false
     # setup directories
     rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/";
     fromgliderdir = rootdir * "electa-20230320-maracoos/from-glider/"; 
@@ -53,7 +53,7 @@ if @isdefined datadir == false
     cacdir = rootdir * "electa-20230320-maracoos/from-glider/cache/";
 end
 
-if @isdefined trange == false
+if (@isdefined trange) == false
     # specify valid data time period
     t0 = DateTime("2023-03-21");
     tN = DateTime("2023-04-21");
@@ -69,20 +69,24 @@ end
 #ebdElecta = dbdreader.MultiDBD(datadir * "/EBD/0*.ebd", cacheDir = datadir * "/cache/");
 
 #debdElecta = dbdreader.MultiDBD(pattern = datadir * "/[DE]BD/0*.[de]bd", complement_files = true, cacheDir = datadir * "/cache/");
-dataElecta = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-engvars = dataElecta.parameterNames["eng"];
-scivars = dataElecta.parameterNames["sci"];
+if datamode == "realtime"
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+else
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+end
+engvars = dataGlider.parameterNames["eng"];
+scivars = dataGlider.parameterNames["sci"];
 
 # load CTD data from raw glider DBD & EBD files
-#tctd, cond, temp, pres, m_de_oil_vol = dataElecta.get_CTD_sync("m_de_oil_vol");
-sci_m_present_time = pyrow2jlcol(dataElecta.get("sci_m_present_time"));
-sci_water_temp = pyrow2jlcol(dataElecta.get("sci_water_temp"));
-sci_water_cond = pyrow2jlcol(dataElecta.get("sci_water_cond"));
-sci_water_pressure = pyrow2jlcol(dataElecta.get("sci_water_pressure"));
-sci_flbbcd_chlor_units = pyrow2jlcol(dataElecta.get("sci_flbbcd_chlor_units"));
-sci_bsipar_par = pyrow2jlcol(dataElecta.get("sci_bsipar_par"));
+#tctd, cond, temp, pres, m_de_oil_vol = dataGlider.get_CTD_sync("m_de_oil_vol");
+sci_m_present_time = pyrow2jlcol(dataGlider.get("sci_m_present_time"));
+sci_water_temp = pyrow2jlcol(dataGlider.get("sci_water_temp"));
+sci_water_cond = pyrow2jlcol(dataGlider.get("sci_water_cond"));
+sci_water_pressure = pyrow2jlcol(dataGlider.get("sci_water_pressure"));
+sci_flbbcd_chlor_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_chlor_units"));
+sci_bsipar_par = pyrow2jlcol(dataGlider.get("sci_bsipar_par"));
 
-m_num_tot_inflections = pyrow2jlcol(dataElecta.get("m_tot_num_inflections")); 
+m_num_tot_inflections = pyrow2jlcol(dataGlider.get("m_tot_num_inflections")); 
 
 # QC loaded data by time and values, create interpolation function for T,C,P
 tempind = findall((trange[1] .<= sci_water_temp[:,1] .<= trange[end]) .& (40.0 .>= sci_water_temp[:,2] .> 0.0));
