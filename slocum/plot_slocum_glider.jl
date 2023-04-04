@@ -12,8 +12,10 @@ if (@isdefined figoutdir) == false
     glider = "electa";
 end
 
-pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
-iday = 3; # day intervals for plotting
+if (@isdefined iday) == false
+    pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+    iday = 3; # day intervals for plotting
+end
 
 # setting x and y axes for plotting
 td = dtctdf[1:pint:end];

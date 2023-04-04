@@ -16,6 +16,8 @@ t0 = DateTime("2022-10-01");
 tN = DateTime("2022-12-01");
 trange = datetime2unix.([t0; tN]);
 
+pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+iday = 1; # day intervals for plotting
 datamode = "delayed"
 
 include("load_slocum_glider.jl")
