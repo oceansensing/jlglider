@@ -4,7 +4,7 @@
 # setup directories
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS/electa-20230320-maracoos/";
 fromgliderdir = rootdir * "from-glider/"; 
-datadir = fromgliderdir * "electa-from-glider-20230404T113550/";
+datadir = fromgliderdir * "electa-from-glider-20230405T023652/";
 cacdir = fromgliderdir * "cache/";
 
 figoutdir = rootdir * "figures/";
