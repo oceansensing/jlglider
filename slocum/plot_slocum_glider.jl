@@ -35,9 +35,9 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:thermal, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (xf[1]:86400*iday:xf[end], string.(DateTime.(td[1]:Day(iday):td[end])))
-Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = false)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)
 
@@ -51,9 +51,9 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:haline, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
-Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :haline, flipaxis = false)
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_saltA.png", fig)
 
@@ -67,9 +67,9 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:dense, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
-Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = false)
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_sigma0.png", fig)
 

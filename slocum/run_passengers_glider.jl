@@ -2,6 +2,8 @@
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
 #
 # setup directories
+using Dates
+
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2022_glider_data/electa-20221105-passengers/";
 fromgliderdir = rootdir * "from-glider/"; 
 datadir = fromgliderdir;
