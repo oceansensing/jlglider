@@ -15,6 +15,10 @@ end
 if (@isdefined iday) == false
     pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
     iday = 3; # day intervals for plotting
+    ms = 3;
+    tsms = 2;
+    pres = (1200, 800)
+    tspres = (1000, 1000)
 end
 
 # setting x and y axes for plotting
@@ -29,13 +33,13 @@ y = zzraw;
 z = ctempraw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1200, 800))
+fig = Figure(resolution = pres)
 ax = Axis(fig[1, 1],
     title = mission * " " * glider * " Conservative Temperature",
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
@@ -45,13 +49,13 @@ save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)
 z = saltAraw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1200, 800))
+fig = Figure(resolution = pres)
 ax = Axis(fig[1, 1],
     title = mission * " " * glider * " Absolute Salinity",
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
@@ -61,13 +65,13 @@ save(figoutdir * mission * "_" * glider * "_saltA.png", fig)
 z = sigma0raw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1200, 800))
+fig = Figure(resolution = pres)
 ax = Axis(fig[1, 1],
     title = mission * " " * glider * " Potential Density",
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
@@ -77,13 +81,13 @@ save(figoutdir * mission * "_" * glider * "_sigma0.png", fig)
 z = spice0raw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1200, 800))
+fig = Figure(resolution = pres)
 ax = Axis(fig[1, 1],
     title = mission * " " * glider * " Spiciness0",
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:balance, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
 fig
@@ -93,13 +97,13 @@ save(figoutdir * mission * "_" * glider * "_spice0.png", fig)
 z = sndspdraw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1200, 800))
+fig = Figure(resolution = pres)
 ax = Axis(fig[1, 1],
     title = mission * " " * glider * " Sound Speed",
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
 ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
@@ -127,13 +131,13 @@ y = ctempraw[1:pint:end];
 z = sigma0raw[1:pint:end];
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
-fig = Figure(resolution = (1000, 1000))
+fig = Figure(resolution = tspres)
 ax = Axis(fig[1, 1],
     title = mission * " " * glider * " T/S",
     xlabel = "Absolute Salinity",
     ylabel = "Conservative Temperature"
 )
-Makie.scatter!(x, y, color=z, colormap=:jet, markersize=2, colorrange=(zmin, zmax))
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
 #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sigma0")
 fig
