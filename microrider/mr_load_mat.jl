@@ -1,23 +1,35 @@
 # example loading of .mat file produced by odas_p2mat.m
 # 2023-04-18 gong@vims.edu
 
-using Glob, MAT, JLD2, FileIO
+using Glob, MAT, JLD2
 import MR_types: MicroRiderRaw
 
 datadirJM = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/"
 datadirLBE = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/"
 
-datadir = datadirJM;
+datadir = datadirLBE;
 pdir = datadir * "mr1000g/";
 matdir = datadir * "mr1000g_processing/matfiles/";
 jld2dir = datadir * "mr1000g_processing/jld2files/";
+
+
+if !isdir(matdir)
+    mkpath(matdir)
+    println("matdir directory created.")
+end
+
+if !isdir(jld2dir)
+    mkpath(jld2dir)
+    println("jld2dir directory created.")
+end
+
 datafiles = Glob.glob("*.mat", matdir);
 
 global mrdata = MicroRiderRaw[];
 
 #mrzarr = Zarr.zgroup(datadir * "MR_data.zarr");
 
-for i = 1:length(datafiles)
+Threads.@threads for i = 61:length(datafiles)
     display(i)
     mrfile = matopen(datafiles[i]);
 
