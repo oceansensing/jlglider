@@ -1,20 +1,26 @@
 # example loading of .mat file produced by odas_p2mat.m
 # 2023-04-18 gong@vims.edu
 
-using Glob, MAT
+using Glob, MAT, JLD2, FileIO
 import MR_types: MicroRiderRaw
 
-datadirJM = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/mr1000g/"
-datadirLBE = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/mr1000g/"
+datadirJM = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/"
+datadirLBE = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/"
 
 datadir = datadirJM;
-datafiles = Glob.glob("*.mat", datadir);
+pdir = datadir * "mr1000g/";
+matdir = datadir * "mr1000g_processing/matfiles/";
+jld2dir = datadir * "mr1000g_processing/jld2files/";
+datafiles = Glob.glob("*.mat", matdir);
 
 global mrdata = MicroRiderRaw[];
 
-for i = 1:10
+#mrzarr = Zarr.zgroup(datadir * "MR_data.zarr");
+
+for i = 1:length(datafiles)
     display(i)
     mrfile = matopen(datafiles[i]);
+
     fullPath = read(mrfile, "fullPath");
     fs_fast = read(mrfile, "fs_fast");
     fs_slow = read(mrfile, "fs_slow");
@@ -71,6 +77,13 @@ for i = 1:10
     params = read(mrfile, "params");
 
     mrprofile = MicroRiderRaw(fullPath, fs_fast, fs_slow, header_version, t_slow, t_fast, setupfilestr, cfgobj, header, filetime, date, time, Gnd, Ax, Ay, T1, T1_dT1, T2, T2_dT2, sh1, sh2, P, P_dP, PV, V_Bat, Incl_Y, Incl_X, Incl_T, odas_version, vehicle_info, t_fast_YD, t_slow_YD, Year, Month, Day, Hour, Minute, Second, Milli, T1_slow, T1_fast, T2_slow, T2_fast, P_slow, P_fast, temperature_fast, W_slow, W_fast, speed_slow, speed_fast, gradT1, gradT2, input_parameters, params);
-    global mrdata = push!(mrdata, mrprofile);
-    close(mrfile)
+    jldsave(jld2dir * datafiles[i][end-11:end-4] * ".jld2", true; mrprofile);
+    #global mrdata = push!(mrdata, mrprofile);
+    #close(mrfile)
+
+    ## trying to use Zarr but not really working
+    # Zarr.zopen(datadir * "MR_data.zarr", mode="w")
+    # a = Zarr.zcreate(Float64, mrzarr, "fs_fast", 1)
+    # a = fs_fast;
 end
+
