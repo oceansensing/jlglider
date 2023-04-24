@@ -106,6 +106,7 @@ function MR_loadjld2(jld2datafilepath)
     mrr = MicroRiderRaw[];
     data = jldopen(jld2datafilepath, "r");
     mrr = data["mrprofile"];
+    return mrr;
 end
 
 # load specific profiles based on what user desires
@@ -117,15 +118,20 @@ function MR_load_profile(project::String, mission::String, profilename::String)
     for i = 1:length(datafiles)
         push!(filenames, datafiles[i][end-12:end-5]);
     end
-    iprofile = findall(filenames .== profilename)[1];
-    MRprofile = MR_loadjld2(datafiles[iprofile]);
-    return MRprofile
+    iprofile = findall(filenames .== profilename);
+    if !isempty(iprofile)
+        MRprofile = MR_loadjld2(datafiles[iprofile[1]]);
+    else
+        display("Profile " * profilename * " not found, there are " * string(length(filenames)) * " available, exit 0.")
+        MRprofile = 0;
+    end
+    return MRprofile;
 end
 
 function MR_load_profile(project::String, mission::String, profileid::Int)
     datafilestr = "dat_" * string(profileid, base = 10, pad = 4);
     MRprofile = MR_load_profile(project, mission, datafilestr);
-    return MRprofile
+    return MRprofile;
 end
 
 end #module
