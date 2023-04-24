@@ -6,8 +6,10 @@ using GLMakie, ColorSchemes
 
 if (@isdefined figoutdir) == false
     #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
-    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
-    figoutdir = rootdir * "/electa-20230320-maracoos/figures/";
+#    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
+#    figoutdir = rootdir * "/electa-20230320-maracoos/figures/";
+    rootdir = "~/GitHub/jlglider/slocum/";
+    figoutdir = "figures/";
     mission = "MARACOOS";
     glider = "electa";
 end
