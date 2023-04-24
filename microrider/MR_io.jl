@@ -36,10 +36,7 @@ function MR_mat2jld2(project::String, mission::String)
     jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String)
 
     datafiles = Glob.glob("*.mat", matdir);
-
     global mrdata = MicroRiderRaw[];
-
-    #mrzarr = Zarr.zgroup(datadir * "MR_data.zarr");
 
     Threads.@threads for i = 1:length(datafiles)
         display(i)
@@ -102,37 +99,11 @@ function MR_mat2jld2(project::String, mission::String)
 
         mrprofile = MicroRiderRaw(fullPath, fs_fast, fs_slow, header_version, t_slow, t_fast, setupfilestr, cfgobj, header, filetime, date, time, Gnd, Ax, Ay, T1, T1_dT1, T2, T2_dT2, sh1, sh2, P, P_dP, PV, V_Bat, Incl_Y, Incl_X, Incl_T, odas_version, vehicle_info, t_fast_YD, t_slow_YD, Year, Month, Day, Hour, Minute, Second, Milli, T1_slow, T1_fast, T2_slow, T2_fast, P_slow, P_fast, temperature_fast, W_slow, W_fast, speed_slow, speed_fast, gradT1, gradT2, input_parameters, params);
         jldsave(jld2dir * datafiles[i][end-11:end-4] * ".jld2", true; mrprofile);
-        #global mrdata = push!(mrdata, mrprofile);
-        #close(mrfile)
-
-        ## trying to use Zarr but not really working
-        # Zarr.zopen(datadir * "MR_data.zarr", mode="w")
-        # a = Zarr.zcreate(Float64, mrzarr, "fs_fast", 1)
-        # a = fs_fast;
     end
 end
 
 function MR_loadjld2(jld2datafilepath)
-    #datadirJM = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/"
-    #datadirLBE = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/"
-    #
-    #datadir = datadirLBE;
-    #pdir = datadir * "mr1000g/";
-    #matdir = datadir * "mr1000g_processing/matfiles/";
-    #jld2dir = datadir * "mr1000g_processing/jld2files/";
-
     mrr = MicroRiderRaw[];
-
-    #if isdir(jld2dir)
-    #    jldfiles = Glob.glob("*.jld2", jld2dir);
-    #    if !isempty(jldfiles)
-    #        i = 1
-    #        display(i)
-    #        data = jldopen(jldfiles[i], "r");
-    #        mrr = data["mrprofile"];
-    #    end #if
-    #end #if
-
     data = jldopen(jld2datafilepath, "r");
     mrr = data["mrprofile"];
 end
