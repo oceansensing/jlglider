@@ -29,7 +29,7 @@ global mrdata = MicroRiderRaw[];
 
 #mrzarr = Zarr.zgroup(datadir * "MR_data.zarr");
 
-Threads.@threads for i = 61:length(datafiles)
+Threads.@threads for i = 1:length(datafiles)
     display(i)
     mrfile = matopen(datafiles[i]);
 
