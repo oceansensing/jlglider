@@ -161,7 +161,7 @@ mutable struct MR1000G
     mr1000g_qc1::Array{Float64};
 end
 
-mutable struct SeaExplorer
+mutable struct SeaExplorerTest
     nav::Array{NAV};
     ctd::Array{LEGATO};
     flbbcd::Array{FLBBCD};
@@ -172,11 +172,46 @@ mutable struct SeaExplorer
     ad2cp1d::AD2CP;
 end
 
-mutable struct SeaExplorerRT
+mutable struct SeaExplorer
     nav::Array{NAV_RT};
     pld::Array{PLD_RT};
     nav1d::Array{NAV_RT};
     pld1d::Array{PLD_RT};
+end
+
+mutable struct SeaExplorerData
+    t::Array{DateTime};
+    lat::Array{Float64};
+    lon::Array{Float64};
+    p::Array{Float64}
+    temp::Array{Float64}
+    salt::Array{Float64}
+    saltA::Array{Float64}
+    ctemp::Array{Float64}
+    sigma0::Array{Float64}
+    spice0::Array{Float64}
+    sndspd::Array{Float64}
+ 
+    mr_eps1::Array{Float64}
+    mr_eps2::Array{Float64}
+    mr_qc1::Array{Float64}
+    mr_qc2::Array{Float64}
+    mr_sh1_std::Array{Float64}
+    mr_sh2_std::Array{Float64}
+    mr_t1_avg::Array{Float64}
+    mr_t2_avg::Array{Float64}
+    ad2cp_Ueast::Array{Float64}
+    ad2cp_Unorth::Array{Float64}
+    ad2cp_Utot::Array{Float64}
+    ad2cp_Udir::Array{Float64}
+    ad2cp_qf::Array{Float64}
+    chla::Array{Float64}
+    bb700::Array{Float64}
+    cdom::Array{Float64}
+    n2::Array{Float64}
+    pmid::Array{Float64}
+    zmid::Array{Float64}
+    tmid::Array{DateTime}
 end
 
 end

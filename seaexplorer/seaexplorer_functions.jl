@@ -4,8 +4,10 @@
 module seaexplorer_functions
 
 using Glob, DataFrames, CSV, Dates, Missings
+using NaNMath, GibbsSeaWater
+import seaexplorer_types: NAV_RT, PLD_RT, SeaExplorerData
+import gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
 
-import seaexplorer_types: NAV_RT, PLD_RT
 
 function missing2nan(varin)
     varin = collect(varin);
@@ -650,6 +652,105 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
     #gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
 
     return pld_rt, pld1d_rt
+end
+
+function seaexplorer_load_mission(mission)
+
+    # setting src and data directory paths
+    srcdir = "/Users/gong/GitHub/jlglider/";
+    dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
+    #dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
+    #dataroot = "/Users/gong/Research/sea064/";
+
+    if (@isdefined gliderSN) != true
+        gliderSN = 64
+    end
+
+    if (@isdefined mission) != true
+        mission = 37
+    end
+
+    # define data load location
+    #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
+
+    # define dataset loading parameters
+    #project = "maracoos"
+    #deploydate = "20220311"
+    #suffix = "data"
+
+    if (gliderSN == 64) & (mission == 37)
+        projectname = "norse"
+        deploydate = "20221021"
+        suffix = "deployment"
+        datadir = dataroot * "sea064-20221021-norse-janmayen-complete/";
+        dataflag = "all";
+
+    elseif (gliderSN == 64) & (mission == 38)
+        projectname = "norse"
+        deploydate = "20221102"
+        suffix = "deployment"
+        datadir = dataroot * "sea064-20221102-norse-lofoten-complete/";
+        dataflag = "all";
+    end
+
+    if (dataflag == "realtime") | (dataflag == "all") 
+        navdir = datadir * "glimpse/";
+        scidir = datadir * "glimpse/";
+    else 
+        navdir = datadir * "nav/logs/";
+        scidir = datadir * "science/logs/";
+    end
+
+    (sea064nav, sea064nav1d) = load_NAV(gliderSN, mission, navdir, dataflag);
+    (sea064pld, sea064pld1d) = load_PLD(gliderSN, mission, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+
+    return sea064nav, sea064pld, sea064nav1d, sea064pld1d
+end
+
+function seaexplorer_process(sea064pld1d)
+    lon = sea064pld1d.lon;
+    lat = sea064pld1d.lat;
+    t = sea064pld1d.t;
+
+    badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< DateTime(2020,1,1,0,0,0)));
+    if isempty(badind) != true
+        lon[badind] .= NaN;
+        lat[badind] .= NaN;
+        t[badind] .= t[badind[end]+1];
+    end
+
+    #t = cleanTime(sea064pld1d.t);
+    p = cleanPress(sea064pld1d.legato_pressure);
+    temp = cleanTemp(sea064pld1d.legato_temperature);
+    salt = cleanSalt(sea064pld1d.legato_salinity);
+    saltA = cleanSalt(gsw_sa_from_sp.(salt, p, lon, lat));
+    ctemp = cleanTemp(gsw_ct_from_t.(saltA, temp, p));
+    sigma0 = sigma0_from_t_sp(temp, salt, p, lon, lat);
+    spice0 = spice0_from_t_sp(temp, salt, p, lon, lat);
+    sndspd = gsw_sound_speed.(saltA, ctemp, p);
+
+    n2, pmid = N2_from_t_sp(temp, salt, p, lon, lat);
+    zmid = gsw_z_from_p.(pmid, lat[2:end], 0, 0);
+    tmid = t[1:end-1] .+ Second(15);
+
+    mr_eps1 = cleanEPS(sea064pld1d.mr1000g_eps1);
+    mr_eps2 = cleanEPS(sea064pld1d.mr1000g_eps2);
+    mr_qc1 = clean9999(sea064pld1d.mr1000g_qc1);
+    mr_qc2 = clean9999(sea064pld1d.mr1000g_qc2);
+    mr_sh1_std = clean9999(sea064pld1d.mr1000g_sh1_std);
+    mr_sh2_std = clean9999(sea064pld1d.mr1000g_sh2_std);
+    mr_t1_avg = clean9999(sea064pld1d.mr1000g_t1_avg);
+    mr_t2_avg = clean9999(sea064pld1d.mr1000g_t2_avg);
+    ad2cp_Ueast = cleanAD2CP(sea064pld1d.ad2cp_Ueast);
+    ad2cp_Unorth = cleanAD2CP(sea064pld1d.ad2cp_Unorth);
+    ad2cp_Utot = cleanAD2CP(sea064pld1d.ad2cp_Utot);
+    ad2cp_Udir = cleanAD2CP(sea064pld1d.ad2cp_Udir);
+    ad2cp_qf = cleanAD2CP(sea064pld1d.ad2cp_qf);
+    chla = cleanFLBBCDchl(sea064pld1d.flbbcd_chl_scaled);
+    bb700 = cleanFLBBCDbb700(sea064pld1d.flbbcd_bb_700_scaled);
+    cdom = cleanFLBBCDcdom(sea064pld1d.flbbcd_cdom_scaled);
+
+    SEAdata = SeaExplorerData(t, lat, lon, p, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
 end
 
 end
