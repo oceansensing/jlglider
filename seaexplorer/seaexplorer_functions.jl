@@ -136,7 +136,7 @@ function cleanFLBBCDcdom(varin)
     return varout;
 end
 
-function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
+function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::String)
     nav_rt = NAV_RT[];
 
     #missionroot = uppercase(glidername) * "." * mission;
@@ -149,7 +149,7 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
     #glilist_suffix = [];
     yos = [];
     yolist = [];
-    allindx = 0;
+    allindx = 1;
     for i = 1:length(glilist)
         suffix2 = glilist[i][end-1:end]
         fnlen = length(glilist[i]) - length(navdir);
@@ -165,7 +165,7 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
             end
             yos = push!(yos, yo);
             yolist = push!(yolist, glilist[i]);
-        elseif (suffix2 != "gz" && suffix2 != "ll")
+        elseif (suffix2 != "gz") & (suffix2 != "ll") & (suffix2 != "sv")
             if fnlen == 19  # sea064.37.gli.sub.1
                 yo = parse(Int,glilist[i][end:end]);
             elseif fnlen == 20 # sea064.37.gli.sub.10
@@ -181,6 +181,12 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
             if fnlen == 21 # SEA064.37.gli.sub.all
                 allindx = i;
             end
+            yos = [-1];
+        elseif suffix2 == "sv"
+            if fnlen == 25 # SEA064.37.gli.sub.all.csv
+                allindx = i;
+            end
+            yos = [-1];
         end
         #glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
     end
@@ -188,9 +194,12 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
     #allindx = findall(glilist_suffix .== "all");
     yosi = sortperm(Int.(yos));
     yos = yos[yosi];
-    yolist = yolist[yosi];
 
-    if dataflag == 1
+    if !isempty(yolist)
+        yolist = yolist[yosi];
+    end
+
+    if dataflag == "all"
         glilist = [glilist[allindx]];
     else
         glilist = yolist;
@@ -228,7 +237,7 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
     for i = 1:length(glilist)
         #yostring = glilist[i][end-2:end];
 
-        if dataflag == 1
+        if dataflag == "all"
         #    yo = parse.(Int, glilist_suffix[yolist]);
             yo = yos;
         else
@@ -303,12 +312,18 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::Int)
     return nav_rt, nav1d_rt
 end
 
-function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
+function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
     pld_rt = PLD_RT[];
 
-    if dataflag < 2
+    #if dataflag < 2
+    #    datatype = "sub"
+    #else
+    #    datatype = "raw"
+    #end
+
+    if (dataflag == "sub") | (dataflag == "realtime") | (dataflag == "all")
         datatype = "sub"
-    else
+    elseif (dataflag == "raw") | (dataflag == "delayed")
         datatype = "raw"
     end
 
@@ -327,7 +342,7 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
 
     yos = [];
     yolist = [];
-    allindx = 0;
+    allindx = 1;
     for i = 1:length(pldlist)
         suffix2 = pldlist[i][end-1:end]
         fnlen = length(pldlist[i]) - length(scidir);
@@ -343,7 +358,7 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
             end
             yos = push!(yos, yo);
             yolist = push!(yolist, pldlist[i]);
-        elseif (suffix2 != "gz" && suffix2 != "ll")
+        elseif (suffix2 != "gz") & (suffix2 != "ll") & (suffix2 != "sv")
             if fnlen == 19+1  # sea064.37.pld1.sub.1
                 yo = parse(Int,pldlist[i][end:end]);
             elseif fnlen == 20+1 # sea064.37.pld1.sub.10
@@ -359,6 +374,12 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
             if fnlen == 21+1 # SEA064.37.pld1.sub.all
                 allindx = i;
             end
+            yos = [-1];
+        elseif suffix2 == "sv"
+            if fnlen == 25 # SEA064.37.gli.sub.all.csv
+                allindx = i;
+            end
+            yos = [-1];
         end
         #glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
     end
@@ -366,9 +387,12 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
     #allindx = findall(glilist_suffix .== "all");
     yosi = sortperm(Int.(yos));
     yos = yos[yosi];
-    yolist = yolist[yosi];
 
-    if dataflag == 1
+    if !isempty(yolist)
+        yolist = yolist[yosi];
+    end
+
+    if dataflag == "all"
         pldlist = [pldlist[allindx]];
     else
         pldlist = yolist;
@@ -453,7 +477,7 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
         #yostring = pldlist[i][end-2:end];
 
         # separating '.all' from '.###' files
-        if dataflag == 1
+        if dataflag == "all"
         #    yo = parse.(Int, pldlist_suffix[yolist]);
             yo = yos
         else
@@ -538,7 +562,7 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
         tmpvar = Array{Float64,1}(undef, length(ad2cp_alt));
         tmpvar .= NaN;
 
-        if dataflag == 1
+        if dataflag == "all"
             ad2cp_Unorth = missing2nan(df.AD2CP_Unorth_c);
             ad2cp_Ueast = missing2nan(df.AD2CP_Ueast_c);
             ad2cp_Utot = missing2nan(df.AD2CP_Utot_c);
@@ -551,6 +575,8 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::Int)
             ad2cp_Udir = tmpvar;
             ad2cp_qf = tmpvar;
         end
+
+        display(yo)
 
         yo1d = cat(yo1d, yo[1], dims = 1);
         t1d = cat(t1d, t, dims = 1);

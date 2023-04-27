@@ -9,18 +9,9 @@ import seaexplorer_functions: missing2nan, cleanTime, cleanAD2CPtime, cleanEPS, 
 
 # setting src and data directory paths
 srcdir = "/Users/gong/GitHub/jlglider/";
-#dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
-dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
+dataroot = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/";
+#dataroot = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/2022_fieldwork/";
 #dataroot = "/Users/gong/Research/sea064/";
-
-# define dataset loading parameters
-#project = "maracoos"
-#deploydate = "20220311"
-#suffix = "data"
-
-projectname = "norse"
-deploydate = "20221021"
-suffix = "deployment"
 
 if (@isdefined gliderSN) != true
     gliderSN = 64
@@ -33,16 +24,32 @@ end
 # define data load location
 #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
 
-if mission == 37 # Jan Mayen 2022
+# define dataset loading parameters
+#project = "maracoos"
+#deploydate = "20220311"
+#suffix = "data"
+
+if (gliderSN == 64) & (mission == 37)
+    projectname = "norse"
+    deploydate = "20221021"
+    suffix = "deployment"
     datadir = dataroot * "sea064-20221021-norse-janmayen-complete/";
+    dataflag = "all";
+
+elseif (gliderSN == 64) & (mission == 38)
+    projectname = "norse"
+    deploydate = "20221102"
+    suffix = "deployment"
+    datadir = dataroot * "sea064-20221102-norse-lofoten-complete/";
+    dataflag = "all";
+end
+
+if (dataflag == "realtime") | (dataflag == "all") 
+    navdir = datadir * "glimpse/";
+    scidir = datadir * "glimpse/";
+else 
     navdir = datadir * "nav/logs/";
     scidir = datadir * "science/logs/";
-    dataflag = 2;
-elseif mission == 38 # Lofoten Basin 2022
-    datadir = dataroot;
-    navdir = datadir * "realtime/";
-    scidir = datadir * "realtime/";
-    dataflag = 1;
 end
 
 (sea064nav, sea064nav1d) = load_NAV(gliderSN, mission, navdir, dataflag);
