@@ -721,6 +721,7 @@ function seaexplorer_process(sea064pld1d)
 
     #t = cleanTime(sea064pld1d.t);
     p = cleanPress(sea064pld1d.legato_pressure);
+    z = gsw_z_from_p.(p, lat, 0, 0);
     temp = cleanTemp(sea064pld1d.legato_temperature);
     salt = cleanSalt(sea064pld1d.legato_salinity);
     saltA = cleanSalt(gsw_sa_from_sp.(salt, p, lon, lat));
@@ -750,7 +751,7 @@ function seaexplorer_process(sea064pld1d)
     bb700 = cleanFLBBCDbb700(sea064pld1d.flbbcd_bb_700_scaled);
     cdom = cleanFLBBCDcdom(sea064pld1d.flbbcd_cdom_scaled);
 
-    SEAdata = SeaExplorerData(t, lat, lon, p, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
+    SEAdata = SeaExplorerData(t, lon, lat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
 end
 
 end

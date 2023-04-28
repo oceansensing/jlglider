@@ -181,9 +181,10 @@ end
 
 mutable struct SeaExplorerData
     t::Array{DateTime};
-    lat::Array{Float64};
     lon::Array{Float64};
+    lat::Array{Float64};
     p::Array{Float64}
+    z::Array{Float64}
     temp::Array{Float64}
     salt::Array{Float64}
     saltA::Array{Float64}

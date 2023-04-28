@@ -6,7 +6,8 @@ jmnav, jmnav1d, jmpld, jmpld1d = seaexplorer_load_mission(37);
 lbenav, lbenav1d, lbepld, lbepld1d = seaexplorer_load_mission(38);
 jm = seaexplorer_process(jmpld1d);
 lbe = seaexplorer_process(lbepld1d);
+#sea064data = jm;
 
-sea064data = jm;
+include("seaexplorer_processing.jl");
 
 #include("seaexplorer_plotFast.jl")
