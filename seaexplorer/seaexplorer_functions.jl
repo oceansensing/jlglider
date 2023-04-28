@@ -3,8 +3,9 @@
 
 module seaexplorer_functions
 
-using Glob, DataFrames, CSV, Dates, Missings
-using NaNMath, GibbsSeaWater
+using Glob, DataFrames, CSV, Dates, Missings, NaNMath
+using GLMakie, NCDatasets
+using GibbsSeaWater
 import seaexplorer_types: NAV_RT, PLD_RT, SeaExplorerData
 import gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
 

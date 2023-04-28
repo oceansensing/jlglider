@@ -8,6 +8,5 @@ jm = seaexplorer_process(jmpld1d);
 lbe = seaexplorer_process(lbepld1d);
 #sea064data = jm;
 
-include("seaexplorer_processing.jl");
-
+#include("seaexplorer_processing.jl");
 #include("seaexplorer_plotFast.jl")
