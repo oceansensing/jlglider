@@ -1,19 +1,27 @@
 # gong@vims.edu 2023-04-28
 # this script plots glider data from SEA064's NORSE project
 
-using GLMakie, NCDatasets, NaNMath
+using GLMakie, NCDatasets, NaNMath, Dates, Interpolations
+import seaexplorer_functions: seaexplorer_MR_laur_load
 
 if (@isdefined jm) == false
     display("Loading NORSE SEA064 data.")
     include("run_seaexplorer.jl")
 end
-
 display("NORSE data loaded, begin plotting...")
 
 pzlist = [0, -30, -60, -100, -150, -200, -300, -400, -600, -800];
-pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0"];
+pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0", "epsilon"];
 
-pvarlist = ["sndspd"];
+pvarlist = ["epsilon"];
+
+region = 
+
+# define plot boundaries
+latmin, latmax = 68, 73;
+lonmin, lonmax = -13, 17;
+
+ms = 15;
 
 for pvar in pvarlist
     for pz in pzlist
@@ -37,6 +45,14 @@ for pvar in pvarlist
             c1 = jm.spice0;
             c2 = lbe.spice0;
             cmin, cmax = -0.15, 1.2;
+        elseif pvar == "epsilon"
+            if (@isdefined eps1) == false
+                #include("seaexplorer_plotMR.jl")
+                lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, pz, 20.0);
+            end
+            c1 = eps1;
+            c2 = eps2;
+            cmin, cmax = -10.5, -6;
         end
 
         plotflag = pvar * "-" * string(abs(pz)) * "m";
@@ -66,14 +82,6 @@ for pvar in pvarlist
         lon = bathyds["lon"][:];
         lat = bathyds["lat"][:];
 
-        # define plot boundaries
-        latmin, latmax = 68, 73;
-        lonmin, lonmax = -13, 17;
-        tempmin, tempmax = -1, 9; # temperature
-
-        #cmin, cmax = tempmin, tempmax;
-        ms = 15;
-
         # approximate x-axis scaling to make it look "normal"
         dlat = latmax - latmin;
         dlon = lonmax - lonmin;
@@ -102,13 +110,27 @@ for pvar in pvarlist
             ylabel = "Latitude",
         )
         Makie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-4000, 4000))
-        Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
-        Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+        if pvar != "epsilon"
+            Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+            Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+        elseif pvar == "epsilon"
+            c1 = log10.(eps1);
+            c2 = log10.(eps2);
+            #nanind1 = findall(isnan.(c1));
+            #nanind2 = findall(isnan.(c1));
+            #c1[nanind1] .= Inf;
+            #c2[nanind2] .= Inf;
+            Makie.scatter!(lon1[1,:], lat1[1,:], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            Makie.scatter!(lon2[1,:], lat2[1,:], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+        end
         Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * pfname, fig)
     end #pzlist
 end #pvarlist
+
+lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, -600, 20.0);
+
 #= 
 fig = Figure()
 

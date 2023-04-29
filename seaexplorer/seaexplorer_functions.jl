@@ -3,9 +3,9 @@
 
 module seaexplorer_functions
 
-using Glob, DataFrames, CSV, Dates, Missings, NaNMath
+using Glob, DataFrames, CSV, Dates, Missings, NaNMath, Interpolations
 using GLMakie, NCDatasets
-using GibbsSeaWater
+using GibbsSeaWater, MAT
 import seaexplorer_types: NAV_RT, PLD_RT, SeaExplorerData
 import gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
 
@@ -754,5 +754,74 @@ function seaexplorer_process(sea064pld1d)
 
     SEAdata = SeaExplorerData(t, lon, lat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
 end
+
+function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)
+    # load roughly processed MR1000G data by Laur Ferris for plotting
+    # gong@vims.edu 2023-04-28
+
+    #if (@isdefined jmpld1d) != true
+    #    include("run_seaexplorer.jl");
+    #end
+    
+    #pld1 = jmpld1d;
+    #pld2 = lbepld1d;
+    
+    pld1t = datetime2unix.(pld1.t);
+    pld2t = datetime2unix.(pld2.t);
+    
+    # load performatted epsilon values produced by Laur Ferris
+    datadir = "/Users/gong/GitHub/jlglider/seaexplorer/data/"
+    mr1 = matopen(datadir * "jm_P.mat");
+    mr2 = matopen(datadir * "lb_P.mat");
+    
+    mr1_t = read(mr1, "unixt");
+    mr1_p = read(mr1, "pres");
+    mr1_eps1 = read(mr1, "eps1");
+    mr1_eps2 = read(mr1, "eps2");
+    
+    mr2_t = read(mr2, "unixt");
+    mr2_p = read(mr2, "pres");
+    mr2_eps1 = read(mr2, "eps1");
+    mr2_eps2 = read(mr2, "eps2");
+    
+    # calculate z from p assuming latitude of 70
+    mr1_z = gsw_z_from_p.(mr1_p, 70, 0, 0);
+    mr2_z = gsw_z_from_p.(mr2_p, 70, 0, 0);
+    
+    # create interpolation function for lon and lat based on time using glider CTD data
+    lon1f = linear_interpolation(pld1t, pld1.lon, extrapolation_bc=Line());
+    lat1f = linear_interpolation(pld1t, pld1.lat, extrapolation_bc=Line());
+    lon2f = linear_interpolation(pld2t, pld2.lon, extrapolation_bc=Line());
+    lat2f = linear_interpolation(pld2t, pld2.lat, extrapolation_bc=Line());
+
+    # calculate lon and lat for the epsilon casts based on interpolation functions
+    lon1 = zeros(Float64, size(mr1_t,1), size(mr1_t,2));
+    lat1 = deepcopy(lon1);
+    lon2 = zeros(Float64, size(mr2_t,1), size(mr2_t,2));
+    lat2 = deepcopy(lon2);
+    
+    eps1 = zeros(Float64, size(mr1_t,2));
+    eps2 = zeros(Float64, size(mr2_t,2));
+    
+    # calculate depth-averaged epsilon values based on depth range of zlo and zhi
+    zlo, zhi = pz-dz, pz+dz;
+    for i = 1:size(mr1_p, 2)
+        lon1[:,i] = lon1f(mr1_t[:,i]);
+        lat1[:,i] = lat1f(mr1_t[:,i]);
+    
+        zind = findall(zlo .<= mr1_z[:,i] .<= zhi);
+        eps1[i] = 10 .^ NaNMath.mean(log10.(mr1_eps1[zind,i]));
+    end
+    
+    for i = 1:size(mr2_p, 2)
+        lon2[:,i] = lon2f(mr2_t[:,i]);
+        lat2[:,i] = lat2f(mr2_t[:,i]);
+    
+        zind = findall(zlo .<= mr2_z[:,i] .<= zhi);
+        eps2[i] = 10 .^ NaNMath.mean(log10.(mr2_eps1[zind,i]));
+    end
+    
+    return lon1, lat1, lon2, lat2, eps1, eps2
+end    
 
 end
