@@ -114,14 +114,15 @@ for pvar in pvarlist
             Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
             Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
         elseif pvar == "epsilon"
-            c1 = log10.(eps1);
-            c2 = log10.(eps2);
-            #nanind1 = findall(isnan.(c1));
-            #nanind2 = findall(isnan.(c1));
-            #c1[nanind1] .= Inf;
-            #c2[nanind2] .= Inf;
-            Makie.scatter!(lon1[1,:], lat1[1,:], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
-            Makie.scatter!(lon2[1,:], lat2[1,:], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            c1 = []; c2 = [];
+            log10eps1 = log10.(eps1);
+            log10eps2 = log10.(eps2);
+            gind1 = findall(isnan.(log10eps1) .!= true);
+            gind2 = findall(isnan.(log10eps2) .!= true);
+            c1 = log10eps1[gind1];
+            c2 = log10eps2[gind2];
+            Makie.scatter!(lon1[1,gind1], lat1[1,gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            Makie.scatter!(lon2[1,gind2], lat2[1,gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
         end
         Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
