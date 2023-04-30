@@ -32,10 +32,10 @@ mr2_eps2 = read(mr2, "eps2");
 mr1_z = gsw_z_from_p.(mr1_p, 70, 0, 0);
 mr2_z = gsw_z_from_p.(mr2_p, 70, 0, 0);
 
-lon1f = linear_interpolation(pld1t, pld1.lon, extrapolation_bc=Line());
-lat1f = linear_interpolation(pld1t, pld1.lat, extrapolation_bc=Line());
-lon2f = linear_interpolation(pld2t, pld2.lon, extrapolation_bc=Line());
-lat2f = linear_interpolation(pld2t, pld2.lat, extrapolation_bc=Line());
+lon1f = linear_interpolation(pld1t, pld1.lon);
+lat1f = linear_interpolation(pld1t, pld1.lat);
+lon2f = linear_interpolation(pld2t, pld2.lon);
+lat2f = linear_interpolation(pld2t, pld2.lat); #  extrapolation_bc=Line()
 
 zlo, zhi = pz-dz, pz+dz;
 

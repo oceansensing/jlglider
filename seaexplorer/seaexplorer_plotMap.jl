@@ -121,8 +121,8 @@ for pvar in pvarlist
             gind2 = findall(isnan.(log10eps2) .!= true);
             c1 = log10eps1[gind1];
             c2 = log10eps2[gind2];
-            Makie.scatter!(lon1[1,gind1], lat1[1,gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
-            Makie.scatter!(lon2[1,gind2], lat2[1,gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            Makie.scatter!(lon1[end,gind1], lat1[end,gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            Makie.scatter!(lon2[end,gind2], lat2[end,gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
         end
         Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
