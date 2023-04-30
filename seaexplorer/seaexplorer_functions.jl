@@ -705,7 +705,7 @@ function seaexplorer_load_mission(mission)
     (sea064nav, sea064nav1d) = load_NAV(gliderSN, mission, navdir, dataflag);
     (sea064pld, sea064pld1d) = load_PLD(gliderSN, mission, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
 
-    return sea064nav, sea064pld, sea064nav1d, sea064pld1d
+    return sea064nav, sea064nav1d, sea064pld, sea064pld1d
 end
 
 function seaexplorer_process(sea064pld1d)
@@ -775,6 +775,7 @@ function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)
     mr2 = matopen(datadir * "lb_P.mat");
     
     mr1_t = read(mr1, "unixt");
+    mr1_t[:,106] .= datetime2unix(DateTime(2022,10,30,1,0,0));
     mr1_p = read(mr1, "pres");
     mr1_eps1 = read(mr1, "eps1");
     mr1_eps2 = read(mr1, "eps2");
@@ -789,10 +790,10 @@ function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)
     mr2_z = gsw_z_from_p.(mr2_p, 70, 0, 0);
     
     # create interpolation function for lon and lat based on time using glider CTD data
-    lon1f = linear_interpolation(pld1t, pld1.lon, extrapolation_bc=Line());
-    lat1f = linear_interpolation(pld1t, pld1.lat, extrapolation_bc=Line());
+    lon1f = linear_interpolation(pld1t, pld1.lon);
+    lat1f = linear_interpolation(pld1t, pld1.lat);
     lon2f = linear_interpolation(pld2t, pld2.lon, extrapolation_bc=Line());
-    lat2f = linear_interpolation(pld2t, pld2.lat, extrapolation_bc=Line());
+    lat2f = linear_interpolation(pld2t, pld2.lat, extrapolation_bc=Line()); # extrapolation_bc=Line()
 
     # calculate lon and lat for the epsilon casts based on interpolation functions
     lon1 = zeros(Float64, size(mr1_t,1), size(mr1_t,2));
@@ -805,20 +806,33 @@ function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)
     
     # calculate depth-averaged epsilon values based on depth range of zlo and zhi
     zlo, zhi = pz-dz, pz+dz;
+
+    if abs(zlo) < 0.1
+        zlo = -0.1;
+    end
+
     for i = 1:size(mr1_p, 2)
         lon1[:,i] = lon1f(mr1_t[:,i]);
         lat1[:,i] = lat1f(mr1_t[:,i]);
+        bind = findall(abs.(mr1_z[:,i]) .< 0.01);
+        mr1_eps1[bind,i] .= NaN;
+        mr1_eps2[bind,i] .= NaN;
     
         zind = findall(zlo .<= mr1_z[:,i] .<= zhi);
-        eps1[i] = 10 .^ NaNMath.mean(log10.(mr1_eps1[zind,i]));
+        #eps1[i] = 10 .^ NaNMath.mean(log10.(mr1_eps1[zind,i]));
+        eps1[i] = 10 .^ NaNMath.mean([NaNMath.mean(log10.(mr1_eps1[zind,i])); NaNMath.mean(log10.(mr1_eps2[zind,i]))]);
     end
     
     for i = 1:size(mr2_p, 2)
         lon2[:,i] = lon2f(mr2_t[:,i]);
         lat2[:,i] = lat2f(mr2_t[:,i]);
-    
+        bind = findall(abs.(mr2_z[:,i]) .< 0.01);
+        mr2_eps1[bind,i] .= NaN;
+        mr2_eps2[bind,i] .= NaN;
+   
         zind = findall(zlo .<= mr2_z[:,i] .<= zhi);
-        eps2[i] = 10 .^ NaNMath.mean(log10.(mr2_eps1[zind,i]));
+        #eps2[i] = 10 .^ NaNMath.mean(log10.(mr2_eps1[zind,i]));
+        eps2[i] = 10 .^ NaNMath.mean([NaNMath.mean(log10.(mr2_eps1[zind,i])); NaNMath.mean(log10.(mr2_eps2[zind,i]))]);    
     end
     
     return lon1, lat1, lon2, lat2, eps1, eps2

@@ -1,5 +1,9 @@
 # gong@vims.edu 2023-04-28
 # this script plots glider data from SEA064's NORSE project
+workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
+if (workdir in LOAD_PATH) == false
+    push!(LOAD_PATH, workdir);
+end
 
 using GLMakie, NCDatasets, NaNMath, Dates, Interpolations
 import seaexplorer_functions: seaexplorer_MR_laur_load
@@ -10,16 +14,25 @@ if (@isdefined jm) == false
 end
 display("NORSE data loaded, begin plotting...")
 
-pzlist = [0, -30, -60, -100, -150, -200, -300, -400, -600, -800];
+pzlist = [-10, -30, -60, -100, -150, -200, -300, -400, -600, -800];
 pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0", "epsilon"];
 
-pvarlist = ["epsilon"];
+pzlist = [0];
+pvarlist = ["epsilon"]
 
-region = 
+region = "JM" # JM, LBE, or ALL
 
 # define plot boundaries
-latmin, latmax = 68, 73;
-lonmin, lonmax = -13, 17;
+if region == "JM"
+    latmin, latmax = 70.5, 71.5;
+    lonmin, lonmax = -10, -5;
+elseif region == "LBE"
+    latmin, latmax = 69, 71;
+    lonmin, lonmax = 0, 10;
+else
+    latmin, latmax = 68, 73;
+    lonmin, lonmax = -13, 17;
+end
 
 ms = 15;
 
@@ -48,7 +61,7 @@ for pvar in pvarlist
         elseif pvar == "epsilon"
             if (@isdefined eps1) == false
                 #include("seaexplorer_plotMR.jl")
-                lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, pz, 20.0);
+                lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, pz, 10.0);
             end
             c1 = eps1;
             c2 = eps2;
@@ -57,8 +70,8 @@ for pvar in pvarlist
 
         plotflag = pvar * "-" * string(abs(pz)) * "m";
 
-        ptitle = "NORSE SEA064 " * pvar * " (" * string(abs(pz)) * "m)";
-        pfname = "NORSE_SEA064_" * pvar * "_" * string(abs(pz)) * "m.png";
+        ptitle = "NORSE SEA064 " * region * " " * pvar * " (" * string(abs(pz)) * "m)";
+        pfname = "NORSE_SEA064_" * region * "_" * pvar * "_" * string(abs(pz)) * "m.png";
         zlo, zhi = pz-10, pz+10;
 
         x1 = jm.lon;
@@ -111,8 +124,12 @@ for pvar in pvarlist
         )
         Makie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-4000, 4000))
         if pvar != "epsilon"
-            Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
-            Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+            if region != "LBE"
+                Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+            end
+            if region != "JM"
+                Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+            end
         elseif pvar == "epsilon"
             c1 = []; c2 = [];
             log10eps1 = log10.(eps1);
@@ -121,8 +138,12 @@ for pvar in pvarlist
             gind2 = findall(isnan.(log10eps2) .!= true);
             c1 = log10eps1[gind1];
             c2 = log10eps2[gind2];
-            Makie.scatter!(lon1[end,gind1], lat1[end,gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
-            Makie.scatter!(lon2[end,gind2], lat2[end,gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            if region != "LBE"
+                Makie.scatter!(lon1[end,gind1], lat1[end,gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            end
+            if region != "JM"
+                Makie.scatter!(lon2[end,gind2], lat2[end,gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
+            end
         end
         Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
@@ -130,7 +151,7 @@ for pvar in pvarlist
     end #pzlist
 end #pvarlist
 
-lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, -600, 20.0);
+lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, -30, 20.0);
 
 #= 
 fig = Figure()

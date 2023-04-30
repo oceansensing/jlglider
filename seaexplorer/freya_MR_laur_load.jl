@@ -3,21 +3,10 @@
 
 using MAT, GibbsSeaWater, Interpolations, NaNMath
 
-function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)
-
-#if (@isdefined jmpld1d) != true
-#    include("run_seaexplorer.jl");
-#end
-
-#pld1 = jmpld1d;
-#pld2 = lbepld1d;
-
-pld1t = datetime2unix.(pld1.t);
-pld2t = datetime2unix.(pld2.t);
+function freya_MR_laur_load(pld1, pld2, pz, dz)
 
 datadir = "/Users/gong/GitHub/jlglider/seaexplorer/data/"
-mr1 = matopen(datadir * "jm_P.mat");
-mr2 = matopen(datadir * "lb_P.mat");
+freya = matopen(datadir * "freya.mat");
 
 mr1_t = read(mr1, "unixt");
 mr1_p = read(mr1, "pres");

@@ -1,3 +1,8 @@
+workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
+if (workdir in LOAD_PATH) == false
+    push!(LOAD_PATH, workdir);
+end
+
 import seaexplorer_functions: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process
 
 mission = 38; # M37 is Jan Mayen, M38 is Lofoten Basin
