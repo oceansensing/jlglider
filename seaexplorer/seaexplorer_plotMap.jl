@@ -71,7 +71,13 @@ for pvar in pvarlist
         plotflag = pvar * "-" * string(abs(pz)) * "m";
 
         ptitle = "NORSE SEA064 " * region * " " * pvar * " (" * string(abs(pz)) * "m)";
-        pfname = "NORSE_SEA064_" * region * "_" * pvar * "_" * string(abs(pz)) * "m.png";
+        
+        if (region == "JM") | (region == "LBE")
+            pfname = "NORSE_SEA064_" * region * "_" * pvar * "_" * string(abs(pz)) * "m.png";
+        else
+            pfname = "NORSE_SEA064_" * pvar * "_" * string(abs(pz)) * "m.png";
+        end
+
         zlo, zhi = pz-10, pz+10;
 
         x1 = jm.lon;
