@@ -14,13 +14,13 @@ if (@isdefined jm) == false
 end
 display("NORSE data loaded, begin plotting...")
 
-pzlist = [-10, -30, -60, -100, -150, -200, -300, -400, -600, -800];
+pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150, -200, -300, -400, -600, -800];
 pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0", "epsilon"];
 
-pzlist = [0];
-pvarlist = ["epsilon"]
+#pzlist = [0];
+#pvarlist = ["sigma0"]
 
-region = "JM" # JM, LBE, or ALL
+region = "ALL" # JM, LBE, or ALL
 
 # define plot boundaries
 if region == "JM"
@@ -49,7 +49,7 @@ for pvar in pvarlist
         elseif pvar == "sigma0"
             c1 = jm.sigma0;
             c2 = lbe.sigma0;
-            cmin, cmax = 27.3, 28.15;
+            cmin, cmax = 27.3, 28.2;
         elseif pvar == "sndspd"
             c1 = jm.sndspd;
             c2 = lbe.sndspd;
@@ -65,7 +65,7 @@ for pvar in pvarlist
             end
             c1 = eps1;
             c2 = eps2;
-            cmin, cmax = -10.5, -6;
+            cmin, cmax = -11.5, -5.75;
         end
 
         plotflag = pvar * "-" * string(abs(pz)) * "m";
@@ -157,7 +157,7 @@ for pvar in pvarlist
     end #pzlist
 end #pvarlist
 
-lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, -30, 20.0);
+lon1, lat1, lon2, lat2, eps1, eps2 = seaexplorer_MR_laur_load(jmpld1d, lbepld1d, -10, 10.0);
 
 #= 
 fig = Figure()
