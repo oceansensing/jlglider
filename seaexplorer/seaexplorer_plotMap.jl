@@ -18,9 +18,10 @@ pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150, -200, -300, -400, -6
 pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0", "epsilon"];
 
 #pzlist = [0];
-#pvarlist = ["sigma0"]
+pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -90, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -450, -500, -550, -600, -650, -700, -750, -800, -850, -900];
+pvarlist = ["epsilon"]
 
-region = "ALL" # JM, LBE, or ALL
+region = "LBE" # JM, LBE, or ALL
 
 # define plot boundaries
 if region == "JM"
