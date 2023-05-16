@@ -6,8 +6,13 @@ using PyCall
 using Glob, NaNMath, GibbsSeaWater, Dates, Interpolations
 
 dbdreader = pyimport("dbdreader");
-
-mutable struct gliderStruct
+mutable struct engStruct
+    t::Array{DateTime}
+    p::Array{Float64}
+    lon::Array{Float64}
+    lat::Array{Float64}
+end
+mutable struct sciStruct
     t::Array{DateTime}
     p::Array{Float64}
     z::Array{Float64}
@@ -77,7 +82,31 @@ end
 engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
 
-# load CTD data from raw glider DBD & EBD files
+# load engineering data from raw glider DBD files
+m_present_time = pyrow2jlcol(dataGlider.get("m_present_time"));
+m_lat = pyrow2jlcol(dataGlider.get("m_lat")); 
+m_lon = pyrow2jlcol(dataGlider.get("m_lon")); 
+m_pressure= pyrow2jlcol(dataGlider.get("m_pressure"));
+m_vacuum = pyrow2jlcol(dataGlider.get("m_vacuum"));
+m_battery = pyrow2jlcol(dataGlider.get("m_battery"));
+#m_leak_detect = pyrow2jlcol(dataGlider.get("m_leakdetect")); 
+m_veh_temp = pyrow2jlcol(dataGlider.get("m_veh_temp"));  
+m_roll = pyrow2jlcol(dataGlider.get("m_roll"));
+c_heading = pyrow2jlcol(dataGlider.get("c_heading")); 
+m_heading = pyrow2jlcol(dataGlider.get("m_heading")); 
+m_pitch = pyrow2jlcol(dataGlider.get("m_pitch"));
+m_battpos = pyrow2jlcol(dataGlider.get("m_battpos"));
+m_de_oil_vol = pyrow2jlcol(dataGlider.get("m_de_oil_vol"));
+m_ballast_pumped = pyrow2jlcol(dataGlider.get("m_ballast_pumped"));
+m_fin = pyrow2jlcol(dataGlider.get("m_fin"));
+m_depth_rate = pyrow2jlcol(dataGlider.get("m_depth_rate")); 
+m_altimeter_status = pyrow2jlcol(dataGlider.get("m_altimeter_status")); 
+m_raw_altitude = pyrow2jlcol(dataGlider.get("m_raw_altitude"));
+m_altimeter_voltage = pyrow2jlcol(dataGlider.get("m_altimeter_voltage")); 
+
+#m_ = pyrow2jlcol(dataGlider.get("m_")); 
+
+# load CTD data from raw glider EBD files
 #tctd, cond, temp, pres, m_de_oil_vol = dataGlider.get_CTD_sync("m_de_oil_vol");
 sci_m_present_time = pyrow2jlcol(dataGlider.get("sci_m_present_time"));
 sci_water_temp = pyrow2jlcol(dataGlider.get("sci_water_temp"));
@@ -183,4 +212,5 @@ sigma0f = gsw.gsw_sigma0.(saltAf, ctempf);
 spice0f = gsw.gsw_spiciness0.(saltAf, ctempf);
 sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);
 
-gliderData = gliderStruct[];
+engData = engStruct[];
+sciData = sciStruct[];
