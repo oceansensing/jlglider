@@ -23,4 +23,4 @@ iday = 1; # day intervals for plotting
 datamode = "delayed"
 
 include("load_slocum_glider.jl")
-include("plot_slocum_glider.jl")
+#include("plot_slocum_glider.jl")
