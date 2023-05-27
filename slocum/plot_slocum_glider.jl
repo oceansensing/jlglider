@@ -144,3 +144,21 @@ Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, 
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sigma0")
 fig
 save(figoutdir * mission * "_" * glider * "_TS.png", fig)
+
+# plotting Density-Spiciness diagram
+x = spice0raw[1:pint:end]; 
+y = sigma0raw[1:pint:end];
+z = sndspdraw[1:pint:end];
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = tspres)
+ax = Axis(fig[1, 1],
+    title = mission * " " * glider * "Sigma0-Spice0",
+    xlabel = "Spiciness",
+    ylabel = "Potential Density Anomaly"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
+#ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sound Speed")
+fig
+save(figoutdir * mission * "_" * glider * "_Sigma0Spice0.png", fig)
