@@ -14,7 +14,7 @@ tspres = (1000, 1000)
 
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir = rootdir * "from-glider/"; 
-datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230528T051937/";
+datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230528T150639/";
 cacdir = fromgliderdir * "cache/";
 figoutdir = rootdir * "figures/";
 mission = "PASSENGERS";
