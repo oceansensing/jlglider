@@ -7,14 +7,14 @@ using Dates
 datamode = "realtime" # delayed or realtime
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
-ms = 6;
-tsms = 4;
+ms = 8;
+tsms = 5;
 pres = (1200, 800)
 tspres = (1000, 1000)
 
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir = rootdir * "from-glider/"; 
-datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230527T191821/";
+datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230528T051937/";
 cacdir = fromgliderdir * "cache/";
 figoutdir = rootdir * "figures/";
 mission = "PASSENGERS";
@@ -25,7 +25,7 @@ t0 = DateTime("2023-05-23");
 tN = DateTime("2023-06-20");
 trange = datetime2unix.([t0; tN]);
 
-if (@isdefined tctdf) == false
+#if (@isdefined tctdf) == false 
     include("load_slocum_glider.jl")
-end
+#end
 include("plot_slocum_glider.jl")

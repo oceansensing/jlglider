@@ -111,21 +111,46 @@ Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_soundspeed.png", fig)
 
-## plotting Chl-a
-#z = chlaraw[1:pint:end,2];
-#zmin = NaNMath.minimum(z);
+# plotting Chl-a
+x = chlatime;
+xdt = chladtime;
+y = chlaz;
+z = chlaraw[1:pint:end,2];
+zmin = NaNMath.minimum(z);
 #zmax = NaNMath.maximum(z); 
-#fig = Figure(resolution = (1200, 800))
-#ax = Axis(fig[1, 1],
-#    title = mission * " " * glider * " Chl-a Concentration",
-#    xlabel = "Time",
-#    ylabel = "Depth"
-#)
-#Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-#ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-#Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-#fig
-#save(figoutdir * mission * "_" * glider * "_chla.png", fig)
+zmax = 0.8;
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = mission * " " * glider * " Chl-a Concentration",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * mission * "_" * glider * "_chla.png", fig)
+
+# plotting BSI PAR
+x = bpartime;
+xdt = bpardtime;
+y = bparz;
+z = log10.(bparraw[1:pint:end,2]);
+#zmin = NaNMath.minimum(z);
+#zmax = NaNMath.maximum(z);
+zmin = -1.0;
+zmax = 4.0; 
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = mission * " " * glider * " PAR",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Log(PAR)")
+fig
+save(figoutdir * mission * "_" * glider * "_bsipar.png", fig)
 
 # plotting T/S diagram
 x = saltAraw[1:pint:end]; 

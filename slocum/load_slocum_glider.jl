@@ -3,9 +3,11 @@
 #
 
 using PyCall
-using Glob, NaNMath, GibbsSeaWater, Dates, Interpolations
+using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 
 dbdreader = pyimport("dbdreader");
+gsw = GibbsSeaWater;
+
 mutable struct engStruct
     t::Array{DateTime}
     p::Array{Float64}
@@ -103,6 +105,7 @@ m_depth_rate = pyrow2jlcol(dataGlider.get("m_depth_rate"));
 m_altimeter_status = pyrow2jlcol(dataGlider.get("m_altimeter_status")); 
 m_raw_altitude = pyrow2jlcol(dataGlider.get("m_raw_altitude"));
 m_altimeter_voltage = pyrow2jlcol(dataGlider.get("m_altimeter_voltage")); 
+m_num_tot_inflections = pyrow2jlcol(dataGlider.get("m_tot_num_inflections")); 
 
 #m_ = pyrow2jlcol(dataGlider.get("m_")); 
 
@@ -117,7 +120,11 @@ sci_flbbcd_cdom_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_cdom_units"));
 sci_flbbcd_bb_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_bb_units"));
 sci_bsipar_par = pyrow2jlcol(dataGlider.get("sci_bsipar_par"));
 
-m_num_tot_inflections = pyrow2jlcol(dataGlider.get("m_tot_num_inflections")); 
+# calculate derived values from CTD data
+llat = Statistics.mean(m_lat[:,2]);
+llon = Statistics.mean(m_lon[:,2]);
+#llon = -73.4;
+#llat = 38.0;
 
 # QC loaded data by time and values, create interpolation function for T,C,P
 tempind = findall((trange[1] .<= sci_water_temp[:,1] .<= trange[end]) .& (40.0 .>= sci_water_temp[:,2] .> 0.0));
@@ -138,13 +145,15 @@ sortedpind = sortperm(presraw[:,1]);
 presraw = presraw[sortedpind,:];
 presfunc = linear_interpolation(presraw[:,1], presraw[:,2], extrapolation_bc=Line());
 
-chlaind = findall((trange[1] .<= sci_flbbcd_chlor_units[:,1] .<= trange[end]) .& (20.0 .>= sci_flbbcd_chlor_units[:,2] .>= 0.0)); 
+chlaind = findall((trange[1] .<= sci_flbbcd_chlor_units[:,1] .<= trange[end]) .& (2.0 .>= sci_flbbcd_chlor_units[:,2] .>= -0.1)); 
 chlaraw = sci_flbbcd_chlor_units[chlaind,:];
 sortedchlaind = sortperm(chlaraw[:,1]);
 chlaraw = chlaraw[sortedchlaind,:];
 chlafunc = linear_interpolation(chlaraw[:,1], chlaraw[:,2], extrapolation_bc=Line()); 
 chlatime = chlaraw[:,1];
+chladtime = unix2datetime.(chlatime);
 chlapres = presfunc(chlatime);
+chlaz = gsw.gsw_z_from_p.(chlapres*10, llat, 0.0, 0.0); 
 
 cdomind = findall((trange[1] .<= sci_flbbcd_cdom_units[:,1] .<= trange[end]) .& (5.0 .>= sci_flbbcd_cdom_units[:,2] .>= -5.0)); 
 cdomraw = sci_flbbcd_cdom_units[cdomind,:];
@@ -152,7 +161,9 @@ sortedcdomind = sortperm(cdomraw[:,1]);
 cdomraw = cdomraw[sortedcdomind,:];
 cdomfunc = linear_interpolation(cdomraw[:,1], cdomraw[:,2], extrapolation_bc=Line()); 
 cdomtime = cdomraw[:,1];
+cdomdtime = unix2datetime.(cdomtime);
 cdompres = presfunc(cdomtime);
+cdomz = gsw.gsw_z_from_p.(cdompres*10, llat, 0.0, 0.0); 
 
 bb700ind = findall((trange[1] .<= sci_flbbcd_bb_units[:,1] .<= trange[end]) .& (0.008 .>= sci_flbbcd_bb_units[:,2] .>= 0.0)); 
 bb700raw = sci_flbbcd_bb_units[bb700ind,:];
@@ -160,7 +171,9 @@ sortedbb700ind = sortperm(bb700raw[:,1]);
 bb700raw = bb700raw[sortedbb700ind,:];
 bb700func = linear_interpolation(bb700raw[:,1], bb700raw[:,2], extrapolation_bc=Line()); 
 bb700time = bb700raw[:,1];
+bb700dtime = unix2datetime.(bb700time);
 bb700pres = presfunc(bb700time);
+bb700z = gsw.gsw_z_from_p.(bb700pres*10, llat, 0.0, 0.0); 
 
 bparind = findall((trange[1] .<= sci_bsipar_par[:,1] .<= trange[end]) .& (6000.0 .>= sci_bsipar_par[:,2] .>= 0)); 
 bparraw = sci_bsipar_par[bparind,:];
@@ -168,7 +181,9 @@ sortedbparind = sortperm(bparraw[:,1]);
 bparraw = bparraw[sortedbparind,:];
 bparfunc = linear_interpolation(bparraw[:,1], bparraw[:,2], extrapolation_bc=Line()); 
 bpartime = bparraw[:,1];
+bpardtime = unix2datetime.(bpartime);
 bparpres = presfunc(bpartime);
+bparz = gsw.gsw_z_from_p.(bparpres*10, llat, 0.0, 0.0); 
 
 # find common glider values
 tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
@@ -209,12 +224,6 @@ tempf = tempf[si];
 condf = condf[si];
 presf = presf[si];
 chlaf = chlaf[si];
-
-# calculate derived values from CTD data
-gsw = GibbsSeaWater;
-
-llon = -73.4;
-llat = 38.0;
 
 # raw values from the sensor
 ttraw = tctd; 
