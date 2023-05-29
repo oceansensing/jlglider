@@ -145,45 +145,53 @@ sortedpind = sortperm(presraw[:,1]);
 presraw = presraw[sortedpind,:];
 presfunc = linear_interpolation(presraw[:,1], presraw[:,2], extrapolation_bc=Line());
 
-chlaind = findall((trange[1] .<= sci_flbbcd_chlor_units[:,1] .<= trange[end]) .& (2.0 .>= sci_flbbcd_chlor_units[:,2] .>= -0.1)); 
-chlaraw = sci_flbbcd_chlor_units[chlaind,:];
-sortedchlaind = sortperm(chlaraw[:,1]);
-chlaraw = chlaraw[sortedchlaind,:];
-chlafunc = linear_interpolation(chlaraw[:,1], chlaraw[:,2], extrapolation_bc=Line()); 
-chlatime = chlaraw[:,1];
-chladtime = unix2datetime.(chlatime);
-chlapres = presfunc(chlatime);
-chlaz = gsw.gsw_z_from_p.(chlapres*10, llat, 0.0, 0.0); 
+if isempty(sci_flbbcd_chlor_units) != true
+    chlaind = findall((trange[1] .<= sci_flbbcd_chlor_units[:,1] .<= trange[end]) .& (2.0 .>= sci_flbbcd_chlor_units[:,2] .>= -0.1)); 
+    chlaraw = sci_flbbcd_chlor_units[chlaind,:];
+    sortedchlaind = sortperm(chlaraw[:,1]);
+    chlaraw = chlaraw[sortedchlaind,:];
+    chlafunc = linear_interpolation(chlaraw[:,1], chlaraw[:,2], extrapolation_bc=Line()); 
+    chlatime = chlaraw[:,1];
+    chladtime = unix2datetime.(chlatime);
+    chlapres = presfunc(chlatime);
+    chlaz = gsw.gsw_z_from_p.(chlapres*10, llat, 0.0, 0.0); 
+end
 
-cdomind = findall((trange[1] .<= sci_flbbcd_cdom_units[:,1] .<= trange[end]) .& (5.0 .>= sci_flbbcd_cdom_units[:,2] .>= -5.0)); 
-cdomraw = sci_flbbcd_cdom_units[cdomind,:];
-sortedcdomind = sortperm(cdomraw[:,1]);
-cdomraw = cdomraw[sortedcdomind,:];
-cdomfunc = linear_interpolation(cdomraw[:,1], cdomraw[:,2], extrapolation_bc=Line()); 
-cdomtime = cdomraw[:,1];
-cdomdtime = unix2datetime.(cdomtime);
-cdompres = presfunc(cdomtime);
-cdomz = gsw.gsw_z_from_p.(cdompres*10, llat, 0.0, 0.0); 
+if isempty(sci_flbbcd_cdom_units) != true
+    cdomind = findall((trange[1] .<= sci_flbbcd_cdom_units[:,1] .<= trange[end]) .& (5.0 .>= sci_flbbcd_cdom_units[:,2] .>= -5.0)); 
+    cdomraw = sci_flbbcd_cdom_units[cdomind,:];
+    sortedcdomind = sortperm(cdomraw[:,1]);
+    cdomraw = cdomraw[sortedcdomind,:];
+    cdomfunc = linear_interpolation(cdomraw[:,1], cdomraw[:,2], extrapolation_bc=Line()); 
+    cdomtime = cdomraw[:,1];
+    cdomdtime = unix2datetime.(cdomtime);
+    cdompres = presfunc(cdomtime);
+    cdomz = gsw.gsw_z_from_p.(cdompres*10, llat, 0.0, 0.0); 
+end
 
-bb700ind = findall((trange[1] .<= sci_flbbcd_bb_units[:,1] .<= trange[end]) .& (0.008 .>= sci_flbbcd_bb_units[:,2] .>= 0.0)); 
-bb700raw = sci_flbbcd_bb_units[bb700ind,:];
-sortedbb700ind = sortperm(bb700raw[:,1]);
-bb700raw = bb700raw[sortedbb700ind,:];
-bb700func = linear_interpolation(bb700raw[:,1], bb700raw[:,2], extrapolation_bc=Line()); 
-bb700time = bb700raw[:,1];
-bb700dtime = unix2datetime.(bb700time);
-bb700pres = presfunc(bb700time);
-bb700z = gsw.gsw_z_from_p.(bb700pres*10, llat, 0.0, 0.0); 
+if isempty(sci_flbbcd_bb_units) != true
+    bb700ind = findall((trange[1] .<= sci_flbbcd_bb_units[:,1] .<= trange[end]) .& (0.008 .>= sci_flbbcd_bb_units[:,2] .>= 0.0)); 
+    bb700raw = sci_flbbcd_bb_units[bb700ind,:];
+    sortedbb700ind = sortperm(bb700raw[:,1]);
+    bb700raw = bb700raw[sortedbb700ind,:];
+    bb700func = linear_interpolation(bb700raw[:,1], bb700raw[:,2], extrapolation_bc=Line()); 
+    bb700time = bb700raw[:,1];
+    bb700dtime = unix2datetime.(bb700time);
+    bb700pres = presfunc(bb700time);
+    bb700z = gsw.gsw_z_from_p.(bb700pres*10, llat, 0.0, 0.0); 
+end
 
-bparind = findall((trange[1] .<= sci_bsipar_par[:,1] .<= trange[end]) .& (6000.0 .>= sci_bsipar_par[:,2] .>= 0)); 
-bparraw = sci_bsipar_par[bparind,:];
-sortedbparind = sortperm(bparraw[:,1]);
-bparraw = bparraw[sortedbparind,:];
-bparfunc = linear_interpolation(bparraw[:,1], bparraw[:,2], extrapolation_bc=Line()); 
-bpartime = bparraw[:,1];
-bpardtime = unix2datetime.(bpartime);
-bparpres = presfunc(bpartime);
-bparz = gsw.gsw_z_from_p.(bparpres*10, llat, 0.0, 0.0); 
+if isempty(sci_bsipar_par) != true
+    bparind = findall((trange[1] .<= sci_bsipar_par[:,1] .<= trange[end]) .& (6000.0 .>= sci_bsipar_par[:,2] .>= 0)); 
+    bparraw = sci_bsipar_par[bparind,:];
+    sortedbparind = sortperm(bparraw[:,1]);
+    bparraw = bparraw[sortedbparind,:];
+    bparfunc = linear_interpolation(bparraw[:,1], bparraw[:,2], extrapolation_bc=Line()); 
+    bpartime = bparraw[:,1];
+    bpardtime = unix2datetime.(bpartime);
+    bparpres = presfunc(bpartime);
+    bparz = gsw.gsw_z_from_p.(bparpres*10, llat, 0.0, 0.0); 
+end
 
 # find common glider values
 tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
