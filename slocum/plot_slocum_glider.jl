@@ -126,7 +126,9 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
+#ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
+xtickdt = [x[1:10] for x in string.(xdt)];
+ax.xticks = (x[1:10000:end], xtickdt[1:10000:end])
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_chla.png", fig)
