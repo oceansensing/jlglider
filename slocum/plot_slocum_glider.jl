@@ -29,6 +29,20 @@ xf = tctdf[1:pint:end];
 yf = zzf[1:pint:end];
 
 x = tctd;
+xdt = unix2datetime.(tctd); 
+yday = Dates.dayofyear.(xdt);
+uyday = unique(yday);
+hour = Dates.Hour.(xdt);
+minute = Dates.Minute.(xdt);
+
+#iday = Vector{Int64}(undef, length(uyday));
+iday = [];
+for i = 1:length(uyday)
+    t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
+    if isempty(t0) == false
+        push!(iday, t0[1]);
+    end
+end
 y = zzraw;
 
 # plotting conservative temperature
