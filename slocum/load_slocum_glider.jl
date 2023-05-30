@@ -127,23 +127,41 @@ llon = Statistics.mean(m_lon[:,2]);
 #llat = 38.0;
 
 # QC loaded data by time and values, create interpolation function for T,C,P
-tempind = findall((trange[1] .<= sci_water_temp[:,1] .<= trange[end]) .& (40.0 .>= sci_water_temp[:,2] .> 0.0));
-tempraw = sci_water_temp[tempind,:];
-sortedtind = sortperm(tempraw[:,1]);
-tempraw = tempraw[sortedtind,:];
-tempfunc = linear_interpolation(tempraw[:,1], tempraw[:,2], extrapolation_bc=Line());
+if isempty(sci_water_pressure) != true
+    presind = findall((trange[1] .<= sci_water_pressure[:,1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[:,2] .>= 0.0));
+    presraw = sci_water_pressure[presind,:];
+    sortedpind = sortperm(presraw[:,1]);
+    presraw = presraw[sortedpind,:];
+    presfunc = linear_interpolation(presraw[:,1], presraw[:,2], extrapolation_bc=Line());
+    prestime = presraw[:,1];
+    presdtime = unix2datetime.(prestime);
+    prespres = presraw[:,2];
+    presz = gsw.gsw_z_from_p.(prespres*10, llat, 0.0, 0.0); 
+end
 
-condind = findall((trange[1] .<= sci_water_cond[:,1] .<= trange[end]) .& (100.0 .>= sci_water_cond[:,2] .>= 0.01));
-condraw = sci_water_cond[condind,:];
-sortedcind = sortperm(condraw[:,1]);
-condraw = condraw[sortedcind,:];
-condfunc = linear_interpolation(condraw[:,1], condraw[:,2], extrapolation_bc=Line());
+if isempty(sci_water_temp) != true
+    tempind = findall((trange[1] .<= sci_water_temp[:,1] .<= trange[end]) .& (40.0 .>= sci_water_temp[:,2] .> 0.0));
+    tempraw = sci_water_temp[tempind,:];
+    sortedtind = sortperm(tempraw[:,1]);
+    tempraw = tempraw[sortedtind,:];
+    tempfunc = linear_interpolation(tempraw[:,1], tempraw[:,2], extrapolation_bc=Line());
+    temptime = tempraw[:,1];
+    tempdtime = unix2datetime.(temptime);
+    temppres = presfunc(temptime);
+    tempz = gsw.gsw_z_from_p.(temppres*10, llat, 0.0, 0.0); 
+end
 
-presind = findall((trange[1] .<= sci_water_pressure[:,1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[:,2] .>= 0.01));
-presraw = sci_water_pressure[presind,:];
-sortedpind = sortperm(presraw[:,1]);
-presraw = presraw[sortedpind,:];
-presfunc = linear_interpolation(presraw[:,1], presraw[:,2], extrapolation_bc=Line());
+if isempty(sci_water_cond) != true
+    condind = findall((trange[1] .<= sci_water_cond[:,1] .<= trange[end]) .& (100.0 .>= sci_water_cond[:,2] .>= 0.01));
+    condraw = sci_water_cond[condind,:];
+    sortedcind = sortperm(condraw[:,1]);
+    condraw = condraw[sortedcind,:];
+    condfunc = linear_interpolation(condraw[:,1], condraw[:,2], extrapolation_bc=Line());
+    condtime = condraw[:,1];
+    conddtime = unix2datetime.(condtime);
+    condpres = presfunc(condtime);
+    condz = gsw.gsw_z_from_p.(condpres*10, llat, 0.0, 0.0); 
+end
 
 if isempty(sci_flbbcd_chlor_units) != true
     chlaind = findall((trange[1] .<= sci_flbbcd_chlor_units[:,1] .<= trange[end]) .& (2.0 .>= sci_flbbcd_chlor_units[:,2] .>= -0.1)); 
@@ -202,7 +220,7 @@ tctdP = intersectalajulia2(tctd, presraw[:,1])[3];
 tpuck = chlaraw[:,1];
 
 # build a common timeline (not necessary if data is of good quality and CTD data all has the same length)
-tall = unique(union(tempraw[:,1], condraw[:,1], presraw[:,1]));
+tall = sort(unique(intersect(tempraw[:,1], condraw[:,1], presraw[:,1])));
 tind = findall(trange[1] .<= tall .<= trange[end]);
 
 t1 = floor(NaNMath.minimum(tall[tind]));
@@ -217,7 +235,7 @@ pres_fit = presfunc(tall[tind]);
 chla_fit = chlafunc(tall[tind]);
 tctd_fit = deepcopy(tall[tind]);
 
-gind = findall((30.0 .>= temp_fit .>= 0.0) .& (7.0 .>= cond_fit .>= 3.0) .& (50.0 .>= pres_fit .>= 0.0) .& (20.0 .>= chla_fit .>= 0));
+gind = findall((35.0 .>= temp_fit .>= 0.0) .& (7.0 .>= cond_fit .>= 3.0) .& (50.0 .>= pres_fit .>= 0.0) .& (20.0 .>= chla_fit .>= 0));
 dtctdf = dtctd_fit[gind];
 tctdf = tctd_fit[gind];
 tempf = temp_fit[gind];
