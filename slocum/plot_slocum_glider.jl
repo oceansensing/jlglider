@@ -202,4 +202,4 @@ Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, 
 #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sound Speed")
 fig
-save(figoutdir * mission * "_" * glider * "_Sigma0Spice0.png", fig)
+save(figoutdir * mission * "_" * glider * "_sigma0spice0.png", fig)
