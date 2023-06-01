@@ -4,6 +4,27 @@ using GLMakie, ColorSchemes
 # plot CTD data using Makie
 # the plotting code will be refactored into a function of its own in the next revision
 
+function datetick(unix_t)
+    x = unix_t
+    xdt = unix2datetime.(unix_t); 
+    yday = Dates.dayofyear.(xdt);
+    uyday = unique(yday);
+    hour = Dates.Hour.(xdt);
+    minute = Dates.Minute.(xdt);
+
+    #tickind = Vector{Int64}(undef, length(uyday));
+    tickind = [];
+    for i = 1:length(uyday)
+        t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
+        if isempty(t0) == false
+            push!(tickind, t0[1]);
+        end
+    end
+    xtick = x[tickind];
+    xticklabel = string.(Dates.Date.(xdt[tickind]));
+    return xdt, xtick, xticklabel    
+end
+
 if (@isdefined figoutdir) == false
     #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
 #    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
@@ -28,21 +49,23 @@ td = dtctdf[1:pint:end];
 xf = tctdf[1:pint:end]; 
 yf = zzf[1:pint:end];
 
-x = tctd;
-xdt = unix2datetime.(tctd); 
-yday = Dates.dayofyear.(xdt);
-uyday = unique(yday);
-hour = Dates.Hour.(xdt);
-minute = Dates.Minute.(xdt);
+#x = tctd;
+#xdt = unix2datetime.(tctd); 
+#yday = Dates.dayofyear.(xdt);
+#uyday = unique(yday);
+#hour = Dates.Hour.(xdt);
+#minute = Dates.Minute.(xdt);
 
-#iday = Vector{Int64}(undef, length(uyday));
-iday = [];
-for i = 1:length(uyday)
-    t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
-    if isempty(t0) == false
-        push!(iday, t0[1]);
-    end
-end
+#tickind = Vector{Int64}(undef, length(uyday));
+#tickind = [];
+#for i = 1:length(uyday)
+#    t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
+#    if isempty(t0) == false
+#        push!(tickind, t0[1]);
+#    end
+#end
+x = tctd;
+xdt, xtick, xticklabel = datetick(x);
 y = zzraw;
 
 # plotting conservative temperature
@@ -56,7 +79,8 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-#ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
+#ax.xticks = (x[tickind], string.(Dates.Date.(xdt[tickind])));
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)
@@ -73,6 +97,7 @@ ax = Axis(fig[1, 1],
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
 #ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_saltA.png", fig)
@@ -88,7 +113,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-#ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_sigma0.png", fig)
@@ -104,7 +129,7 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-#ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_spice0.png", fig)
@@ -120,14 +145,15 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-#ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_soundspeed.png", fig)
 
 # plotting Chl-a
 x = chlatime;
-xdt = chladtime;
+xdt, xtick, xticklabel = datetick(x);
+#xdt = chladtime;
 y = chlaz;
 z = chlaraw[1:pint:end,2];
 zmin = NaNMath.minimum(z);
@@ -141,15 +167,17 @@ ax = Axis(fig[1, 1],
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
 #ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
-xtickdt = [x[1:10] for x in string.(xdt)];
-ax.xticks = (x[1:10000:end], xtickdt[1:10000:end])
+#xtickdt = [x[1:10] for x in string.(xdt)];
+#ax.xticks = (x[1:10000:end], xtickdt[1:10000:end])
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_chla.png", fig)
 
 # plotting BSI PAR
 x = bpartime;
-xdt = bpardtime;
+xdt, xtick, xticklabel = datetick(x);
+#xdt = bpardtime;
 y = bparz;
 z = log10.(bparraw[1:pint:end,2]);
 #zmin = NaNMath.minimum(z);
@@ -164,6 +192,7 @@ ax = Axis(fig[1, 1],
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
 #ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Log(PAR)")
 fig
 save(figoutdir * mission * "_" * glider * "_bsipar.png", fig)
