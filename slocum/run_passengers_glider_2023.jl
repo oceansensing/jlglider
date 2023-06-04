@@ -14,10 +14,10 @@ tspres = (1000, 1000)
 
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir = rootdir * "from-glider/"; 
-datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230602T103433/";
+datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230604T120311/";
 cacdir = fromgliderdir * "cache/";
 figoutdir = rootdir * "figures/";
-mission = "PASSENGERS";
+mission = "PASSENGERS 2023";
 glider = "electa";
 
 # specify valid data time period

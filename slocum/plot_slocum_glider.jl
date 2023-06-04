@@ -11,6 +11,7 @@ function datetick(unix_t)
     uyday = unique(yday);
     hour = Dates.Hour.(xdt);
     minute = Dates.Minute.(xdt);
+    #df = DateFormat("y-m-d");
 
     #tickind = Vector{Int64}(undef, length(uyday));
     tickind = [];
@@ -21,7 +22,8 @@ function datetick(unix_t)
         end
     end
     xtick = x[tickind];
-    xticklabel = string.(Dates.Date.(xdt[tickind]));
+    #xticklabel = string.(Dates.Date.(xdt[tickind]));
+    xticklabel = [x[6:10] for x in string.(xdt[tickind])];
     return xdt, xtick, xticklabel    
 end
 
@@ -166,13 +168,52 @@ ax = Axis(fig[1, 1],
     ylabel = "Depth"
 )
 Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-#ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
-#xtickdt = [x[1:10] for x in string.(xdt)];
-#ax.xticks = (x[1:10000:end], xtickdt[1:10000:end])
 ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glider * "_chla.png", fig)
+
+# plotting CDOM
+x = cdomtime;
+xdt, xtick, xticklabel = datetick(x);
+y = cdomz;
+z = cdomraw[1:pint:end,2];
+#zmin = NaNMath.minimum(z);
+#zmax = NaNMath.maximum(z); 
+zmin = 0.0;
+zmax = 1.0;
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = mission * " " * glider * " CDOM",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xtick, xticklabel);
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * mission * "_" * glider * "_cdom.png", fig)
+
+# plotting BB700
+x = bb700time;
+xdt, xtick, xticklabel = datetick(x);
+y = bb700z;
+z = bb700raw[1:pint:end,2];
+#zmin = NaNMath.minimum(z);
+#zmax = NaNMath.maximum(z); 
+zmin = 0.0;
+zmax = 0.0004;
+fig = Figure(resolution = (1200, 800))
+ax = Axis(fig[1, 1],
+    title = mission * " " * glider * " BB700",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+ax.xticks = (xtick, xticklabel);
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * mission * "_" * glider * "_bb700.png", fig)
 
 # plotting BSI PAR
 x = bpartime;
