@@ -31,7 +31,7 @@ function intersectalajulia4(a,b)
 end
 =#
 
-function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glider)
+function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
     
@@ -193,7 +193,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glider)
 
     #engData = engStruct[];
     #sciData = sciStruct[];
-    ctdData = ctdStruct(mission, glider, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
+    ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
     return ctdData
 end
 

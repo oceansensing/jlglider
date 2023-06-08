@@ -66,4 +66,27 @@ function glider_var_load(glidervar, trange, varlim, p, lat)
     return varraw, vartime, varpres, varz
 end
 
+function datetick(unix_t)
+    x = unix_t
+    xdt = unix2datetime.(unix_t); 
+    yday = Dates.dayofyear.(xdt);
+    uyday = unique(yday);
+    hour = Dates.Hour.(xdt);
+    minute = Dates.Minute.(xdt);
+    #df = DateFormat("y-m-d");
+
+    #tickind = Vector{Int64}(undef, length(uyday));
+    tickind = [];
+    for i = 1:length(uyday)
+        t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
+        if isempty(t0) == false
+            push!(tickind, t0[1]);
+        end
+    end
+    xtick = x[tickind];
+    #xticklabel = string.(Dates.Date.(xdt[tickind]));
+    xticklabel = [x[6:10] for x in string.(xdt[tickind])];
+    return xdt, xtick, xticklabel    
+end
+
 end #slocumFunc module

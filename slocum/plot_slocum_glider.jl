@@ -1,33 +1,13 @@
 using NaNMath, GibbsSeaWater, Dates, Interpolations
 using GLMakie, ColorSchemes
 
+import slocumFunc: datetick
+
 # plot CTD data using Makie
 # the plotting code will be refactored into a function of its own in the next revision
 
-function datetick(unix_t)
-    x = unix_t
-    xdt = unix2datetime.(unix_t); 
-    yday = Dates.dayofyear.(xdt);
-    uyday = unique(yday);
-    hour = Dates.Hour.(xdt);
-    minute = Dates.Minute.(xdt);
-    #df = DateFormat("y-m-d");
 
-    #tickind = Vector{Int64}(undef, length(uyday));
-    tickind = [];
-    for i = 1:length(uyday)
-        t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
-        if isempty(t0) == false
-            push!(tickind, t0[1]);
-        end
-    end
-    xtick = x[tickind];
-    #xticklabel = string.(Dates.Date.(xdt[tickind]));
-    xticklabel = [x[6:10] for x in string.(xdt[tickind])];
-    return xdt, xtick, xticklabel    
-end
-
-function plot_glider_ctd(glider, figoutdir, ps)
+#function plot_glider_ctd(glider, figoutdir, ps)
     #if (@isdefined figoutdir) == false
         #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
     #    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
@@ -40,7 +20,7 @@ function plot_glider_ctd(glider, figoutdir, ps)
 
     #if (@isdefined ps) == false
     pint = ps.pint; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
-    iday = ps.ida; # day intervals for plotting
+    iday = ps.iday; # day intervals for plotting
     ms = ps.ms;
     tsms = ps.tsms;
     pres = ps.pres;
@@ -279,4 +259,4 @@ function plot_glider_ctd(glider, figoutdir, ps)
     fig
     save(figoutdir * mission * "_" * glider * "_sigma0spice0.png", fig)
     =#
-end
+#end

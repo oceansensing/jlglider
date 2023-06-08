@@ -18,18 +18,19 @@ ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir = rootdir * "from-glider/"; 
-datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230608T052727/";
+datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230608T193159/";
 cacdir = fromgliderdir * "cache/";
 figoutdir = rootdir * "figures/";
 mission = "PASSENGERS 2023";
-glider = "electa";
+glidername = "electa";
 
 # specify valid data time period
 t0 = DateTime("2023-05-23");
 tN = DateTime("2023-06-20");
 trange = datetime2unix.([t0; tN]);
 
-electaCTD = load_glider_ctd(datadir, cacdir, trange, datamode, mission, glider);
+electaCTD = load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername);
 #plot_glider_ctd(electaCTD, figoutdir, ps)
 
-#include("plot_slocum_glider.jl")
+glider = electaCTD;
+include("plot_slocum_glider.jl")
