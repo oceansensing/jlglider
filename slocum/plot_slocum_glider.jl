@@ -180,88 +180,96 @@ import slocumFunc: datetick
     save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
 
     # plotting Chl-a
-    #x = chlatime;
-    x = gliderCHLA.t;
-    xdt, xtick, xticklabel = datetick(x);
-    y = gliderCHLA.z;
-    z = gliderCHLA.var;
-    zmin = NaNMath.minimum(z);
-    #zmax = NaNMath.maximum(z); 
-    zmax = 0.8;
-    fig = Figure(resolution = (1200, 800))
-    ax = Axis(fig[1, 1],
-        title = gliderCHLA.mission * " " * gliderCHLA.glidername * " Chl-a Concentration",
-        xlabel = "Time",
-        ylabel = "Depth"
-    )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-    fig
-    save(figoutdir * gliderCHLA.mission * "_" * gliderCHLA.glidername * "_chla.png", fig)
+    if isdefined(gliderCHLA, :t) == true
+        #x = chlatime;
+        x = gliderCHLA.t;
+        xdt, xtick, xticklabel = datetick(x);
+        y = gliderCHLA.z;
+        z = gliderCHLA.var;
+        zmin = NaNMath.minimum(z);
+        #zmax = NaNMath.maximum(z); 
+        zmax = 0.8;
+        fig = Figure(resolution = (1200, 800))
+        ax = Axis(fig[1, 1],
+            title = gliderCHLA.mission * " " * gliderCHLA.glidername * " Chl-a Concentration",
+            xlabel = "Time",
+            ylabel = "Depth"
+        )
+        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        ax.xticks = (xtick, xticklabel);
+        Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+        fig
+        save(figoutdir * gliderCHLA.mission * "_" * gliderCHLA.glidername * "_chla.png", fig);
+    end
 
     # plotting CDOM
-    x = gliderCDOM.t;
-    xdt, xtick, xticklabel = datetick(x);
-    y = gliderCDOM.z;
-    z = gliderCDOM.var;
-    #zmin = NaNMath.minimum(z);
-    #zmax = NaNMath.maximum(z); 
-    zmin = 0.0;
-    zmax = 1.0;
-    fig = Figure(resolution = (1200, 800))
-    ax = Axis(fig[1, 1],
-        title = gliderCDOM.mission * " " * gliderCDOM.glidername * " CDOM",
-        xlabel = "Time",
-        ylabel = "Depth"
-    )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-    fig
-    save(figoutdir * gliderCDOM.mission * "_" * gliderCDOM.glidername * "_cdom.png", fig)
+    if isdefined(gliderCDOM, :t) == true
+        x = gliderCDOM.t;
+        xdt, xtick, xticklabel = datetick(x);
+        y = gliderCDOM.z;
+        z = gliderCDOM.var;
+        #zmin = NaNMath.minimum(z);
+        #zmax = NaNMath.maximum(z); 
+        zmin = 0.0;
+        zmax = 1.0;
+        fig = Figure(resolution = (1200, 800))
+        ax = Axis(fig[1, 1],
+            title = gliderCDOM.mission * " " * gliderCDOM.glidername * " CDOM",
+            xlabel = "Time",
+            ylabel = "Depth"
+        )
+        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        ax.xticks = (xtick, xticklabel);
+        Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+        fig
+        save(figoutdir * gliderCDOM.mission * "_" * gliderCDOM.glidername * "_cdom.png", fig);
+    end
 
     # plotting BB700
-    x = gliderBB700.t;
-    xdt, xtick, xticklabel = datetick(x);
-    y = gliderBB700.z;
-    z = gliderBB700.var;
-    #zmin = NaNMath.minimum(z);
-    #zmax = NaNMath.maximum(z); 
-    zmin = 0.0;
-    zmax = 0.0004;
-    fig = Figure(resolution = (1200, 800))
-    ax = Axis(fig[1, 1],
-        title = gliderBB700.mission * " " * gliderBB700.glidername * " BB700",
-        xlabel = "Time",
-        ylabel = "Depth"
-    )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-    fig
-    save(figoutdir * gliderBB700.mission * "_" * gliderBB700.glidername * "_bb700.png", fig)
+    if isdefined(gliderBB700, :t) == true
+        x = gliderBB700.t;
+        xdt, xtick, xticklabel = datetick(x);
+        y = gliderBB700.z;
+        z = gliderBB700.var;
+        #zmin = NaNMath.minimum(z);
+        #zmax = NaNMath.maximum(z); 
+        zmin = 0.0;
+        zmax = 0.0004;
+        fig = Figure(resolution = (1200, 800))
+        ax = Axis(fig[1, 1],
+            title = gliderBB700.mission * " " * gliderBB700.glidername * " BB700",
+            xlabel = "Time",
+            ylabel = "Depth"
+        )
+        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        ax.xticks = (xtick, xticklabel);
+        Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+        fig
+        save(figoutdir * gliderBB700.mission * "_" * gliderBB700.glidername * "_bb700.png", fig);
+    end
 
     # plotting BSI PAR
-    x = gliderBPAR.t;
-    xdt, xtick, xticklabel = datetick(x);
-    y = gliderBPAR.z;
-    z = log10.(gliderBPAR.var);
-    #zmin = NaNMath.minimum(z);
-    #zmax = NaNMath.maximum(z);
-    zmin = -1.0;
-    zmax = 4.0; 
-    fig = Figure(resolution = (1200, 800))
-    ax = Axis(fig[1, 1],
-        title = gliderBPAR.mission * " " * gliderBPAR.glidername * " PAR",
-        xlabel = "Time",
-        ylabel = "Depth"
-    )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-    #ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
-    ax.xticks = (xtick, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Log(PAR)")
-    fig
-    save(figoutdir * gliderBPAR.mission * "_" * gliderBPAR.glidername * "_bsipar.png", fig)
+    if isdefined(gliderBPAR, :t) == true
+        x = gliderBPAR.t;
+        xdt, xtick, xticklabel = datetick(x);
+        y = gliderBPAR.z;
+        z = log10.(gliderBPAR.var);
+        #zmin = NaNMath.minimum(z);
+        #zmax = NaNMath.maximum(z);
+        zmin = -1.0;
+        zmax = 4.0; 
+        fig = Figure(resolution = (1200, 800))
+        ax = Axis(fig[1, 1],
+            title = gliderBPAR.mission * " " * gliderBPAR.glidername * " PAR",
+            xlabel = "Time",
+            ylabel = "Depth"
+        )
+        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        #ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
+        ax.xticks = (xtick, xticklabel);
+        Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Log(PAR)")
+        fig
+        save(figoutdir * gliderBPAR.mission * "_" * gliderBPAR.glidername * "_bsipar.png", fig);
+    end
 
 #end
