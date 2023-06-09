@@ -7,7 +7,7 @@ module load_slocum_glider
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 
-import slocumType: ctdStruct
+import slocumType: ctdStruct, sciStruct
 import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
 
 #=
@@ -195,6 +195,63 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     #sciData = sciStruct[];
     ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
     return ctdData
+end
+
+function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername)
+    dbdreader = pyimport("dbdreader");
+    gsw = GibbsSeaWater;
+
+    # setup glider data loading using dbdreader
+    if datamode == "realtime"
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+    else
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+    end
+    engvars = dataGlider.parameterNames["eng"];
+    scivars = dataGlider.parameterNames["sci"];
+
+    m_lat = pyrow2jlcol(dataGlider.get("m_lat")); 
+    m_lon = pyrow2jlcol(dataGlider.get("m_lon")); 
+
+    sci_m_present_time = pyrow2jlcol(dataGlider.get("sci_m_present_time"));
+    sci_water_pressure = pyrow2jlcol(dataGlider.get("sci_water_pressure"));
+    sci_flbbcd_chlor_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_chlor_units"));
+    sci_flbbcd_cdom_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_cdom_units"));
+    sci_flbbcd_bb_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_bb_units"));
+    sci_bsipar_par = pyrow2jlcol(dataGlider.get("sci_bsipar_par"));
+
+    llat = Statistics.mean(m_lat[:,2]);
+    llon = Statistics.mean(m_lon[:,2]);
+
+    if isempty(sci_flbbcd_chlor_units) != true
+        chlaraw, chlatime, chlapres, chlaz = glider_var_load(sci_flbbcd_chlor_units, trange, [-0.1 3.0], sci_water_pressure, llat)
+        chlaData = sciStruct(mission, glidername, chlatime, chlapres, chlaz, m_lon[:,2], m_lat[:,2], chlaraw[:,2]);
+    else
+        chlaData = [];
+    end
+
+    if isempty(sci_flbbcd_cdom_units) != true
+        cdomraw, cdomtime, cdompres, cdomz = glider_var_load(sci_flbbcd_cdom_units, trange, [-5.0 5.0], sci_water_pressure, llat)
+        cdomData = sciStruct(mission, glidername, cdomtime, cdompres, cdomz, m_lon[:,2], m_lat[:,2], cdomraw[:,2]);
+    else
+        cdomData = [];
+    end
+
+    if isempty(sci_flbbcd_bb_units) != true
+        bb700raw, bb700time, bb700pres, bb700z = glider_var_load(sci_flbbcd_bb_units, trange, [0.0 0.008], sci_water_pressure, llat)
+        bb700Data = sciStruct(mission, glidername, bb700time, bb700pres, bb700z, m_lon[:,2], m_lat[:,2], bb700raw[:,2]);
+    else
+        bb700Data = [];
+    end
+
+    if isempty(sci_bsipar_par) != true
+        bparraw, bpartime, bparpres, bparz = glider_var_load(sci_bsipar_par, trange, [0.0 6000.0], sci_water_pressure, llat)
+        bparData = sciStruct(mission, glidername, bpartime, bparpres, bparz, m_lon[:,2], m_lat[:,2], bparraw[:,2]);
+    else
+        bparData = [];
+    end
+
+    return chlaData, cdomData, bb700Data, bparData;
 end
 
 end

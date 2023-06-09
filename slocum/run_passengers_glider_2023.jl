@@ -3,8 +3,8 @@
 #
 # setup directories
 using Dates
-import slocumType: plotSetting
-import load_slocum_glider: load_glider_ctd
+import slocumType: plotSetting, ctdStruct, sciStruct
+import load_slocum_glider: load_glider_ctd, load_glider_sci
 #import plot_slocum_glider: plot_glider_ctd
 
 datamode = "realtime" # delayed or realtime
@@ -18,7 +18,7 @@ ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 
 rootdir = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir = rootdir * "from-glider/"; 
-datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230608T193159/";
+datadir = fromgliderdir * datamode * "/" * "electa-from-glider-20230609T060713/";
 cacdir = fromgliderdir * "cache/";
 figoutdir = rootdir * "figures/";
 mission = "PASSENGERS 2023";
@@ -30,7 +30,9 @@ tN = DateTime("2023-06-20");
 trange = datetime2unix.([t0; tN]);
 
 electaCTD = load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername);
+electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername);
 #plot_glider_ctd(electaCTD, figoutdir, ps)
 
-glider = electaCTD;
+gliderCTD = electaCTD;
+gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = electaCHLA, electaCDOM, electaBB700, electaBPAR;
 include("plot_slocum_glider.jl")

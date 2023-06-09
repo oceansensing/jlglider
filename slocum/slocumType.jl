@@ -18,7 +18,7 @@ end
 
 mutable struct ctdStruct
     mission::String
-    glider::String
+    glidername::String
     t::Array{Float64}
     p::Array{Float64}
     z::Array{Float64}
@@ -37,9 +37,13 @@ mutable struct ctdStruct
 end
 
 mutable struct sciStruct
+    mission::String
+    glidername::String    
     t::Array{Float64}
     p::Array{Float64}
     z::Array{Float64}
+    lon::Array{Float64}
+    lat::Array{Float64}
     var::Array{Float64}
 end
 

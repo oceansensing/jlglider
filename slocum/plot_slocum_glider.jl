@@ -15,8 +15,8 @@ import slocumFunc: datetick
     #    rootdir = "~/GitHub/jlglider/slocum/";
     #    figoutdir = figoutdir;
     #end
-    mission = glider.mission;
-    glider = glider.glider;
+    mission = gliderCTD.mission;
+    glidername = gliderCTD.glidername;
 
     #if (@isdefined ps) == false
     pint = ps.pint; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
@@ -48,54 +48,52 @@ import slocumFunc: datetick
     #    end
     #end
     #x = tctd;
-    x = glider.t;
+    x = gliderCTD.t;
     xdt, xtick, xticklabel = datetick(x);
     #y = zzraw;
-    y = glider.z;
+    y = gliderCTD.z;
 
     # plotting conservative temperature
-    #z = ctempraw[1:pint:end];
-    z = glider.ctemp;
+    z = gliderCTD.ctemp;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " Conservative Temperature",
+        title = mission * " " * glidername * " Conservative Temperature",
         xlabel = "Time",
         ylabel = "Depth"
     )
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    #ax.xticks = (x[tickind], string.(Dates.Date.(xdt[tickind])));
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_ctemp.png", fig)
+    save(figoutdir * mission * "_" * glidername * "_ctemp.png", fig)
 
-    #=
     # plotting absolute salinity
-    z = saltAraw[1:pint:end];
+    #z = saltAraw[1:pint:end];
+    z = gliderCTD.saltA;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " Absolute Salinity",
+        title = mission * " " * glidername * " Absolute Salinity",
         xlabel = "Time",
         ylabel = "Depth"
     )
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    #ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_saltA.png", fig)
+    save(figoutdir * mission * "_" * glidername * "_saltA.png", fig)
 
     # plotting sigma0
-    z = sigma0raw[1:pint:end];
+    #z = sigma0raw[1:pint:end];
+    z = gliderCTD.sigma0;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " Potential Density",
+        title = mission * " " * glidername * " Potential Density",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -103,15 +101,16 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_sigma0.png", fig)
+    save(figoutdir * mission * "_" * glidername * "_sigma0.png", fig)
 
     # plotting spice0
-    z = spice0raw[1:pint:end];
+    #z = spice0raw[1:pint:end];
+    z = gliderCTD.spice0;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " Spiciness0",
+        title = mission * " " * glidername * " Spiciness0",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -119,15 +118,16 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_spice0.png", fig)
+    save(figoutdir * mission * "_" * glidername * "_spice0.png", fig)
 
     # plotting sound speed
-    z = sndspdraw[1:pint:end];
+    #z = sndspdraw[1:pint:end];
+    z = gliderCTD.sndspd;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " Sound Speed",
+        title = mission * " " * glidername * " Sound Speed",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -135,20 +135,62 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_soundspeed.png", fig)
+    save(figoutdir * mission * "_" * glidername * "_soundspeed.png", fig)
+
+    # plotting T/S diagram
+    #x = saltAraw[1:pint:end]; 
+    #y = ctempraw[1:pint:end];
+    #z = sigma0raw[1:pint:end];
+    x = gliderCTD.saltA;
+    y = gliderCTD.ctemp;
+    z = gliderCTD.sigma0;
+    zmin = NaNMath.minimum(z);
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = tspres)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * glidername * " T/S",
+        xlabel = "Absolute Salinity",
+        ylabel = "Conservative Temperature"
+    )
+    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
+    #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sigma0")
+    fig
+    save(figoutdir * mission * "_" * glidername * "_TS.png", fig)
+
+    # plotting Density-Spiciness diagram
+    #x = spice0raw[1:pint:end]; 
+    #y = sigma0raw[1:pint:end];
+    #z = sndspdraw[1:pint:end];
+    x = gliderCTD.spice0;
+    y = gliderCTD.sigma0;
+    z = gliderCTD.sndspd;
+    zmin = NaNMath.minimum(z);
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = tspres)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * glidername * "Sigma0-Spice0",
+        xlabel = "Spiciness",
+        ylabel = "Potential Density Anomaly"
+    )
+    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
+    #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sound Speed")
+    fig
+    save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
 
     # plotting Chl-a
-    x = chlatime;
+    #x = chlatime;
+    x = gliderCHLA.t;
     xdt, xtick, xticklabel = datetick(x);
-    #xdt = chladtime;
-    y = chlaz;
-    z = chlaraw[1:pint:end,2];
+    y = gliderCHLA.z;
+    z = gliderCHLA.var;
     zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
     zmax = 0.8;
     fig = Figure(resolution = (1200, 800))
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " Chl-a Concentration",
+        title = gliderCHLA.mission * " " * gliderCHLA.glidername * " Chl-a Concentration",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -156,20 +198,20 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_chla.png", fig)
+    save(figoutdir * gliderCHLA.mission * "_" * gliderCHLA.glidername * "_chla.png", fig)
 
     # plotting CDOM
-    x = cdomtime;
+    x = gliderCDOM.t;
     xdt, xtick, xticklabel = datetick(x);
-    y = cdomz;
-    z = cdomraw[1:pint:end,2];
+    y = gliderCDOM.z;
+    z = gliderCDOM.var;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
     zmin = 0.0;
     zmax = 1.0;
     fig = Figure(resolution = (1200, 800))
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " CDOM",
+        title = gliderCDOM.mission * " " * gliderCDOM.glidername * " CDOM",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -177,20 +219,20 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_cdom.png", fig)
+    save(figoutdir * gliderCDOM.mission * "_" * gliderCDOM.glidername * "_cdom.png", fig)
 
     # plotting BB700
-    x = bb700time;
+    x = gliderBB700.t;
     xdt, xtick, xticklabel = datetick(x);
-    y = bb700z;
-    z = bb700raw[1:pint:end,2];
+    y = gliderBB700.z;
+    z = gliderBB700.var;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
     zmin = 0.0;
     zmax = 0.0004;
     fig = Figure(resolution = (1200, 800))
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " BB700",
+        title = gliderBB700.mission * " " * gliderBB700.glidername * " BB700",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -198,21 +240,20 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
-    save(figoutdir * mission * "_" * glider * "_bb700.png", fig)
+    save(figoutdir * gliderBB700.mission * "_" * gliderBB700.glidername * "_bb700.png", fig)
 
     # plotting BSI PAR
-    x = bpartime;
+    x = gliderBPAR.t;
     xdt, xtick, xticklabel = datetick(x);
-    #xdt = bpardtime;
-    y = bparz;
-    z = log10.(bparraw[1:pint:end,2]);
+    y = gliderBPAR.z;
+    z = log10.(gliderBPAR.var);
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z);
     zmin = -1.0;
     zmax = 4.0; 
     fig = Figure(resolution = (1200, 800))
     ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " PAR",
+        title = gliderBPAR.mission * " " * gliderBPAR.glidername * " PAR",
         xlabel = "Time",
         ylabel = "Depth"
     )
@@ -221,42 +262,6 @@ import slocumFunc: datetick
     ax.xticks = (xtick, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Log(PAR)")
     fig
-    save(figoutdir * mission * "_" * glider * "_bsipar.png", fig)
+    save(figoutdir * gliderBPAR.mission * "_" * gliderBPAR.glidername * "_bsipar.png", fig)
 
-    # plotting T/S diagram
-    x = saltAraw[1:pint:end]; 
-    y = ctempraw[1:pint:end];
-    z = sigma0raw[1:pint:end];
-    zmin = NaNMath.minimum(z);
-    zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres)
-    ax = Axis(fig[1, 1],
-        title = mission * " " * glider * " T/S",
-        xlabel = "Absolute Salinity",
-        ylabel = "Conservative Temperature"
-    )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
-    #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sigma0")
-    fig
-    save(figoutdir * mission * "_" * glider * "_TS.png", fig)
-
-    # plotting Density-Spiciness diagram
-    x = spice0raw[1:pint:end]; 
-    y = sigma0raw[1:pint:end];
-    z = sndspdraw[1:pint:end];
-    zmin = NaNMath.minimum(z);
-    zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres)
-    ax = Axis(fig[1, 1],
-        title = mission * " " * glider * "Sigma0-Spice0",
-        xlabel = "Spiciness",
-        ylabel = "Potential Density Anomaly"
-    )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
-    #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sound Speed")
-    fig
-    save(figoutdir * mission * "_" * glider * "_sigma0spice0.png", fig)
-    =#
 #end
