@@ -7,7 +7,9 @@ import slocumType: plotSetting, ctdStruct, sciStruct
 import load_slocum_glider: load_glider_ctd, load_glider_sci
 #import plot_slocum_glider: plot_glider_ctd
 
-datamode = "realtime" # delayed or realtime
+datamode = "realtime"; # delayed or realtime
+mission = "PASSENGERS 2023";
+
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
 ms = 8;
@@ -16,19 +18,24 @@ pres = (1200, 800)
 tspres = (1000, 1000)
 ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 
-mission = "PASSENGERS 2023";
-
 glidername_electa = "electa";
 rootdir_electa = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230609T181801/";
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230610T001637/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
+
+glidername_sylvia = "sylvia";
+rootdir_sylvia = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
+fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
+datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230610T114112/";
+cacdir_sylvia = fromgliderdir_sylvia * "cache/";
+figoutdir_sylvia = rootdir_sylvia * "figures/";
 
 glidername_nrl641 = "nrl641";
 rootdir_nrl641 = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/nrl641-20230523-passengers/";
 fromgliderdir_nrl641 = rootdir_nrl641 * "from-glider/"; 
-datadir_nrl641 = fromgliderdir_nrl641 * datamode * "/" * "f641sg17-from-glider-20230610T040435/";
+datadir_nrl641 = fromgliderdir_nrl641 * datamode * "/" * "f641sg17-from-glider-20230610T113712/";
 cacdir_nrl641 = fromgliderdir_nrl641 * "cache/";
 figoutdir_nrl641 = rootdir_nrl641 * "figures/";
 
@@ -57,6 +64,20 @@ electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir_electa
 gliderCTD = electaCTD;
 gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = electaCHLA, electaCDOM, electaBB700, electaBPAR;
 figoutdir = figoutdir_electa;
+include("plot_slocum_glider.jl")
+
+sylviaCTD = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
+sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR = load_glider_sci(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
+gliderCTD = sylviaCTD;
+gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR;
+figoutdir = figoutdir_sylvia;
+include("plot_slocum_glider.jl")
+
+nrl641CTD = load_glider_ctd(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
+nrl641CHLA, nrl641CDOM, nrl641BB700, nrl641BPAR = load_glider_sci(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
+gliderCTD = nrl641CTD;
+gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = nrl641CHLA, nrl641CDOM, nrl641BB700, nrl641BPAR;
+figoutdir = figoutdir_nrl641;
 include("plot_slocum_glider.jl")
 
 ru30CTD = load_glider_ctd(datadir_ru30, cacdir_ru30, trange, datamode, mission, glidername_ru30);
