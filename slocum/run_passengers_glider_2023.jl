@@ -25,6 +25,13 @@ datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-202
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
+glidername_nrl641 = "nrl641";
+rootdir_nrl641 = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/nrl641-20230523-passengers/";
+fromgliderdir_nrl641 = rootdir_nrl641 * "from-glider/"; 
+datadir_nrl641 = fromgliderdir_nrl641 * datamode * "/" * "f641sg17-from-glider-20230610T040435/";
+cacdir_nrl641 = fromgliderdir_nrl641 * "cache/";
+figoutdir_nrl641 = rootdir_nrl641 * "figures/";
+
 glidername_ru30 = "ru30";
 rootdir_ru30 = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/ru30-20230525-passengers/";
 fromgliderdir_ru30 = rootdir_ru30 * "from-glider/"; 
