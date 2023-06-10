@@ -1,6 +1,7 @@
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 
+import slocumFunc: datetick
 import slocumType: plotSetting, ctdStruct, sciStruct
 import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
 
@@ -78,6 +79,7 @@ sci_m_present_time = pyrow2jlcol(dataGlider.get("sci_m_present_time"));
 sci_water_temp = pyrow2jlcol(dataGlider.get("sci_water_temp"));
 sci_water_cond = pyrow2jlcol(dataGlider.get("sci_water_cond"));
 sci_water_pressure = pyrow2jlcol(dataGlider.get("sci_water_pressure"));
+sci_ctd41cp_timestamp = pyrow2jlcol(dataGlider.get("sci_ctd41cp_timestamp")); 
 sci_flbbcd_chlor_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_chlor_units"));
 sci_flbbcd_cdom_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_cdom_units"));
 sci_flbbcd_bb_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_bb_units"));
@@ -149,7 +151,7 @@ tempf = tempf[si];
 condf = condf[si];
 presf = presf[si];
 chlaf = chlaf[si];
-
+=#
 
 # raw values from the sensor
 ttraw = tctd; 
@@ -164,7 +166,6 @@ rhoraw = gsw.gsw_rho.(saltAraw, ctempraw, ppraw*10);
 sigma0raw = gsw.gsw_sigma0.(saltAraw, ctempraw);
 spice0raw = gsw.gsw_spiciness0.(saltAraw, ctempraw);
 sndspdraw = gsw.gsw_sound_speed.(saltAraw, ctempraw, ppraw*10);
-=#
 
 #=
 # values fitted to a 1 second time grid
@@ -181,3 +182,26 @@ sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);
 #engData = engStruct[];
 #sciData = sciStruct[];
 ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
+
+
+#x = ttraw;
+#y = zzraw;
+#z = ttempraw;
+
+x = temptime;
+y = tempz;
+z = tempraw[:,2];
+
+zmin = NaNMath.minimum(z);
+zmax = NaNMath.maximum(z); 
+fig = Figure(resolution = pres)
+ax = Axis(fig[1, 1],
+    title = mission * " " * glidername * " Conservative Temperature",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+ax.xticks = (xtick, xticklabel);
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * mission * "_" * glidername * "_ctemp.png", fig)
