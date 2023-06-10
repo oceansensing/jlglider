@@ -106,22 +106,6 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     tempraw, temptime, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, llat)
     condraw, condtime, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, llat)
 
-    if isempty(sci_flbbcd_chlor_units) != true
-        chlaraw, chlatime, chlapres, chlaz = glider_var_load(sci_flbbcd_chlor_units, trange, [-0.1 3.0], sci_water_pressure, llat)
-    end
-
-    if isempty(sci_flbbcd_cdom_units) != true
-        cdomraw, cdomtime, cdompres, cdomz = glider_var_load(sci_flbbcd_cdom_units, trange, [-5.0 5.0], sci_water_pressure, llat)
-    end
-
-    if isempty(sci_flbbcd_bb_units) != true
-        bb700raw, bb700time, bb700pres, bb700z = glider_var_load(sci_flbbcd_bb_units, trange, [0.0 0.008], sci_water_pressure, llat)
-    end
-
-    if isempty(sci_bsipar_par) != true
-        bparraw, bpartime, bparpres, bparz = glider_var_load(sci_bsipar_par, trange, [0.0 6000.0], sci_water_pressure, llat)
-    end
-
     # find common glider values
     tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
     tctdT = intersectalajulia2(tctd, tempraw[:,1])[3];
