@@ -10,6 +10,11 @@ import load_slocum_glider: load_glider_ctd, load_glider_sci
 datamode = "realtime"; # delayed or realtime
 mission = "PASSENGERS 2023";
 
+# specify valid data time period
+t0 = DateTime("2023-05-23");
+tN = DateTime("2023-06-20");
+trange = datetime2unix.([t0; tN]);
+
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
 ms = 8;
@@ -49,14 +54,9 @@ figoutdir_ru30 = rootdir_ru30 * "figures/";
 glidername_ru36 = "ru36";
 rootdir_ru36 = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/ru36-20230525-passengers/";
 fromgliderdir_ru36 = rootdir_ru36 * "from-glider/"; 
-datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36-from-glider-20230609T182417/";
+datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36-from-glider-20230610T211047/";
 cacdir_ru36 = fromgliderdir_ru36 * "cache/";
 figoutdir_ru36 = rootdir_ru36 * "figures/";
-
-# specify valid data time period
-t0 = DateTime("2023-05-23");
-tN = DateTime("2023-06-20");
-trange = datetime2unix.([t0; tN]);
 
 electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);
 electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);

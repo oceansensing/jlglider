@@ -27,7 +27,7 @@ end
 
 function glider_presfunc(sci_water_pressure, trange)
     if isempty(sci_water_pressure) != true
-        presind = findall((trange[1] .<= sci_water_pressure[:,1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[:,2] .>= 0.0));
+        presind = findall((trange[1] .<= sci_water_pressure[1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[2] .>= 0.0));
         presraw = sci_water_pressure[presind,:];
         sortedpind = sortperm(presraw[:,1]);
         presraw = presraw[sortedpind,:];
