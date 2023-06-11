@@ -42,7 +42,7 @@ trange = datetime2unix.([t0; tN]);
 
 # setup glider data loading using dbdreader
 if datamode == "realtime"
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir, return_nan=true);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
 else
     dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir, return_nan=true);
 end
