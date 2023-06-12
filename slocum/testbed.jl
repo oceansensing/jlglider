@@ -2,6 +2,8 @@ using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 using GLMakie, ColorSchemes
 
+#GLMakie.activate!()
+
 import slocumFunc: datetick
 import slocumType: plotSetting, ctdStruct, sciStruct
 import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
@@ -12,8 +14,8 @@ gsw = GibbsSeaWater;
 datamode = "realtime" # delayed or realtime
 mission = "PASSENGERS 2023";
 
-dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
-#dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
+#dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
+dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
 
 glidername_electa = "electa";
 rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
@@ -45,12 +47,23 @@ trange = datetime2unix.([t0; tN]);
 
 # setup glider data loading using dbdreader
 if datamode == "realtime"
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files_only = true, cacheDir = cacdir, return_nan=true);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir);
 else
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir, return_nan=true);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files_only = true, cacheDir = cacdir, return_nan=true);
 end
 engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
+t, t_sci, p_eng, p_sci, temp_sci = dataGlider.get_sync("sci_m_present_time", "m_pressure", "sci_water_pressure", "sci_water_temp");
+tisorted = sortperm(t_sci);
+x = t_sci[tisorted][end-10000:end-5000];
+y = p_sci[tisorted][end-10000:end-5000];
+z = temp_sci[tisorted][end-10000:end-5000];
+
+GLMakie.plot(x, y, color=z)
+GLMakie.plot(x .- x[1], y, color=z)
+Plots.scatter(x, y, zcolor=z, clim=(18,20), markerstrokewidth = 0)
+
 
 # load engineering data from raw glider DBD files
 m_present_time = dataGlider.get("m_present_time");
@@ -85,6 +98,8 @@ sci_water_cond = dataGlider.get("sci_water_cond");
 sci_water_pressure = dataGlider.get("sci_water_pressure");
 sci_ctd41cp_timestamp = dataGlider.get("sci_ctd41cp_timestamp"); 
 ctdtime = sci_ctd41cp_timestamp[2];
+
+
 sci_flbbcd_chlor_units = dataGlider.get("sci_flbbcd_chlor_units");
 sci_flbbcd_cdom_units = dataGlider.get("sci_flbbcd_cdom_units");
 sci_flbbcd_bb_units = dataGlider.get("sci_flbbcd_bb_units");
