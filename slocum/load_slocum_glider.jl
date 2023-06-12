@@ -61,56 +61,56 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     scivars = dataGlider.parameterNames["sci"];
 
     # load engineering data from raw glider DBD files
-    m_present_time = pyrow2jlcol(dataGlider.get("m_present_time"));
-    m_lat = pyrow2jlcol(dataGlider.get("m_lat")); 
-    m_lon = pyrow2jlcol(dataGlider.get("m_lon")); 
-    m_pressure= pyrow2jlcol(dataGlider.get("m_pressure"));
-    m_vacuum = pyrow2jlcol(dataGlider.get("m_vacuum"));
-    m_battery = pyrow2jlcol(dataGlider.get("m_battery"));
-    #m_leak_detect = pyrow2jlcol(dataGlider.get("m_leakdetect")); 
-    m_veh_temp = pyrow2jlcol(dataGlider.get("m_veh_temp"));  
-    m_roll = pyrow2jlcol(dataGlider.get("m_roll"));
-    c_heading = pyrow2jlcol(dataGlider.get("c_heading")); 
-    m_heading = pyrow2jlcol(dataGlider.get("m_heading")); 
-    m_pitch = pyrow2jlcol(dataGlider.get("m_pitch"));
-    m_battpos = pyrow2jlcol(dataGlider.get("m_battpos"));
-    m_de_oil_vol = pyrow2jlcol(dataGlider.get("m_de_oil_vol"));
-    m_ballast_pumped = pyrow2jlcol(dataGlider.get("m_ballast_pumped"));
-    m_fin = pyrow2jlcol(dataGlider.get("m_fin"));
-    m_depth_rate = pyrow2jlcol(dataGlider.get("m_depth_rate")); 
-    m_altimeter_status = pyrow2jlcol(dataGlider.get("m_altimeter_status")); 
-    m_raw_altitude = pyrow2jlcol(dataGlider.get("m_raw_altitude"));
-    m_altimeter_voltage = pyrow2jlcol(dataGlider.get("m_altimeter_voltage")); 
-    m_num_tot_inflections = pyrow2jlcol(dataGlider.get("m_tot_num_inflections")); 
+    m_present_time = dataGlider.get("m_present_time");
+    m_lat = dataGlider.get("m_lat"); 
+    m_lon = dataGlider.get("m_lon"); 
+    m_pressure= dataGlider.get("m_pressure");
+    m_vacuum = dataGlider.get("m_vacuum");
+    m_battery = dataGlider.get("m_battery");
+    #m_leak_detect = dataGlider.get("m_leakdetect"); 
+    m_veh_temp = dataGlider.get("m_veh_temp");  
+    m_roll = dataGlider.get("m_roll");
+    c_heading = dataGlider.get("c_heading"); 
+    m_heading = dataGlider.get("m_heading"); 
+    m_pitch = dataGlider.get("m_pitch");
+    m_battpos = dataGlider.get("m_battpos");
+    m_de_oil_vol = dataGlider.get("m_de_oil_vol");
+    m_ballast_pumped = dataGlider.get("m_ballast_pumped");
+    m_fin = dataGlider.get("m_fin");
+    m_depth_rate = dataGlider.get("m_depth_rate"); 
+    m_altimeter_status = dataGlider.get("m_altimeter_status"); 
+    m_raw_altitude = dataGlider.get("m_raw_altitude");
+    m_altimeter_voltage = dataGlider.get("m_altimeter_voltage"); 
+    m_num_tot_inflections = dataGlider.get("m_tot_num_inflections"); 
 
     #m_ = pyrow2jlcol(dataGlider.get("m_")); 
 
     # load CTD data from raw glider EBD files
     #tctd, cond, temp, pres, m_de_oil_vol = dataGlider.get_CTD_sync("m_de_oil_vol");
-    sci_m_present_time = pyrow2jlcol(dataGlider.get("sci_m_present_time"));
-    sci_water_temp = pyrow2jlcol(dataGlider.get("sci_water_temp"));
-    sci_water_cond = pyrow2jlcol(dataGlider.get("sci_water_cond"));
-    sci_water_pressure = pyrow2jlcol(dataGlider.get("sci_water_pressure"));
-    sci_flbbcd_chlor_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_chlor_units"));
-    sci_flbbcd_cdom_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_cdom_units"));
-    sci_flbbcd_bb_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_bb_units"));
-    sci_bsipar_par = pyrow2jlcol(dataGlider.get("sci_bsipar_par"));
+    sci_m_present_time = dataGlider.get("sci_m_present_time");
+    sci_water_temp = dataGlider.get("sci_water_temp");
+    sci_water_cond = dataGlider.get("sci_water_cond");
+    sci_water_pressure = dataGlider.get("sci_water_pressure");
+    sci_flbbcd_chlor_units = dataGlider.get("sci_flbbcd_chlor_units");
+    sci_flbbcd_cdom_units = dataGlider.get("sci_flbbcd_cdom_units");
+    sci_flbbcd_bb_units = dataGlider.get("sci_flbbcd_bb_units");
+    sci_bsipar_par = dataGlider.get("sci_bsipar_par");
 
     # calculate derived values from CTD data
-    llat = Statistics.mean(m_lat[:,2]);
-    llon = Statistics.mean(m_lon[:,2]);
+    llat = Statistics.mean(m_lat[2]);
+    llon = Statistics.mean(m_lon[2]);
     #llon = -73.4;
     #llat = 38.0;
 
-    presfunc, presraw = glider_presfunc(sci_water_pressure, trange);
+    presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
     tempraw, temptime, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, llat)
     condraw, condtime, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, llat)
 
     # find common glider values
-    tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
-    tctdT = intersectalajulia2(tctd, tempraw[:,1])[3];
-    tctdC = intersectalajulia2(tctd, condraw[:,1])[3];
-    tctdP = intersectalajulia2(tctd, presraw[:,1])[3];
+    tctd = unique(intersect(prestime, temptime, condtime));
+    tctdT = intersectalajulia2(tctd, temptime)[3];
+    tctdC = intersectalajulia2(tctd, condtime)[3];
+    tctdP = intersectalajulia2(tctd, prestime)[3];
 
     #=
     tpuck = chlaraw[:,1];
@@ -151,10 +151,10 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
 
     # raw values from the sensor
     ttraw = tctd; 
-    ppraw = presraw[tctdP,2];
+    ppraw = presraw[tctdP];
     zzraw = gsw.gsw_z_from_p.(ppraw*10, llat, 0.0, 0.0); 
-    ttempraw = tempraw[tctdT,2];
-    ccondraw = condraw[tctdC,2];
+    ttempraw = tempraw[tctdT];
+    ccondraw = condraw[tctdC];
     ssaltraw = gsw.gsw_sp_from_c.(ccondraw*10, ttempraw, ppraw*10);
     saltAraw= gsw.gsw_sa_from_sp.(ssaltraw, ppraw*10, llon, llat);
     ctempraw = gsw.gsw_ct_from_t.(saltAraw, ttempraw, ppraw*10);
@@ -177,7 +177,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
 
     #engData = engStruct[];
     #sciData = sciStruct[];
-    ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
+    ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[2], m_lat[2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
     return ctdData
 end
 
@@ -194,43 +194,43 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername)
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
 
-    m_lat = pyrow2jlcol(dataGlider.get("m_lat")); 
-    m_lon = pyrow2jlcol(dataGlider.get("m_lon")); 
+    m_lat = dataGlider.get("m_lat"); 
+    m_lon = dataGlider.get("m_lon"); 
 
-    sci_m_present_time = pyrow2jlcol(dataGlider.get("sci_m_present_time"));
-    sci_water_pressure = pyrow2jlcol(dataGlider.get("sci_water_pressure"));
-    sci_flbbcd_chlor_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_chlor_units"));
-    sci_flbbcd_cdom_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_cdom_units"));
-    sci_flbbcd_bb_units = pyrow2jlcol(dataGlider.get("sci_flbbcd_bb_units"));
-    sci_bsipar_par = pyrow2jlcol(dataGlider.get("sci_bsipar_par"));
+    sci_m_present_time = dataGlider.get("sci_m_present_time");
+    sci_water_pressure = dataGlider.get("sci_water_pressure");
+    sci_flbbcd_chlor_units = dataGlider.get("sci_flbbcd_chlor_units");
+    sci_flbbcd_cdom_units = dataGlider.get("sci_flbbcd_cdom_units");
+    sci_flbbcd_bb_units = dataGlider.get("sci_flbbcd_bb_units");
+    sci_bsipar_par = dataGlider.get("sci_bsipar_par");
 
-    llat = Statistics.mean(m_lat[:,2]);
-    llon = Statistics.mean(m_lon[:,2]);
+    llat = Statistics.mean(m_lat[2]);
+    llon = Statistics.mean(m_lon[2]);
 
     if isempty(sci_flbbcd_chlor_units) != true
         chlaraw, chlatime, chlapres, chlaz = glider_var_load(sci_flbbcd_chlor_units, trange, [-0.1 3.0], sci_water_pressure, llat)
-        chlaData = sciStruct(mission, glidername, chlatime, chlapres, chlaz, m_lon[:,2], m_lat[:,2], chlaraw[:,2]);
+        chlaData = sciStruct(mission, glidername, chlatime, chlapres, chlaz, m_lon[2], m_lat[2], chlaraw);
     else
         chlaData = [];
     end
 
     if isempty(sci_flbbcd_cdom_units) != true
         cdomraw, cdomtime, cdompres, cdomz = glider_var_load(sci_flbbcd_cdom_units, trange, [-5.0 5.0], sci_water_pressure, llat)
-        cdomData = sciStruct(mission, glidername, cdomtime, cdompres, cdomz, m_lon[:,2], m_lat[:,2], cdomraw[:,2]);
+        cdomData = sciStruct(mission, glidername, cdomtime, cdompres, cdomz, m_lon[2], m_lat[2], cdomraw);
     else
         cdomData = [];
     end
 
     if isempty(sci_flbbcd_bb_units) != true
         bb700raw, bb700time, bb700pres, bb700z = glider_var_load(sci_flbbcd_bb_units, trange, [0.0 0.008], sci_water_pressure, llat)
-        bb700Data = sciStruct(mission, glidername, bb700time, bb700pres, bb700z, m_lon[:,2], m_lat[:,2], bb700raw[:,2]);
+        bb700Data = sciStruct(mission, glidername, bb700time, bb700pres, bb700z, m_lon[2], m_lat[2], bb700raw);
     else
         bb700Data = [];
     end
 
     if isempty(sci_bsipar_par) != true
         bparraw, bpartime, bparpres, bparz = glider_var_load(sci_bsipar_par, trange, [0.0 6000.0], sci_water_pressure, llat)
-        bparData = sciStruct(mission, glidername, bpartime, bparpres, bparz, m_lon[:,2], m_lat[:,2], bparraw[:,2]);
+        bparData = sciStruct(mission, glidername, bpartime, bparpres, bparz, m_lon[2], m_lat[2], bparraw);
     else
         bparData = [];
     end

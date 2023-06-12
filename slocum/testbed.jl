@@ -12,20 +12,20 @@ gsw = GibbsSeaWater;
 datamode = "realtime" # delayed or realtime
 mission = "PASSENGERS 2023";
 
-glidername_sylvia = "sylvia";
-rootdir_sylvia = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
-fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
-datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
-cacdir_sylvia = fromgliderdir_sylvia * "cache/";
-figoutdir_sylvia = rootdir_sylvia * "figures/";
+glidername_electa = "electa";
+rootdir_electa = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
+fromgliderdir_electa = rootdir_electa * "from-glider/"; 
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T025956/";
+cacdir_electa = fromgliderdir_electa * "cache/";
+figoutdir_electa = rootdir_electa * "figures/";
 
-glidername = glidername_sylvia;
-rootdir = rootdir_sylvia;
-fromgliderdir = fromgliderdir_sylvia; 
+glidername = glidername_electa;
+rootdir = rootdir_electa;
+fromgliderdir = fromgliderdir_electa; 
 #datadirpath = Glob.glob("electa-from-glider*.zip", fromgliderdir)[1];
-datadir = datadir_sylvia;
-cacdir = cacdir_sylvia;
-figoutdir = figoutdir_sylvia;
+datadir = datadir_electa;
+cacdir = cacdir_electa;
+figoutdir = figoutdir_electa;
 
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
@@ -42,9 +42,10 @@ trange = datetime2unix.([t0; tN]);
 
 # setup glider data loading using dbdreader
 if datamode == "realtime"
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files_only = true, cacheDir = cacdir);
+    #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir);
 else
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir, return_nan=true);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files_only = true, cacheDir = cacdir);
 end
 engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
@@ -93,7 +94,7 @@ llon = Statistics.mean(m_lon[2]);
 #llon = -73.4;
 #llat = 38.0;
 
-presfunc, presraw = glider_presfunc(sci_water_pressure, trange);
+presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
 tempraw, temptime, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, llat)
 condraw, condtime, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, llat)
 
@@ -114,10 +115,10 @@ if isempty(sci_bsipar_par) != true
 end
 
 # find common glider values
-tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
-tctdT = intersectalajulia2(tctd, tempraw[:,1])[3];
-tctdC = intersectalajulia2(tctd, condraw[:,1])[3];
-tctdP = intersectalajulia2(tctd, presraw[:,1])[3];
+tctd = unique(intersect(prestime[:], temptime[:], condtime[:]));
+tctdT = intersectalajulia2(tctd, temptime[:])[3];
+tctdC = intersectalajulia2(tctd, condtime[:])[3];
+tctdP = intersectalajulia2(tctd, prestime[:])[3];
 
 #=
 tpuck = chlaraw[:,1];
@@ -157,10 +158,10 @@ chlaf = chlaf[si];
 
 # raw values from the sensor
 ttraw = tctd; 
-ppraw = presraw[tctdP,2];
+ppraw = presraw[tctdP];
 zzraw = gsw.gsw_z_from_p.(ppraw*10, llat, 0.0, 0.0); 
-ttempraw = tempraw[tctdT,2];
-ccondraw = condraw[tctdC,2];
+ttempraw = tempraw[tctdT];
+ccondraw = condraw[tctdC];
 ssaltraw = gsw.gsw_sp_from_c.(ccondraw*10, ttempraw, ppraw*10);
 saltAraw= gsw.gsw_sa_from_sp.(ssaltraw, ppraw*10, llon, llat);
 ctempraw = gsw.gsw_ct_from_t.(saltAraw, ttempraw, ppraw*10);
@@ -183,20 +184,22 @@ sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);
 
 #engData = engStruct[];
 #sciData = sciStruct[];
-ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
+ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[2], m_lat[2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
 
 
 #x = ttraw;
 #y = zzraw;
 #z = ttempraw;
 
-x = sci_water_pressure[end-1000:end,1];
-y = sci_water_pressure[end-1000:end,2];
-z = sci_water_temp[end-1000:end,2];
+x = sci_water_pressure[1][end-1000:end];
+y = sci_water_pressure[2][end-1000:end];
+z = sci_water_temp[2][end-1000:end];
 
 #x = temptime;
 #y = tempz;
 #z = tempraw[:,2];
+
+xdt, xtick, xticklabel = datetick(x);
 
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 

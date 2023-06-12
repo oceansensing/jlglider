@@ -28,32 +28,35 @@ end
 function glider_presfunc(sci_water_pressure, trange)
     if isempty(sci_water_pressure) != true
         presind = findall((trange[1] .<= sci_water_pressure[1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[2] .>= 0.0));
-        presraw = sci_water_pressure[presind,:];
-        sortedpind = sortperm(presraw[:,1]);
-        presraw = presraw[sortedpind,:];
-        presfunc = linear_interpolation(presraw[:,1], presraw[:,2], extrapolation_bc=Line());
-        #prestime = presraw[:,1];
+        prestime = sci_water_pressure[1][presind]; 
+        presraw = sci_water_pressure[2][presind];
+        sortedpind = sortperm(prestime);
+        presrawval = presraw[sortedpind];
+        prestime = prestime[sortedpind];
+        presfunc = linear_interpolation(prestime, presrawval, extrapolation_bc=Line());
         #presdtime = unix2datetime.(prestime);
         #prespres = presraw[:,2];
         #presz = gsw.gsw_z_from_p.(prespres*10, llat, 0.0, 0.0); 
     else
         presfunc = []; # need a function that returns [] when called with any input
+        prestime = [];
         presraw = [];
     end
-    return presfunc, presraw
+    return presfunc, prestime, presraw
 end
 
 # this function takes glider variable from dbdreader as input and format it for analysis (trimming, outlier removal, calculate)
 function glider_var_load(glidervar, trange, varlim, p, lat)
     gsw = GibbsSeaWater;
     if isempty(glidervar) != true
-        presfunc, presraw = glider_presfunc(p, trange);
-        varind = findall((trange[1] .<= glidervar[:,1] .<= trange[end]) .& (varlim[1] .<= glidervar[:,2] .<= varlim[end])); 
-        varraw = glidervar[varind,:];
-        sortedvarind = sortperm(varraw[:,1]);
-        varraw = varraw[sortedvarind,:];
-        varfunc = linear_interpolation(varraw[:,1], varraw[:,2], extrapolation_bc=Line()); 
-        vartime = varraw[:,1];
+        presfunc, prestime, presraw = glider_presfunc(p, trange);
+        varind = findall((trange[1] .<= glidervar[1] .<= trange[end]) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
+        vartime = glidervar[1][varind];
+        varraw = glidervar[2][varind];
+        sortedvarind = sortperm(vartime);
+        varrawval = varraw[sortedvarind];
+        vartime = vartime[sortedvarind];
+        varfunc = linear_interpolation(vartime, varrawval, extrapolation_bc=Line()); 
         vardtime = unix2datetime.(vartime);
         varpres = presfunc(vartime);
         varz = gsw.gsw_z_from_p.(varpres*10, lat, 0.0, 0.0);  
