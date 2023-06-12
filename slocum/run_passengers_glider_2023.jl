@@ -26,14 +26,14 @@ ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 glidername_electa = "electa";
 rootdir_electa = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230610T001637/";
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T025956/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
 glidername_sylvia = "sylvia";
 rootdir_sylvia = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
 fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
-datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230610T114112/";
+datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
 cacdir_sylvia = fromgliderdir_sylvia * "cache/";
 figoutdir_sylvia = rootdir_sylvia * "figures/";
 
@@ -47,14 +47,14 @@ figoutdir_nrl641 = rootdir_nrl641 * "figures/";
 glidername_ru30 = "ru30";
 rootdir_ru30 = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/ru30-20230525-passengers/";
 fromgliderdir_ru30 = rootdir_ru30 * "from-glider/"; 
-datadir_ru30 = fromgliderdir_ru30 * datamode * "/" * "ru30-from-glider-20230609T185136/";
+datadir_ru30 = fromgliderdir_ru30 * datamode * "/" * "ru30/from-glider/";
 cacdir_ru30 = fromgliderdir_ru30 * "cache/";
 figoutdir_ru30 = rootdir_ru30 * "figures/";
 
 glidername_ru36 = "ru36";
 rootdir_ru36 = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/ru36-20230525-passengers/";
 fromgliderdir_ru36 = rootdir_ru36 * "from-glider/"; 
-datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36-from-glider-20230610T211047/";
+datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36/from-glider/";
 cacdir_ru36 = fromgliderdir_ru36 * "cache/";
 figoutdir_ru36 = rootdir_ru36 * "figures/";
 

@@ -15,7 +15,7 @@ mission = "PASSENGERS 2023";
 glidername_sylvia = "sylvia";
 rootdir_sylvia = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
 fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
-datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230610T114112/";
+datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
 cacdir_sylvia = fromgliderdir_sylvia * "cache/";
 figoutdir_sylvia = rootdir_sylvia * "figures/";
 
