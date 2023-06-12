@@ -12,10 +12,13 @@ gsw = GibbsSeaWater;
 datamode = "realtime" # delayed or realtime
 mission = "PASSENGERS 2023";
 
+dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
+#dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
+
 glidername_electa = "electa";
-rootdir_electa = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/electa-20230523-passengers/";
+rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T025956/";
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T200456/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
@@ -42,10 +45,9 @@ trange = datetime2unix.([t0; tN]);
 
 # setup glider data loading using dbdreader
 if datamode == "realtime"
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files_only = true, cacheDir = cacdir);
-    #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
 else
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files_only = true, cacheDir = cacdir);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir, return_nan=true);
 end
 engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
@@ -94,7 +96,7 @@ llon = Statistics.mean(m_lon[2]);
 #llon = -73.4;
 #llat = 38.0;
 
-presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
+presfunc, presraw = glider_presfunc(sci_water_pressure, trange);
 tempraw, temptime, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, llat)
 condraw, condtime, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, llat)
 
@@ -115,10 +117,10 @@ if isempty(sci_bsipar_par) != true
 end
 
 # find common glider values
-tctd = unique(intersect(prestime[:], temptime[:], condtime[:]));
-tctdT = intersectalajulia2(tctd, temptime[:])[3];
-tctdC = intersectalajulia2(tctd, condtime[:])[3];
-tctdP = intersectalajulia2(tctd, prestime[:])[3];
+tctd = unique(intersect(presraw[:,1], tempraw[:,1], condraw[:,1]));
+tctdT = intersectalajulia2(tctd, tempraw[:,1])[3];
+tctdC = intersectalajulia2(tctd, condraw[:,1])[3];
+tctdP = intersectalajulia2(tctd, presraw[:,1])[3];
 
 #=
 tpuck = chlaraw[:,1];
@@ -158,10 +160,10 @@ chlaf = chlaf[si];
 
 # raw values from the sensor
 ttraw = tctd; 
-ppraw = presraw[tctdP];
+ppraw = presraw[tctdP,2];
 zzraw = gsw.gsw_z_from_p.(ppraw*10, llat, 0.0, 0.0); 
-ttempraw = tempraw[tctdT];
-ccondraw = condraw[tctdC];
+ttempraw = tempraw[tctdT,2];
+ccondraw = condraw[tctdC,2];
 ssaltraw = gsw.gsw_sp_from_c.(ccondraw*10, ttempraw, ppraw*10);
 saltAraw= gsw.gsw_sa_from_sp.(ssaltraw, ppraw*10, llon, llat);
 ctempraw = gsw.gsw_ct_from_t.(saltAraw, ttempraw, ppraw*10);
@@ -184,22 +186,20 @@ sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);
 
 #engData = engStruct[];
 #sciData = sciStruct[];
-ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[2], m_lat[2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
+ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[:,2], m_lat[:,2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
 
 
 #x = ttraw;
 #y = zzraw;
 #z = ttempraw;
 
-x = sci_water_pressure[1][end-1000:end];
-y = sci_water_pressure[2][end-1000:end];
-z = sci_water_temp[2][end-1000:end];
+x = sci_water_pressure[end-1000:end,1];
+y = sci_water_pressure[end-1000:end,2];
+z = sci_water_temp[end-1000:end,2];
 
 #x = temptime;
 #y = tempz;
 #z = tempraw[:,2];
-
-xdt, xtick, xticklabel = datetick(x);
 
 zmin = NaNMath.minimum(z);
 zmax = NaNMath.maximum(z); 
