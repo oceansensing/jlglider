@@ -12,20 +12,23 @@ gsw = GibbsSeaWater;
 datamode = "realtime" # delayed or realtime
 mission = "PASSENGERS 2023";
 
-glidername_sylvia = "sylvia";
-rootdir_sylvia = "/Users/gong/oceansensing Dropbox/C2PO/PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
-fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
-datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
-cacdir_sylvia = fromgliderdir_sylvia * "cache/";
-figoutdir_sylvia = rootdir_sylvia * "figures/";
+dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
+#dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
 
-glidername = glidername_sylvia;
-rootdir = rootdir_sylvia;
-fromgliderdir = fromgliderdir_sylvia; 
+glidername_electa = "electa";
+rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
+fromgliderdir_electa = rootdir_electa * "from-glider/"; 
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T200456/";
+cacdir_electa = fromgliderdir_electa * "cache/";
+figoutdir_electa = rootdir_electa * "figures/";
+
+glidername = glidername_electa;
+rootdir = rootdir_electa;
+fromgliderdir = fromgliderdir_electa; 
 #datadirpath = Glob.glob("electa-from-glider*.zip", fromgliderdir)[1];
-datadir = datadir_sylvia;
-cacdir = cacdir_sylvia;
-figoutdir = figoutdir_sylvia;
+datadir = datadir_electa;
+cacdir = cacdir_electa;
+figoutdir = figoutdir_electa;
 
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
