@@ -60,11 +60,35 @@ x = t_sci[tisorted][end-10000:end-5000];
 y = p_sci[tisorted][end-10000:end-5000];
 z = temp_sci[tisorted][end-10000:end-5000];
 
-GLMakie.plot(x, y, color=z)
-GLMakie.plot(x .- x[1], y, color=z)
-Plots.scatter(x, y, zcolor=z, clim=(18,20), markerstrokewidth = 0)
+x = t_sci[tisorted];
+y = p_sci[tisorted];
+z = temp_sci[tisorted];
+
+xdt, xtick, xticklabel = datetick(x);
+
+#GLMakie.plot(x, y, color=z)
+x0 = datetime2unix.(DateTime("2022-01-01"))
+#GLMakie.plot(x .- x0, y, color=z)
+
+    # plotting conservative temperature
+    zmin = 18.0;
+    zmax = 21.0; 
+    fig = Figure(resolution = pres)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * glidername * " Conservative Temperature",
+        xlabel = "Time",
+        ylabel = "Depth"
+    )
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick, xticklabel);
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    fig
+    save(figoutdir * mission * "_" * glidername * "_ctemp.png", fig)
 
 
+#Plots.scatter(x, y, zcolor=z, clim=(18,20), markerstrokewidth = 0)
+
+#=
 # load engineering data from raw glider DBD files
 m_present_time = dataGlider.get("m_present_time");
 m_lat = dataGlider.get("m_lat"); 
@@ -229,3 +253,5 @@ ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glidername * "_temp.png", fig)
+
+=#

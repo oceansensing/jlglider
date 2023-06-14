@@ -48,6 +48,7 @@ import slocumFunc: datetick
     #    end
     #end
     #x = tctd;
+    x0 = datetime2unix.(DateTime("2022-01-01"));
     x = gliderCTD.t;
     xdt, xtick, xticklabel = datetick(x);
     #y = zzraw;
