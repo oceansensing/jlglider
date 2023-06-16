@@ -6,7 +6,7 @@ using GLMakie, ColorSchemes
 
 import slocumFunc: datetick
 import slocumType: plotSetting, ctdStruct, sciStruct
-import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
+import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_ctd_load, glider_var_load, glider_presfunc
 
 dbdreader = pyimport("dbdreader");
 gsw = GibbsSeaWater;
@@ -34,7 +34,7 @@ figoutdir = figoutdir_electa;
 
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
-ms = 8;
+ms = 6;
 tsms = 5;
 pres = (1200, 800)
 tspres = (1000, 1000)
@@ -54,15 +54,28 @@ else
 end
 engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
-t, t_sci, p_eng, p_sci, temp_sci = dataGlider.get_sync("sci_m_present_time", "m_pressure", "sci_water_pressure", "sci_water_temp");
-tisorted = sortperm(t_sci);
-x = t_sci[tisorted][end-10000:end-5000];
-y = p_sci[tisorted][end-10000:end-5000];
-z = temp_sci[tisorted][end-10000:end-5000];
 
-x = t_sci[tisorted];
-y = p_sci[tisorted];
-z = temp_sci[tisorted];
+t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond  = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
+t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par =  dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
+#tisorted = sortperm(sci_m_present_time);
+
+mlon = NaNMath.mean(lon);
+mlat = NaNMath.mean(lat);
+
+t1, p1, temp1, cond1 = glider_ctd_load(sci_m_present_time, sci_water_pressure, sci_water_temp, sci_water_cond, trange);
+t2, p2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
+z1 = gsw.gsw_z_from_p.(p1*10, mlat, 0.0, 0.0);  
+z2 = gsw.gsw_z_from_p.(p2*10, mlat, 0.0, 0.0)
+
+#t, sci_m_present_time, m_pressure, sci_water_presure, temp_sci = dataGlider.get_sync("sci_m_present_time", "m_pressure", "sci_water_pressure", "sci_water_temp");
+#tisorted = sortperm(t_sci);
+#x = t_sci[tisorted][end-10000:end-5000];
+#y = p_sci[tisorted][end-10000:end-5000];
+#z = temp_sci[tisorted][end-10000:end-5000];
+
+x = t1;
+y = z1;
+z = temp1;
 
 xdt, xtick, xticklabel = datetick(x);
 
@@ -70,21 +83,37 @@ xdt, xtick, xticklabel = datetick(x);
 x0 = datetime2unix.(DateTime("2022-01-01"))
 #GLMakie.plot(x .- x0, y, color=z)
 
-    # plotting conservative temperature
-    zmin = 18.0;
-    zmax = 21.0; 
-    fig = Figure(resolution = pres)
-    ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Conservative Temperature",
-        xlabel = "Time",
-        ylabel = "Depth"
-    )
-    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-    fig
-    save(figoutdir * mission * "_" * glidername * "_ctemp.png", fig)
+# plotting conservative temperature
+zmin = 18.0;
+zmax = 24.0; 
+fig = Figure(resolution = pres)
+ax = Axis(fig[1, 1],
+    title = mission * " " * glidername * " Temperature",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+ax.xticks = (xtick .- x0, xticklabel);
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * mission * "_" * glidername * "_temp1.png", fig)
 
+#=
+# plotting chlorophyll-a
+z = sci_flbbcd_chlor_units;
+zmin = 0;
+zmax = 1.0; 
+fig = Figure(resolution = pres)
+ax = Axis(fig[1, 1],
+    title = mission * " " * glidername * " FLBBCD Chl-a",
+    xlabel = "Time",
+    ylabel = "Depth"
+)
+Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+ax.xticks = (xtick, xticklabel);
+Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+fig
+save(figoutdir * mission * "_" * glidername * "_chla.png", fig)
 
 #Plots.scatter(x, y, zcolor=z, clim=(18,20), markerstrokewidth = 0)
 
@@ -254,4 +283,5 @@ Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glidername * "_temp.png", fig)
 
+=#
 =#
