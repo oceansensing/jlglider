@@ -64,8 +64,8 @@ import slocumFunc: datetick
         xlabel = "Time",
         ylabel = "Depth"
     )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
     save(figoutdir * mission * "_" * glidername * "_ctemp.png", fig)
@@ -81,8 +81,8 @@ import slocumFunc: datetick
         xlabel = "Time",
         ylabel = "Depth"
     )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
     save(figoutdir * mission * "_" * glidername * "_saltA.png", fig)
@@ -98,8 +98,8 @@ import slocumFunc: datetick
         xlabel = "Time",
         ylabel = "Depth"
     )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
     save(figoutdir * mission * "_" * glidername * "_sigma0.png", fig)
@@ -115,8 +115,8 @@ import slocumFunc: datetick
         xlabel = "Time",
         ylabel = "Depth"
     )
-    Makie.scatter!(x, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
+    Makie.scatter!(x .- x0, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
     fig
     save(figoutdir * mission * "_" * glidername * "_spice0.png", fig)
@@ -132,8 +132,8 @@ import slocumFunc: datetick
         xlabel = "Time",
         ylabel = "Depth"
     )
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick, xticklabel);
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
     fig
     save(figoutdir * mission * "_" * glidername * "_soundspeed.png", fig)
@@ -182,6 +182,7 @@ import slocumFunc: datetick
 
     # plotting Chl-a
     if isdefined(gliderCHLA, :t) == true
+        x0 = datetime2unix.(DateTime("2022-01-01"));
         #x = chlatime;
         x = gliderCHLA.t;
         xdt, xtick, xticklabel = datetick(x);
@@ -196,8 +197,8 @@ import slocumFunc: datetick
             xlabel = "Time",
             ylabel = "Depth"
         )
-        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-        ax.xticks = (xtick, xticklabel);
+        Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        ax.xticks = (xtick .- x0, xticklabel);
         Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * gliderCHLA.mission * "_" * gliderCHLA.glidername * "_chla.png", fig);
@@ -205,6 +206,7 @@ import slocumFunc: datetick
 
     # plotting CDOM
     if isdefined(gliderCDOM, :t) == true
+        x0 = datetime2unix.(DateTime("2022-01-01"));
         x = gliderCDOM.t;
         xdt, xtick, xticklabel = datetick(x);
         y = gliderCDOM.z;
@@ -219,8 +221,8 @@ import slocumFunc: datetick
             xlabel = "Time",
             ylabel = "Depth"
         )
-        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-        ax.xticks = (xtick, xticklabel);
+        Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        ax.xticks = (xtick .- x0, xticklabel);
         Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * gliderCDOM.mission * "_" * gliderCDOM.glidername * "_cdom.png", fig);
@@ -228,6 +230,7 @@ import slocumFunc: datetick
 
     # plotting BB700
     if isdefined(gliderBB700, :t) == true
+        x0 = datetime2unix.(DateTime("2022-01-01"));
         x = gliderBB700.t;
         xdt, xtick, xticklabel = datetick(x);
         y = gliderBB700.z;
@@ -242,8 +245,8 @@ import slocumFunc: datetick
             xlabel = "Time",
             ylabel = "Depth"
         )
-        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
-        ax.xticks = (xtick, xticklabel);
+        Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        ax.xticks = (xtick .- x0, xticklabel);
         Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * gliderBB700.mission * "_" * gliderBB700.glidername * "_bb700.png", fig);
@@ -251,6 +254,7 @@ import slocumFunc: datetick
 
     # plotting BSI PAR
     if isdefined(gliderBPAR, :t) == true
+        x0 = datetime2unix.(DateTime("2022-01-01"));
         x = gliderBPAR.t;
         xdt, xtick, xticklabel = datetick(x);
         y = gliderBPAR.z;
@@ -265,9 +269,9 @@ import slocumFunc: datetick
             xlabel = "Time",
             ylabel = "Depth"
         )
-        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
+        Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=6, colorrange=(zmin, zmax))
         #ax.xticks = (x[1]:86400:x[end], string.(Date.(xdt[1]:Day(1):xdt[end])))
-        ax.xticks = (xtick, xticklabel);
+        ax.xticks = (xtick .- x0, xticklabel);
         Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Log(PAR)")
         fig
         save(figoutdir * gliderBPAR.mission * "_" * gliderBPAR.glidername * "_bsipar.png", fig);
