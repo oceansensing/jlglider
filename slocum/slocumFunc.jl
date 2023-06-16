@@ -46,6 +46,40 @@ function glider_presfunc(sci_water_pressure, trange)
 end
 
 # this function takes glider variable from dbdreader as input and format it for analysis (trimming, outlier removal, calculate)
+
+function glider_var_load(varin, varrange)
+    if isempty(varin) != true
+        varind = findall(varrange[1] .<= varin .<= varrange[end]); 
+        varout = glidervar[varind];
+    else
+        varind = [];
+        varout = [];
+    end
+    return varind, varout;
+end
+
+function glider_ctd_load(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
+    gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 1000.0) .& (0.1 .<= temp .<= 40.0) .& (0.01 .<= cond .<= 100.0)); 
+    return t[gind], pres[gind], temp[gind], cond[gind];
+end
+
+function glider_var_load(t::Array{Float64}, pres::Array{Float64}, glidervar::Array{Float64}, trange::Array{Float64}, varlim::Array{Float64})
+    if isempty(glidervar) != true
+        varind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 1000.0));
+        t = t[varind];
+        varout = glidervar[varind];
+        presout = pres[varind];
+        varbadind = findall((varlim[1] .>= varout) .| (varout .>= varlim[end]));
+        varout[varbadind] .= NaN;
+    else
+        varind = [];
+        t = [];
+        varout = [];
+        presout = [];
+    end
+    return t, presout, varout, varind;
+end
+
 function glider_var_load(glidervar, trange, varlim, p, lat)
     gsw = GibbsSeaWater;
     if isempty(glidervar) != true
@@ -66,7 +100,7 @@ function glider_var_load(glidervar, trange, varlim, p, lat)
         varpres = [];
         varz = [];
     end
-    return varraw, vartime, varpres, varz
+    return vartime, varpres, varraw, varz
 end
 
 function datetick(unix_t)

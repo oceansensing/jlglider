@@ -8,7 +8,7 @@ using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 
 import slocumType: ctdStruct, sciStruct
-import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
+import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load
 
 #=
 # define function for converting an array from python row major to julia column major
@@ -60,6 +60,26 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
 
+    t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
+    #t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
+    #tisorted = sortperm(sci_m_present_time);
+
+    mlon = NaNMath.mean(lon);
+    mlat = NaNMath.mean(lat);
+
+    tctd, pres, temp, cond = glider_ctd_load(sci_m_present_time, sci_water_pressure, sci_water_temp, sci_water_cond, trange);
+    #tctd2, pres2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
+    z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 
+    salt = gsw.gsw_sp_from_c.(cond*10, temp, pres*10);
+    saltA = gsw.gsw_sa_from_sp.(salt, pres*10, mlon, mlat);
+    ctemp = gsw.gsw_ct_from_t.(saltA, temp, pres*10);
+    rho = gsw.gsw_rho.(saltA, ctemp, pres*10);
+    sigma0 = gsw.gsw_sigma0.(saltA, ctemp);
+    spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
+    sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
+
+    
+    #=
     # load engineering data from raw glider DBD files
     m_present_time = dataGlider.get("m_present_time");
     m_lat = dataGlider.get("m_lat"); 
@@ -95,7 +115,9 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     sci_flbbcd_cdom_units = dataGlider.get("sci_flbbcd_cdom_units");
     sci_flbbcd_bb_units = dataGlider.get("sci_flbbcd_bb_units");
     sci_bsipar_par = dataGlider.get("sci_bsipar_par");
+    =#
 
+    #=
     # calculate derived values from CTD data
     llat = Statistics.mean(m_lat[2]);
     llon = Statistics.mean(m_lon[2]);
@@ -174,10 +196,11 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     spice0f = gsw.gsw_spiciness0.(saltAf, ctempf);
     sndspdf = gsw.gsw_sound_speed.(saltAf, ctempf, presf*10);
     =#
+    =#
 
     #engData = engStruct[];
     #sciData = sciStruct[];
-    ctdData = ctdStruct(mission, glidername, ttraw, ppraw, zzraw, m_lon[2], m_lat[2], ttempraw, ccondraw, ssaltraw, ctempraw, saltAraw, sigma0raw, spice0raw, sndspdraw, 0, 0);
+    ctdData = ctdStruct(mission, glidername, t, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
@@ -193,6 +216,7 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername)
     end
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
+
 
     m_lat = dataGlider.get("m_lat"); 
     m_lon = dataGlider.get("m_lon"); 

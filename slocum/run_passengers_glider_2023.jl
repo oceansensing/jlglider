@@ -4,6 +4,7 @@
 # setup directories
 using Dates
 import slocumType: plotSetting, ctdStruct, sciStruct
+
 import load_slocum_glider: load_glider_ctd, load_glider_sci
 #import plot_slocum_glider: plot_glider_ctd
 
@@ -23,13 +24,13 @@ pres = (1200, 800)
 tspres = (1000, 1000)
 ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 
-dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
-#dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
+#dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
+dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
 
 glidername_electa = "electa";
 rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T025956/";
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa/from-glider/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
