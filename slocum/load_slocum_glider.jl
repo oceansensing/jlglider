@@ -53,22 +53,25 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
 
     # setup glider data loading using dbdreader
    if datamode == "realtime"
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
     else
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
     end
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
 
     t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
     #t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
-    #tisorted = sortperm(sci_m_present_time);
+    tis = sortperm(sci_m_present_time);
 
     mlon = NaNMath.mean(lon);
     mlat = NaNMath.mean(lat);
 
-    tctd, pres, temp, cond = glider_ctd_load(sci_m_present_time, sci_water_pressure, sci_water_temp, sci_water_cond, trange);
+    tctd, pres, temp, cond = glider_ctd_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
     #tctd2, pres2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
+
     z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 
     salt = gsw.gsw_sp_from_c.(cond*10, temp, pres*10);
     saltA = gsw.gsw_sa_from_sp.(salt, pres*10, mlon, mlat);
@@ -200,7 +203,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
 
     #engData = engStruct[];
     #sciData = sciStruct[];
-    ctdData = ctdStruct(mission, glidername, t, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = ctdStruct(mission, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 

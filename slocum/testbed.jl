@@ -20,7 +20,8 @@ dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
 glidername_electa = "electa";
 rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230612T200456/";
+#datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230609T181801/";
+datadir_electa = fromgliderdir_electa * datamode * "/" * "electa/from-glider/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
@@ -41,34 +42,34 @@ tspres = (1000, 1000)
 ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 
 # specify valid data time period
-t0 = DateTime("2023-05-23");
-tN = DateTime("2023-06-20");
+t0 = DateTime("2023-05-20");
+tN = DateTime("2023-06-21");
 trange = datetime2unix.([t0; tN]);
 
 # setup glider data loading using dbdreader
 if datamode == "realtime"
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files_only = true, cacheDir = cacdir, return_nan=true);
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+    #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir);
 else
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files_only = true, cacheDir = cacdir, return_nan=true);
+    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complement_file_only = true, skip_initial_line = true);
 end
 engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
 
-t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond  = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
+t, sci_m_present_time, lon, lat, sci_water_pressure, sci_water_temp, sci_water_cond  = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
 t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par =  dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
-#tisorted = sortperm(sci_m_present_time);
+tis = sortperm(sci_m_present_time);
 
 mlon = NaNMath.mean(lon);
 mlat = NaNMath.mean(lat);
 
-t1, p1, temp1, cond1 = glider_ctd_load(sci_m_present_time, sci_water_pressure, sci_water_temp, sci_water_cond, trange);
-t2, p2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
+t1, p1, temp1, cond1 = glider_ctd_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
+t2, p2, temp2, temp2ind = glider_var_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], trange, [0.1 40.0]);
 z1 = gsw.gsw_z_from_p.(p1*10, mlat, 0.0, 0.0);  
 z2 = gsw.gsw_z_from_p.(p2*10, mlat, 0.0, 0.0)
 
 #t, sci_m_present_time, m_pressure, sci_water_presure, temp_sci = dataGlider.get_sync("sci_m_present_time", "m_pressure", "sci_water_pressure", "sci_water_temp");
-#tisorted = sortperm(t_sci);
+#tisorted = sortperm(t1);
 #x = t_sci[tisorted][end-10000:end-5000];
 #y = p_sci[tisorted][end-10000:end-5000];
 #z = temp_sci[tisorted][end-10000:end-5000];
@@ -92,8 +93,9 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Depth"
 )
-Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-ax.xticks = (xtick .- x0, xticklabel);
+Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+#Makie.plot(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+ax.xticks = (xtick, xticklabel);
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
 save(figoutdir * mission * "_" * glidername * "_temp1.png", fig)

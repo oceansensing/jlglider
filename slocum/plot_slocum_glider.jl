@@ -57,6 +57,7 @@ import slocumFunc: datetick
     # plotting conservative temperature
     z = gliderCTD.ctemp;
     zmin = NaNMath.minimum(z);
+    #zmin = 18;
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
@@ -74,6 +75,7 @@ import slocumFunc: datetick
     #z = saltAraw[1:pint:end];
     z = gliderCTD.saltA;
     zmin = NaNMath.minimum(z);
+    #zmin = 36;
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
@@ -91,6 +93,7 @@ import slocumFunc: datetick
     #z = sigma0raw[1:pint:end];
     z = gliderCTD.sigma0;
     zmin = NaNMath.minimum(z);
+    #zmin = 24.0;
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
@@ -108,6 +111,7 @@ import slocumFunc: datetick
     #z = spice0raw[1:pint:end];
     z = gliderCTD.spice0;
     zmin = NaNMath.minimum(z);
+    #zmin = 4.0;
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
@@ -124,7 +128,8 @@ import slocumFunc: datetick
     # plotting sound speed
     #z = sndspdraw[1:pint:end];
     z = gliderCTD.sndspd;
-    zmin = NaNMath.minimum(z);
+    #zmin = NaNMath.minimum(z);
+    zmin = 1520;
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
@@ -180,6 +185,7 @@ import slocumFunc: datetick
     fig
     save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
 
+#=    
     # plotting Chl-a
     if isdefined(gliderCHLA, :t) == true
         x0 = datetime2unix.(DateTime("2022-01-01"));
@@ -278,3 +284,4 @@ import slocumFunc: datetick
     end
 
 #end
+=#
