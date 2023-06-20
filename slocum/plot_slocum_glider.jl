@@ -245,6 +245,8 @@ import slocumFunc: datetick
         xdt, xtick, xticklabel = datetick(x);
         y = gliderCHLA.z;
         z = gliderCHLA.var;
+
+        #findall(isnan.(electaCHLA.var)) 
         zmin = NaNMath.minimum(z);
         #zmax = NaNMath.maximum(z); 
         zmax = 0.8;
