@@ -220,7 +220,13 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername)
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
 
+    t, sci_m_present_time, lon, lat, sci_water_pressure, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "sci_water_pressure", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
+    tis = sortperm(sci_m_present_time);
 
+    mlon = NaNMath.mean(lon);
+    mlat = NaNMath.mean(lat);
+
+    #=
     m_lat = dataGlider.get("m_lat"); 
     m_lon = dataGlider.get("m_lon"); 
 
@@ -233,31 +239,38 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername)
 
     llat = Statistics.mean(m_lat[2]);
     llon = Statistics.mean(m_lon[2]);
+    =#
+
+    #sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]
 
     if isempty(sci_flbbcd_chlor_units) != true
-        chlaraw, chlatime, chlapres, chlaz = glider_var_load(sci_flbbcd_chlor_units, trange, [-0.1 3.0], sci_water_pressure, llat)
-        chlaData = sciStruct(mission, glidername, chlatime, chlapres, chlaz, m_lon[2], m_lat[2], chlaraw);
+        chlatime, chlapres, chlaraw, chlaind = glider_var_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_flbbcd_chlor_units, trange, [-0.1 3.0])
+        chlaz = gsw.gsw_z_from_p.(chlapres*10, mlat, 0.0, 0.0);
+        chlaData = sciStruct(mission, glidername, chlatime, chlapres, chlaz, lon, lat, chlaraw);
     else
         chlaData = [];
     end
 
     if isempty(sci_flbbcd_cdom_units) != true
-        cdomraw, cdomtime, cdompres, cdomz = glider_var_load(sci_flbbcd_cdom_units, trange, [-5.0 5.0], sci_water_pressure, llat)
-        cdomData = sciStruct(mission, glidername, cdomtime, cdompres, cdomz, m_lon[2], m_lat[2], cdomraw);
+        cdomtime, cdompres, cdomraw, cdomind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_flbbcd_cdom_units, trange, [-5.0 5.0])
+        cdomz = gsw.gsw_z_from_p.(cdompres*10, mlat, 0.0, 0.0); 
+        cdomData = sciStruct(mission, glidername, cdomtime, cdompres, cdomz, lon, lat, cdomraw);
     else
         cdomData = [];
     end
 
     if isempty(sci_flbbcd_bb_units) != true
-        bb700raw, bb700time, bb700pres, bb700z = glider_var_load(sci_flbbcd_bb_units, trange, [0.0 0.008], sci_water_pressure, llat)
-        bb700Data = sciStruct(mission, glidername, bb700time, bb700pres, bb700z, m_lon[2], m_lat[2], bb700raw);
+        bb700time, bb700pres, bb700raw, bb700ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_flbbcd_bb_units, trange, [0.0 0.008])
+        bb700z = gsw.gsw_z_from_p.(bb700pres*10, mlat, 0.0, 0.0); 
+        bb700Data = sciStruct(mission, glidername, bb700time, bb700pres, bb700z, lon, lat, bb700raw);
     else
         bb700Data = [];
     end
 
     if isempty(sci_bsipar_par) != true
-        bparraw, bpartime, bparpres, bparz = glider_var_load(sci_bsipar_par, trange, [0.0 6000.0], sci_water_pressure, llat)
-        bparData = sciStruct(mission, glidername, bpartime, bparpres, bparz, m_lon[2], m_lat[2], bparraw);
+        bpartime, bparpres, bparraw, bparind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_bsipar_par, trange, [0.0 6000.0])
+        bparz = gsw.gsw_z_from_p.(bparpres*10, mlat, 0.0, 0.0); 
+        bparData = sciStruct(mission, glidername, bpartime, bparpres, bparz, lon, lat, bparraw);
     else
         bparData = [];
     end

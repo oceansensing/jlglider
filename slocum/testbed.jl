@@ -57,14 +57,15 @@ engvars = dataGlider.parameterNames["eng"];
 scivars = dataGlider.parameterNames["sci"];
 
 t, sci_m_present_time, lon, lat, sci_water_pressure, sci_water_temp, sci_water_cond  = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
-t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par =  dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
+#t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par =  dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
+t2, sci_m_present_time2, lon2, lat2, sci_water_pressure2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "sci_water_pressure", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
 tis = sortperm(sci_m_present_time);
 
 mlon = NaNMath.mean(lon);
 mlat = NaNMath.mean(lat);
 
 t1, p1, temp1, cond1 = glider_ctd_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
-t2, p2, temp2, temp2ind = glider_var_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], trange, [0.1 40.0]);
+t2, p2, chla2, chla2ind = glider_var_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_flbbcd_chlor_units[tis], trange, [0.1 40.0]);
 z1 = gsw.gsw_z_from_p.(p1*10, mlat, 0.0, 0.0);  
 z2 = gsw.gsw_z_from_p.(p2*10, mlat, 0.0, 0.0)
 

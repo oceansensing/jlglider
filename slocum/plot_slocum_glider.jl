@@ -54,6 +54,57 @@ import slocumFunc: datetick
     #y = zzraw;
     y = gliderCTD.z;
 
+    # plotting temperature
+    z = gliderCTD.temp;
+    zmin = NaNMath.minimum(z);
+    #zmin = 18;
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = pres)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * glidername * " Temperature",
+        xlabel = "Time",
+        ylabel = "Depth"
+    )
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    fig
+    save(figoutdir * mission * "_" * glidername * "_temp.png", fig)
+
+    # plotting conductivity
+    z = gliderCTD.cond;
+    zmin = NaNMath.minimum(z);
+    #zmin = 18;
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = pres)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * glidername * " Conductivity",
+        xlabel = "Time",
+        ylabel = "Depth"
+    )
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    fig
+    save(figoutdir * mission * "_" * glidername * "_cond.png", fig)
+
+    # plotting salinity
+    z = gliderCTD.salt;
+    zmin = NaNMath.minimum(z);
+    #zmin = 18;
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = pres)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * glidername * " Salinity",
+        xlabel = "Time",
+        ylabel = "Depth"
+    )
+    Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    ax.xticks = (xtick .- x0, xticklabel);
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    fig
+    save(figoutdir * mission * "_" * glidername * "_salt.png", fig)
+
     # plotting conservative temperature
     z = gliderCTD.ctemp;
     zmin = NaNMath.minimum(z);
@@ -185,7 +236,7 @@ import slocumFunc: datetick
     fig
     save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
 
-#=    
+    
     # plotting Chl-a
     if isdefined(gliderCHLA, :t) == true
         x0 = datetime2unix.(DateTime("2022-01-01"));
@@ -284,4 +335,3 @@ import slocumFunc: datetick
     end
 
 #end
-=#
