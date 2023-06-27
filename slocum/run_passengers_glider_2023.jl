@@ -27,10 +27,11 @@ ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 #dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
 dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
 
+datamode_electa = "delayed"
 glidername_electa = "electa";
 rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode * "/" * "electa/from-glider/";
+datadir_electa = fromgliderdir_electa * datamode_electa * "/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
@@ -62,7 +63,7 @@ datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36/from-glider/";
 cacdir_ru36 = fromgliderdir_ru36 * "cache/";
 figoutdir_ru36 = rootdir_ru36 * "figures/";
 
-electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);
+electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa);
 electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);
 #plot_glider_ctd(electaCTD, figoutdir, ps)
 gliderCTD = electaCTD;

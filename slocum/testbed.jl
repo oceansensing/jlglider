@@ -22,6 +22,7 @@ rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passeng
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
 #datadir_electa = fromgliderdir_electa * datamode * "/" * "electa-from-glider-20230609T181801/";
 datadir_electa = fromgliderdir_electa * datamode * "/" * "electa/from-glider/";
+#datadir_electa = fromgliderdir_electa * datamode * "/";
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
