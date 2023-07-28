@@ -63,7 +63,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Temperature",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -80,7 +80,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Conductivity",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -97,7 +97,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Salinity",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -114,7 +114,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Conservative Temperature",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -132,7 +132,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Absolute Salinity",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -150,7 +150,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Potential Density",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -168,7 +168,7 @@ import slocumFunc: datetick
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Spiciness0",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
     ax.xticks = (xtick .- x0, xticklabel);
@@ -180,17 +180,20 @@ import slocumFunc: datetick
     #z = sndspdraw[1:pint:end];
     z = gliderCTD.sndspd;
     #zmin = NaNMath.minimum(z);
-    zmin = 1520;
-    zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = pres)
+    zmin = 1522;
+    zmax = 1532;
+    #zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = pres, fontsize = 24);
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Sound Speed",
+        title = mission * " – " * uppercasefirst(glidername) * " sound speed",
+        #title =  uppercasefirst(glidername) * " Sound Speed",
         xlabel = "Time",
-        ylabel = "Depth"
+        ylabel = "Depth (m)",
+        #label = :bold
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Sound Speed (m/s)")
     fig
     save(figoutdir * mission * "_" * glidername * "_soundspeed.png", fig)
 
