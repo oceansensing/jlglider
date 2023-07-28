@@ -2,13 +2,18 @@
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
 #
 # setup directories
+
+using PyCall
+using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
+import slocumType: ctdStruct, sciStruct
+import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
+
 using Dates
 import slocumType: plotSetting, ctdStruct, sciStruct
-
 import load_slocum_glider: load_glider_ctd, load_glider_sci
 #import plot_slocum_glider: plot_glider_ctd
 
-datamode = "realtime"; # delayed or realtime
+datamode = "delayed"; # delayed or realtime
 mission = "PASSENGERS 2023";
 
 # specify valid data time period
@@ -18,8 +23,8 @@ trange = datetime2unix.([t0; tN]);
 
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
-ms = 8;
-tsms = 5;
+ms = 4;
+tsms = 4;
 pres = (1200, 800)
 tspres = (1000, 1000)
 ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
@@ -31,10 +36,15 @@ datamode_electa = "delayed"
 glidername_electa = "electa";
 rootdir_electa = dataroot * "PASSENGERS/2023_glider_data/electa-20230523-passengers/";
 fromgliderdir_electa = rootdir_electa * "from-glider/"; 
-datadir_electa = fromgliderdir_electa * datamode_electa * "/";
+if datamode_electa == "delayed"
+    datadir_electa = fromgliderdir_electa * datamode_electa * "/";
+elseif datamode_electa == "realtime"
+    datadir_electa = fromgliderdir_electa * datamode_electa * "/electa/from-glider/";
+end
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 
+datamode_sylvia = "delayed"
 glidername_sylvia = "sylvia";
 rootdir_sylvia = dataroot * "PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
 fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
@@ -63,21 +73,32 @@ datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36/from-glider/";
 cacdir_ru36 = fromgliderdir_ru36 * "cache/";
 figoutdir_ru36 = rootdir_ru36 * "figures/";
 
-electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa);
-electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);
+datadir = datadir_electa;
+cacdir = cacdir_electa;
+datamode = datamode_electa;
+glidername = glidername_electa;
+
+electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa, 1);
+#electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa);
 #plot_glider_ctd(electaCTD, figoutdir, ps)
-gliderCTD = electaCTD;
-gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = electaCHLA, electaCDOM, electaBB700, electaBPAR;
+
+#electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);
+#gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = electaCHLA, electaCDOM, electaBB700, electaBPAR;
+
+gliderCTD = electaCTDraw;
 figoutdir = figoutdir_electa;
-include("plot_slocum_glider.jl")
+include("plot_slocum_glider_ctd.jl")
+#include("plot_slocum_glider_bio.jl")
 
-sylviaCTD = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
-sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR = load_glider_sci(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
-gliderCTD = sylviaCTD;
-gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR;
-figoutdir = figoutdir_sylvia;
-include("plot_slocum_glider.jl")
 
+#sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia, 1);
+#sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR = load_glider_sci(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
+#gliderCTD = sylviaCTDraw;
+#gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR;
+#figoutdir = figoutdir_sylvia;
+#include("plot_slocum_glider_ctd.jl")
+
+#=
 nrl641CTD = load_glider_ctd(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
 nrl641CHLA, nrl641CDOM, nrl641BB700, nrl641BPAR = load_glider_sci(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
 gliderCTD = nrl641CTD;
@@ -98,3 +119,4 @@ gliderCTD = ru36CTD;
 gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = ru36CHLA, ru36CDOM, ru36BB700, ru36BPAR;
 figoutdir = figoutdir_ru36;
 include("plot_slocum_glider.jl")
+=#
