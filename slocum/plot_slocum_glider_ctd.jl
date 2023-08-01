@@ -192,7 +192,11 @@ import slocumFunc: datetick
         #label = :bold
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Sound Speed (m/s)")
     fig
     save(figoutdir * mission * "_" * glidername * "_soundspeed.png", fig)

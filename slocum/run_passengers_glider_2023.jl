@@ -47,8 +47,13 @@ figoutdir_electa = rootdir_electa * "figures/";
 datamode_sylvia = "delayed"
 glidername_sylvia = "sylvia";
 rootdir_sylvia = dataroot * "PASSENGERS/2023_glider_data/sylvia-20230608-passengers/";
-fromgliderdir_sylvia = rootdir_sylvia * "from-glider/"; 
-datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
+fromgliderdir_sylvia = rootdir_sylvia * "from-glider/";
+if datamode_sylvia == "delayed"
+    datadir_sylvia = fromgliderdir_sylvia * datamode_sylvia * "/";
+elseif datamode_sylvia == "realtime"
+    datadir_sylvia = fromgliderdir_sylvia * datamode_sylvia * "/" * glidername_sylvia * "/from-glider/";
+end
+#datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
 cacdir_sylvia = fromgliderdir_sylvia * "cache/";
 figoutdir_sylvia = rootdir_sylvia * "figures/";
 
@@ -90,13 +95,17 @@ figoutdir = figoutdir_electa;
 include("plot_slocum_glider_ctd.jl")
 #include("plot_slocum_glider_bio.jl")
 
+#datadir = datadir_sylvia;
+#cacdir = cacdir_sylvia;
+#datamode = datamode_sylvia;
+#glidername = glidername_sylvia;
 
-#sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia, 1);
+sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode_sylvia, mission, glidername_sylvia, "uppercase");
 #sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR = load_glider_sci(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
-#gliderCTD = sylviaCTDraw;
+gliderCTD = sylviaCTDraw;
 #gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR;
-#figoutdir = figoutdir_sylvia;
-#include("plot_slocum_glider_ctd.jl")
+figoutdir = figoutdir_sylvia;
+include("plot_slocum_glider_ctd.jl")
 
 #=
 nrl641CTD = load_glider_ctd(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);

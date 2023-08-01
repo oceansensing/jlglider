@@ -34,13 +34,25 @@ end
 function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername, loadmode)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
-    if datamode == "realtime"
-        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+
+    if loadmode == "uppercase"
+        if datamode == "realtime"
+            #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        else
+            #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        end
     else
-        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        if datamode == "realtime"
+            #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        else
+            #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        end
     end
+
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
 
