@@ -83,7 +83,7 @@ cacdir = cacdir_electa;
 datamode = datamode_electa;
 glidername = glidername_electa;
 
-electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa, 1);
+electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa, "lowercase");
 #electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa);
 #plot_glider_ctd(electaCTD, figoutdir, ps)
 
@@ -92,6 +92,7 @@ electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_e
 
 gliderCTD = electaCTDraw;
 figoutdir = figoutdir_electa;
+#pst = plotStruct(figoutdir_electa, pres, ms, )
 include("plot_slocum_glider_ctd.jl")
 #include("plot_slocum_glider_bio.jl")
 

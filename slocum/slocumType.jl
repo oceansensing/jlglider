@@ -9,6 +9,24 @@ mutable struct plotSetting
     tspres::Tuple{Int64, Int64}
 end
 
+mutable struct plotStruct
+    figoutdir::String
+    resolution::Tuple{Int64, Int64}
+    markersize::Float64
+    tempmin::Float64
+    tempmax::Float64
+    condmin::Float64
+    condmax::Float64
+    saltmin::Float64
+    saltmax::Float64
+    sigma0min::Float64
+    sigma0max::Float64
+    spice0min::Float64
+    spice0max::Float64
+    sndspdmin::Float64
+    sndspdmax::Float64
+end
+
 mutable struct engStruct
     t::Array{Float64}
     p::Array{Float64}
@@ -45,6 +63,6 @@ mutable struct sciStruct
     lon::Array{Float64}
     lat::Array{Float64}
     var::Array{Float64}
-end
+end  
 
 end
