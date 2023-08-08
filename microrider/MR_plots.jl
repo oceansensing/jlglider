@@ -1,11 +1,11 @@
-
+using GLMakie
 
 figoutdir = "/Users/gong/GitHub/jlglider/microrider/figures/";
 
-xfast = mrr.t_fast[:];
-yfast = mrr.P_fast[:];
-z1fast = mrr.sh1[:];
-z2fast = mrr.sh2[:];
+xfast = mrp.t_fast[:];
+yfast = mrp.P_fast[:];
+z1fast = mrp.sh1[:];
+z2fast = mrp.sh2[:];
 
 x = xfast;
 y = yfast;
@@ -25,7 +25,7 @@ ax = Axis(fig[1, 1],
     xlabel = "Time",
     ylabel = "Pressure"
 )
-Makie.lines!(x, y, color=z, colormap=:jet, linewidth=ms, colorrange=(zmin, zmax))
+GLMakie.plot!(x, y, color=z, colormap=:jet, linewidth=ms, colorrange=(zmin, zmax))
 #ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 fig
