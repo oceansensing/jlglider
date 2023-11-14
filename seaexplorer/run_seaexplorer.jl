@@ -5,10 +5,10 @@ end
 
 import seaexplorer_functions: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process
 
-mission = 38; # M37 is Jan Mayen, M38 is Lofoten Basin
+mission = 48; # M37 is Jan Mayen in 2022, M38 is Lofoten Basin in 2022, M48 is Jan Mayen in 2023
 #include("seaexplorer_load.jl");
-jmnav, jmnav1d, jmpld, jmpld1d = seaexplorer_load_mission(37);
-lbenav, lbenav1d, lbepld, lbepld1d = seaexplorer_load_mission(38);
+jmnav, jmnav1d, jmpld, jmpld1d = seaexplorer_load_mission(mission);
+lbenav, lbenav1d, lbepld, lbepld1d = seaexplorer_load_mission(mission);
 jm = seaexplorer_process(jmpld1d);
 lbe = seaexplorer_process(lbepld1d);
 #sea064data = jm;

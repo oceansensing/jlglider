@@ -4,7 +4,7 @@
 module seaexplorer_functions
 
 using Glob, DataFrames, CSV, Dates, Missings, NaNMath, Interpolations
-using GLMakie, NCDatasets
+using NCDatasets
 using GibbsSeaWater, MAT
 import seaexplorer_types: NAV_RT, PLD_RT, SeaExplorerData
 import gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
@@ -692,6 +692,12 @@ function seaexplorer_load_mission(mission)
         suffix = "deployment"
         datadir = dataroot * "sea064-20221102-norse-lofoten-complete/";
         dataflag = "all";
+    elseif (gliderSN == 64) & (mission == 48)
+        projectname = "norse"
+        deploydate = "20231112"
+        suffix = "deployment"
+        datadir = dataroot * "sea064-20231112-norse/";
+        dataflag = "all";    
     end
 
     if (dataflag == "realtime") | (dataflag == "all") 
