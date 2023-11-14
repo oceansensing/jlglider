@@ -540,12 +540,21 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
         ad2cp_v2_cn6 = cleanAD2CP(df.AD2CP_V2_CN6);
         ad2cp_v3_cn6 = cleanAD2CP(df.AD2CP_V3_CN6);
         ad2cp_v4_cn6 = cleanAD2CP(df.AD2CP_V4_CN6);
-        flbbcd_chl_count = missing2nan(df.FLBBCD_CHL_COUNT);
-        flbbcd_chl_scaled = missing2nan(df.FLBBCD_CHL_SCALED);
-        flbbcd_bb_700_count = missing2nan(df.FLBBCD_BB_700_COUNT);
-        flbbcd_bb_700_scaled = missing2nan(df.FLBBCD_BB_700_SCALED);
-        flbbcd_cdom_count = missing2nan(df.FLBBCD_CDOM_COUNT);
-        flbbcd_cdom_scaled = missing2nan(df.FLBBCD_CDOM_SCALED);
+
+        #flbbcd_chl_count = missing2nan(df.FLBBCD_CHL_COUNT);
+        #flbbcd_chl_scaled = missing2nan(df.FLBBCD_CHL_SCALED);
+        #flbbcd_bb_700_count = missing2nan(df.FLBBCD_BB_700_COUNT);
+        #flbbcd_bb_700_scaled = missing2nan(df.FLBBCD_BB_700_SCALED);
+        #flbbcd_cdom_count = missing2nan(df.FLBBCD_CDOM_COUNT);
+        #flbbcd_cdom_scaled = missing2nan(df.FLBBCD_CDOM_SCALED);
+
+        flbbcd_chl_count = [];
+        flbbcd_chl_scaled = [];
+        flbbcd_bb_700_count = [];
+        flbbcd_bb_700_scaled = [];
+        flbbcd_cdom_count = [];
+        flbbcd_cdom_scaled = [];
+
         legato_conductivity = missing2nan(df.LEGATO_CONDUCTIVITY);
         legato_temperature = missing2nan(df.LEGATO_TEMPERATURE);
         legato_pressure = missing2nan(df.LEGATO_PRESSURE);
