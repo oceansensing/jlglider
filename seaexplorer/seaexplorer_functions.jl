@@ -694,7 +694,6 @@ function seaexplorer_load_mission(mission)
         suffix = "deployment"
         datadir = dataroot * "sea064-20221021-norse-janmayen-complete/";
         dataflag = "all";
-
     elseif (gliderSN == 64) & (mission == 38)
         projectname = "norse"
         deploydate = "20221102"
@@ -709,7 +708,7 @@ function seaexplorer_load_mission(mission)
         dataflag = "all";    
     end
 
-    if (dataflag == "realtime") | (dataflag == "all") 
+    if (dataflag == "realtime") | (dataflag == "all")
         navdir = datadir * "glimpse/";
         scidir = datadir * "glimpse/";
     else 

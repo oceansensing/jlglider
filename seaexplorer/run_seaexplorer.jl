@@ -13,10 +13,10 @@ jm23nav, jm23nav1d, jm23pld, jm23pld1d = seaexplorer_load_mission(48);
 jm22 = seaexplorer_process(jm22pld1d);
 lbe22 = seaexplorer_process(lbe22pld1d);
 jm23 = seaexplorer_process(jm23pld1d);
-#sea064data = jm;
+sea064pld1d = jm23;
 
-include("freya_MR_laur_load.jl");
+#include("freya_MR_laur_load.jl");
 
 #include("seaexplorer_processing.jl");
-#include("seaexplorer_plotFast.jl")
+include("seaexplorer_plotFast.jl")
 
