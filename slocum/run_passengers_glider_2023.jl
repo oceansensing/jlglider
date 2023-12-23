@@ -5,13 +5,10 @@
 
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
-import slocumType: ctdStruct, sciStruct
+import slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
 import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
-
-using Dates
-import slocumType: plotSetting, ctdStruct, sciStruct
-import load_slocum_glider: load_glider_ctd, load_glider_sci
-#import plot_slocum_glider: plot_glider_ctd
+import slocumLoad: load_glider_ctd, load_glider_sci
+import slocumPlot: plot_glider_ctd
 
 datamode = "delayed"; # delayed or realtime
 mission = "PASSENGERS 2023";
@@ -23,10 +20,10 @@ trange = datetime2unix.([t0; tN]);
 
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
-ms = 4;
-tsms = 4;
-pres = (1200, 800)
-tspres = (1000, 1000)
+ms = 4; # marker size
+tsms = 4; # time series marker size
+pres = (1200, 800) # plot resolution
+tspres = (1000, 1000) # time series plot resolution
 ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
 
 #dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
@@ -43,6 +40,14 @@ elseif datamode_electa == "realtime"
 end
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
+temprange = (19, 25);
+condrange = (4.9, 5.5);
+saltrange = (36.3, 37.1);
+sigma0range = (24.5, 26.4);
+sndspdrange = (1522, 1536);
+spice0range = (4.2, 6.0);
+pst_electa = plotStruct(figoutdir_electa, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+
 
 datamode_sylvia = "delayed"
 glidername_sylvia = "sylvia";
@@ -56,6 +61,14 @@ end
 #datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
 cacdir_sylvia = fromgliderdir_sylvia * "cache/";
 figoutdir_sylvia = rootdir_sylvia * "figures/";
+temprange = (19, 25);
+condrange = (4.9, 5.5);
+saltrange = (36.3, 37.1);
+sigma0range = (24.5, 26.4);
+sndspdrange = (1522, 1536);
+spice0range = (4.2, 6.0);
+pst_sylvia = plotStruct(figoutdir_electa, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+
 
 glidername_nrl641 = "nrl641";
 rootdir_nrl641 = dataroot * "PASSENGERS/2023_glider_data/nrl641-20230523-passengers/";
@@ -92,8 +105,8 @@ electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_e
 
 gliderCTD = electaCTDraw;
 figoutdir = figoutdir_electa;
-#pst = plotStruct(figoutdir_electa, pres, ms, )
-include("plot_slocum_glider_ctd.jl")
+plot_glider_ctd(electaCTDraw, figoutdir, ps, pst_electa);
+#include("plot_slocum_glider_ctd.jl")
 #include("plot_slocum_glider_bio.jl")
 
 #datadir = datadir_sylvia;
@@ -106,7 +119,8 @@ sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode_s
 gliderCTD = sylviaCTDraw;
 #gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR;
 figoutdir = figoutdir_sylvia;
-include("plot_slocum_glider_ctd.jl")
+plot_glider_ctd(sylviaCTDraw, figoutdir, ps, pst_sylvia);
+#include("plot_slocum_glider_ctd.jl")
 
 #=
 nrl641CTD = load_glider_ctd(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
