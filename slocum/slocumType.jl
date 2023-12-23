@@ -8,10 +8,13 @@ mutable struct plotSetting
     tsms::Float64
     pres::Tuple{Int64, Int64}
     tspres::Tuple{Int64, Int64}
+    fs::Float64
 end
 
 mutable struct plotStruct
     figoutdir::String
+    mission::String
+    glidername::String
     #resolution::Tuple{Int64, Int64}
     #markersize::Float64
     tempmin::Float64

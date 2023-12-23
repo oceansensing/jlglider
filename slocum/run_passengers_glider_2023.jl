@@ -11,7 +11,7 @@ import slocumLoad: load_glider_ctd, load_glider_sci
 import slocumPlot: plot_glider_ctd
 
 datamode = "delayed"; # delayed or realtime
-mission = "PASSENGERS 2023";
+mission = "NESMA-PASSENGERS 2023";
 
 # specify valid data time period
 t0 = DateTime("2023-05-23");
@@ -22,9 +22,10 @@ pint = 1; # this is the data decimation for plotting. Makie is so fast that it's
 iday = 1; # day intervals for plotting
 ms = 4; # marker size
 tsms = 4; # time series marker size
-pres = (1200, 800) # plot resolution
-tspres = (1000, 1000) # time series plot resolution
-ps = plotSetting(pint, iday, ms, tsms, pres, tspres);
+pres = (1200, 800); # plot resolution
+tspres = (1000, 1000); # time series plot resolution
+fs = 24; # font size
+ps = plotSetting(pint, iday, ms, tsms, pres, tspres, fs);
 
 #dataroot = "/mnt/c/Users/C2PO/oceansensing Dropbox/C2PO/";
 dataroot = "/Users/gong/oceansensing Dropbox/C2PO/";
@@ -46,7 +47,7 @@ saltrange = (36.3, 37.1);
 sigma0range = (24.5, 26.4);
 sndspdrange = (1522, 1536);
 spice0range = (4.2, 6.0);
-pst_electa = plotStruct(figoutdir_electa, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+pst_electa = plotStruct(figoutdir_electa, mission, glidername_electa, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
 
 
 datamode_sylvia = "delayed"
@@ -67,7 +68,7 @@ saltrange = (36.3, 37.1);
 sigma0range = (24.5, 26.4);
 sndspdrange = (1522, 1536);
 spice0range = (4.2, 6.0);
-pst_sylvia = plotStruct(figoutdir_sylvia, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+pst_sylvia = plotStruct(figoutdir_sylvia, mission, glidername_sylvia, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
 
 
 glidername_nrl641 = "nrl641";

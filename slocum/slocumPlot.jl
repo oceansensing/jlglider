@@ -34,8 +34,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #    rootdir = "~/GitHub/jlglider/slocum/";
     #    figoutdir = figoutdir;
     #end
-    mission = gliderCTD.mission;
-    glidername = gliderCTD.glidername;
+    mission = pst.mission;
+    glidername = pst.glidername;
 
     #if (@isdefined ps) == false
     pint = ps.pint; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
@@ -44,6 +44,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     tsms = ps.tsms;
     pres = ps.pres;
     tspres = ps.tspres;
+    fs = ps.fs;
     figoutdir = pst.figoutdir;
     #end
 
@@ -80,15 +81,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.tempmin;
     zmax = pst.tempmax;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Temperature",
+        title = mission * " " * uppercasefirst(glidername) * " Temperature",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Temperature (°C)")
     fig
     save(figoutdir * mission * "_" * glidername * "_temp.png", fig)
 
@@ -98,15 +104,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.condmin;
     zmax = pst.condmax;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Conductivity",
+        title = mission * " " * uppercasefirst(glidername) * " Conductivity",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conductivity (S/m)")
     fig
     save(figoutdir * mission * "_" * glidername * "_cond.png", fig)
 
@@ -116,15 +127,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.saltmin;
     zmax = pst.saltmax;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Salinity",
+        title = mission * " " * uppercasefirst(glidername) * " Salinity",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Salinity (psu)")
     fig
     save(figoutdir * mission * "_" * glidername * "_salt.png", fig)
 
@@ -134,15 +150,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.tempmin;
     zmax = pst.tempmax;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Conservative Temperature",
+        title = mission * " " * uppercasefirst(glidername) * " Conservative Temperature",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conservative Temperature (°C)")
     fig
     save(figoutdir * mission * "_" * glidername * "_ctemp.png", fig)
 
@@ -153,15 +174,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.saltmin;
     zmax = pst.saltmax;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Absolute Salinity",
+        title = mission * " " * uppercasefirst(glidername) * " Absolute Salinity",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Absolute Salinity (g/kg)")
     fig
     save(figoutdir * mission * "_" * glidername * "_saltA.png", fig)
 
@@ -172,15 +198,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.sigma0min;
     zmax = pst.sigma0max;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Potential Density",
+        title = mission * " " * uppercasefirst(glidername) * " Potential Density",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Potential Density (kg/m^3)")
     fig
     save(figoutdir * mission * "_" * glidername * "_sigma0.png", fig)
 
@@ -191,15 +222,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.spice0min;
     zmax = pst.spice0max;
-    fig = Figure(resolution = pres)
+    fig = Figure(resolution = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " Spiciness0",
+        title = mission * " " * uppercasefirst(glidername) * " Spiciness0",
         xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(x .- x0, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-    ax.xticks = (xtick .- x0, xticklabel);
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = false)
+    #ax.xticks = (xtick .- x0, xticklabel);
+    if length(xtick) > 10
+        ax.xticks = (xtick[1:2:end] .- x0, xticklabel[1:2:end]);
+    else
+        ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
+    end
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "Spiciness0")
     fig
     save(figoutdir * mission * "_" * glidername * "_spice0.png", fig)
 
@@ -210,7 +246,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.sndspdmin;
     zmax = pst.sndspdmax;
-    fig = Figure(resolution = pres, fontsize = 24);
+    fig = Figure(resolution = pres, fontsize = fs);
     ax = Axis(fig[1, 1],
         title = mission * " – " * uppercasefirst(glidername) * " sound speed",
         #title =  uppercasefirst(glidername) * " Sound Speed",
@@ -237,15 +273,15 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sigma0;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres)
+    fig = Figure(resolution = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * " T/S",
+        title = mission * " " * uppercasefirst(glidername) * " T/S",
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sigma0")
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
     fig
     save(figoutdir * mission * "_" * glidername * "_TS.png", fig)
 
@@ -258,15 +294,15 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sndspd;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres)
+    fig = Figure(resolution = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * glidername * "Sigma0-Spice0",
+        title = mission * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
         xlabel = "Spiciness",
         ylabel = "Potential Density Anomaly"
     )
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false, label="Sound Speed")
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sound Speed")
     fig
     save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
 
