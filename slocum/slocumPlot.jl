@@ -1,13 +1,32 @@
+module slocumPlot
+
 using NaNMath, GibbsSeaWater, Dates, Interpolations
 using GLMakie, ColorSchemes
 
-import slocumFunc: datetick
+function datetick(unix_t)
+    x = unix_t
+    xdt = unix2datetime.(unix_t); 
+    yday = Dates.dayofyear.(xdt);
+    uyday = unique(yday);
+    hour = Dates.Hour.(xdt);
+    minute = Dates.Minute.(xdt);
+    #df = DateFormat("y-m-d");
 
-# plot CTD data using Makie
-# the plotting code will be refactored into a function of its own in the next revision
+    #tickind = Vector{Int64}(undef, length(uyday));
+    tickind = [];
+    for i = 1:length(uyday)
+        t0 = findall((yday .== uyday[i]) .& (hour .== Hour(0)));
+        if isempty(t0) == false
+            push!(tickind, t0[1]);
+        end
+    end
+    xtick = x[tickind];
+    #xticklabel = string.(Dates.Date.(xdt[tickind]));
+    xticklabel = [x[6:10] for x in string.(xdt[tickind])];
+    return xdt, xtick, xticklabel    
+end
 
-
-#function plot_glider_ctd(glider, figoutdir, ps, pst)
+function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
     #if (@isdefined figoutdir) == false
         #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
     #    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
@@ -25,7 +44,7 @@ import slocumFunc: datetick
     tsms = ps.tsms;
     pres = ps.pres;
     tspres = ps.tspres;
-    #figoutdir = pst.figoutdir;
+    figoutdir = pst.figoutdir;
     #end
 
     # setting x and y axes for plotting
@@ -344,4 +363,6 @@ import slocumFunc: datetick
         save(figoutdir * gliderBPAR.mission * "_" * gliderBPAR.glidername * "_bsipar.png", fig);
     end
     =#
-#end
+end
+
+end
