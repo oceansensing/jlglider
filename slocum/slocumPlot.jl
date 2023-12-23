@@ -26,7 +26,7 @@ function datetick(unix_t)
     return xdt, xtick, xticklabel    
 end
 
-function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
+function plot_glider_ctd(gliderCTD, ps, pst)
     #if (@isdefined figoutdir) == false
         #figoutdir = "/Users/gong/Research/electa-20221103-passengers/figures/";
     #    rootdir = "/Users/gong/oceansensing Dropbox/C2PO/MARACOOS";
@@ -76,9 +76,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
 
     # plotting temperature
     z = gliderCTD.temp;
-    zmin = NaNMath.minimum(z);
-    #zmin = 18;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z);
+    zmin = pst.tempmin;
+    zmax = pst.tempmax;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Temperature",
@@ -93,9 +94,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
 
     # plotting conductivity
     z = gliderCTD.cond;
-    zmin = NaNMath.minimum(z);
-    #zmin = 18;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z);
+    zmin = pst.condmin;
+    zmax = pst.condmax;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Conductivity",
@@ -110,9 +112,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
 
     # plotting salinity
     z = gliderCTD.salt;
-    zmin = NaNMath.minimum(z);
-    #zmin = 18;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z); 
+    zmin = pst.saltmin;
+    zmax = pst.saltmax;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Salinity",
@@ -127,9 +130,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
 
     # plotting conservative temperature
     z = gliderCTD.ctemp;
-    zmin = NaNMath.minimum(z);
-    #zmin = 18;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z); 
+    zmin = pst.tempmin;
+    zmax = pst.tempmax;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Conservative Temperature",
@@ -145,9 +149,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
     # plotting absolute salinity
     #z = saltAraw[1:pint:end];
     z = gliderCTD.saltA;
-    zmin = NaNMath.minimum(z);
-    #zmin = 36;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z); 
+    zmin = pst.saltmin;
+    zmax = pst.saltmax;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Absolute Salinity",
@@ -163,9 +168,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
     # plotting sigma0
     #z = sigma0raw[1:pint:end];
     z = gliderCTD.sigma0;
-    zmin = NaNMath.minimum(z);
-    #zmin = 24.0;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z);
+    zmin = pst.sigma0min;
+    zmax = pst.sigma0max;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Potential Density",
@@ -181,9 +187,10 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
     # plotting spice0
     #z = spice0raw[1:pint:end];
     z = gliderCTD.spice0;
-    zmin = NaNMath.minimum(z);
-    #zmin = 4.0;
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z);
+    zmin = pst.spice0min;
+    zmax = pst.spice0max;
     fig = Figure(resolution = pres)
     ax = Axis(fig[1, 1],
         title = mission * " " * glidername * " Spiciness0",
@@ -200,9 +207,9 @@ function plot_glider_ctd(gliderCTD, figoutdir, ps, pst)
     #z = sndspdraw[1:pint:end];
     z = gliderCTD.sndspd;
     #zmin = NaNMath.minimum(z);
-    zmin = 1522;
-    zmax = 1532;
     #zmax = NaNMath.maximum(z); 
+    zmin = pst.sndspdmin;
+    zmax = pst.sndspdmax;
     fig = Figure(resolution = pres, fontsize = 24);
     ax = Axis(fig[1, 1],
         title = mission * " – " * uppercasefirst(glidername) * " sound speed",
