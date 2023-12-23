@@ -2,7 +2,7 @@
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
 #
 
-module load_slocum_glider
+module slocumLoad
 
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
