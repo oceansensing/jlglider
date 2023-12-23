@@ -1,6 +1,7 @@
 module slocumType
 
 mutable struct plotSetting
+    #figoutdir::String
     pint::Float64
     iday::Float64
     ms::Float64
@@ -11,8 +12,8 @@ end
 
 mutable struct plotStruct
     figoutdir::String
-    resolution::Tuple{Int64, Int64}
-    markersize::Float64
+    #resolution::Tuple{Int64, Int64}
+    #markersize::Float64
     tempmin::Float64
     tempmax::Float64
     condmin::Float64
