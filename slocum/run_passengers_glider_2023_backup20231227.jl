@@ -70,6 +70,7 @@ sndspdrange = (1522, 1536);
 spice0range = (4.2, 6.0);
 pst_sylvia = plotStruct(figoutdir_sylvia, mission, glidername_sylvia, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
 
+
 glidername_nrl641 = "nrl641";
 rootdir_nrl641 = dataroot * "PASSENGERS/2023_glider_data/nrl641-20230523-passengers/";
 fromgliderdir_nrl641 = rootdir_nrl641 * "from-glider/"; 
@@ -97,9 +98,55 @@ datamode = datamode_electa;
 glidername = glidername_electa;
 
 electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa, "lowercase");
+#electaCTD = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa);
+#plot_glider_ctd(electaCTD, figoutdir, ps)
+
+#electaCHLA, electaCDOM, electaBB700, electaBPAR = load_glider_sci(datadir_electa, cacdir_electa, trange, datamode, mission, glidername_electa);
+#gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = electaCHLA, electaCDOM, electaBB700, electaBPAR;
+
 plot_glider_ctd(electaCTDraw, ps, pst_electa);
 
+gliderCTD = electaCTDraw;
+figoutdir = figoutdir_electa;
+#include("plot_slocum_glider_ctd.jl")
+#include("plot_slocum_glider_bio.jl")
+
+#datadir = datadir_sylvia;
+#cacdir = cacdir_sylvia;
+#datamode = datamode_sylvia;
+#glidername = glidername_sylvia;
+
 sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode_sylvia, mission, glidername_sylvia, "uppercase");
+#sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR = load_glider_sci(datadir_sylvia, cacdir_sylvia, trange, datamode, mission, glidername_sylvia);
+
 plot_glider_ctd(sylviaCTDraw, ps, pst_sylvia);
 
-plot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst_electa, pst_sylvia);
+gliderCTD = sylviaCTDraw;
+#gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = sylviaCHLA, sylviaCDOM, sylviaBB700, sylviaBPAR;
+figoutdir = figoutdir_sylvia;
+#include("plot_slocum_glider_ctd.jl")
+
+
+
+#=
+nrl641CTD = load_glider_ctd(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
+nrl641CHLA, nrl641CDOM, nrl641BB700, nrl641BPAR = load_glider_sci(datadir_nrl641, cacdir_nrl641, trange, datamode, mission, glidername_nrl641);
+gliderCTD = nrl641CTD;
+gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = nrl641CHLA, nrl641CDOM, nrl641BB700, nrl641BPAR;
+figoutdir = figoutdir_nrl641;
+include("plot_slocum_glider.jl")
+
+ru30CTD = load_glider_ctd(datadir_ru30, cacdir_ru30, trange, datamode, mission, glidername_ru30);
+ru30CHLA, ru30CDOM, ru30BB700, ru30BPAR = load_glider_sci(datadir_ru30, cacdir_ru30, trange, datamode, mission, glidername_ru30);
+gliderCTD = ru30CTD;
+gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = ru30CHLA, ru30CDOM, ru30BB700, ru30BPAR;
+figoutdir = figoutdir_ru30;
+include("plot_slocum_glider.jl")
+
+ru36CTD = load_glider_ctd(datadir_ru36, cacdir_ru36, trange, datamode, mission, glidername_ru36);
+ru36CHLA, ru36CDOM, ru36BB700, ru36BPAR = load_glider_sci(datadir_ru36, cacdir_ru36, trange, datamode, mission, glidername_ru36);
+gliderCTD = ru36CTD;
+gliderCHLA, gliderCDOM, gliderBB700, gliderBPAR = ru36CHLA, ru36CDOM, ru36BB700, ru36BPAR;
+figoutdir = figoutdir_ru36;
+include("plot_slocum_glider.jl")
+=#
