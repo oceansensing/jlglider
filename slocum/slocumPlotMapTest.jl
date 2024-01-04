@@ -14,8 +14,8 @@ lonmin, lonmax = -65, -61;
 pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150];
 pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0"];
 
-pz = -70;
-pvar = "saltA"
+pz = -150;
+pvar = "spice0"
 #for pvar in pvarlist
 #    for pz in pzlist
         if pvar == "ctemp"
@@ -65,8 +65,8 @@ pvar = "saltA"
         x2 = glider2.lon;
         y2 = glider2.lat;
         z2 = glider2.z;
-        
-        zlo, zhi = pz-10, pz+10;
+
+        zlo, zhi = pz-5, pz+5;
         z1ind = findall(zlo .<= z1 .<= zhi);
         pind1 = z1ind;
         z2ind = findall(zlo .<= z2 .<= zhi);
@@ -104,6 +104,7 @@ pvar = "saltA"
             xlabel = "Longitude",
             ylabel = "Latitude",
         )
+        ms = 12
         Makie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-5400, 5400))
         Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
         Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
