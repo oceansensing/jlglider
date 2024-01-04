@@ -38,6 +38,9 @@ import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_
     m_present_time = dataGlider.get("m_present_time");
     m_lat = dataGlider.get("m_lat"); 
     m_lon = dataGlider.get("m_lon"); 
+    m_gps_lat = dataGlider.get("m_gps_lat");
+    m_gps_lon = dataGlider.get("m_gps_lon");
+
     m_pressure= dataGlider.get("m_pressure");
     m_vacuum = dataGlider.get("m_vacuum");
     m_battery = dataGlider.get("m_battery");
@@ -82,8 +85,8 @@ import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_
     tempfunc, temptime, temppres, tempraw, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, mlat)
     condfunc, condtime, condpres, condraw, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, mlat)
 
-    lonfunc, lontime, lonpres, lonraw, lonz = glider_var_load(m_lon, trange, [-65.0 -55.0], sci_water_pressure, mlat);
-    latfunc, lattime, latpres, latraw, latz = glider_var_load(m_lat, trange, [30.0 50.0], sci_water_pressure, mlat); 
+    lonfunc, lontime, lonpres, lonraw, lonz = glider_var_load(m_gps_lon, trange, [-65.0 -55.0], sci_water_pressure, mlat);
+    latfunc, lattime, latpres, latraw, latz = glider_var_load(m_gps_lat, trange, [30.0 50.0], sci_water_pressure, mlat); 
 
     # find common glider values
     tctd = unique(intersect(prestime, temptime, condtime));

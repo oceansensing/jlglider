@@ -11,7 +11,7 @@ import slocumLoad: load_glider_ctd, load_glider_sci
 import slocumPlot: plot_glider_ctd
 
 datamode = "delayed"; # delayed or realtime
-mission = "NESMA-PASSENGERS 2023";
+mission = "NESMA-PASSENGERS-2023";
 
 # specify valid data time period
 t0 = DateTime("2023-05-23");
@@ -110,4 +110,7 @@ sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, lonrange, 
 #plot_glider_ctd(sylviaCTDraw, ps, pst_sylvia);
 
 pst = pst_electa;
-#aplot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst);
+glider1 = electaCTDraw;
+glider2 = sylviaCTDraw;
+#plot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst);
+include("slocumPlotMapTest.jl");
