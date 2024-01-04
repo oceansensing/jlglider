@@ -264,7 +264,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig
     save(figoutdir * mission * "_" * glidername * "_soundspeed.png", fig)
 
-    # plotting T/S diagram
+    # plotting CT/SA diagram
     #x = saltAraw[1:pint:end]; 
     #y = ctempraw[1:pint:end];
     #z = sigma0raw[1:pint:end];
@@ -275,7 +275,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     zmax = NaNMath.maximum(z); 
     fig = Figure(resolution = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = mission * " " * uppercasefirst(glidername) * " T/S",
+        title = mission * " " * uppercasefirst(glidername) * " CT/SA",
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
@@ -283,7 +283,49 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
     fig
-    save(figoutdir * mission * "_" * glidername * "_TS.png", fig)
+    save(figoutdir * mission * "_" * glidername * "_CT-SA.png", fig)
+
+    # plotting Density-Spiciness diagram
+    #x = spice0raw[1:pint:end]; 
+    #y = sigma0raw[1:pint:end];
+    #z = sndspdraw[1:pint:end];
+    x = gliderCTD.spice0;
+    y = gliderCTD.sigma0;
+    z = gliderCTD.sndspd;
+    zmin = NaNMath.minimum(z);
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = tspres, fontsize = fs)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
+        xlabel = "Spiciness",
+        ylabel = "Potential Density Anomaly"
+    )
+    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
+    #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sound Speed")
+    fig
+    save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
+
+# plotting T/S diagram
+    #x = saltAraw[1:pint:end]; 
+    #y = ctempraw[1:pint:end];
+    #z = sigma0raw[1:pint:end];
+    x = gliderCTD.salt;
+    y = gliderCTD.temp;
+    z = gliderCTD.sigma0;
+    zmin = NaNMath.minimum(z);
+    zmax = NaNMath.maximum(z); 
+    fig = Figure(resolution = tspres, fontsize = fs)
+    ax = Axis(fig[1, 1],
+        title = mission * " " * uppercasefirst(glidername) * " T/S",
+        xlabel = "Practical Salinity",
+        ylabel = "In-Situ Temperature"
+    )
+    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
+    #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
+    fig
+    save(figoutdir * mission * "_" * glidername * "_TSraw.png", fig)
 
     # plotting Density-Spiciness diagram
     #x = spice0raw[1:pint:end]; 

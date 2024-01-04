@@ -45,12 +45,14 @@ end
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
 loadmode_electa = "lowercase";
-temprange = (19, 25);
+ctemprange = (19, 25);
 condrange = (4.9, 5.5);
-saltrange = (36.3, 37.1);
+saltArange = (36.3, 37.1);
 sigma0range = (24.5, 26.4);
 sndspdrange = (1522, 1536);
 spice0range = (4.2, 6.0);
+temprange = ctemprange;
+saltrange = saltArange;
 pst_electa = plotStruct(figoutdir_electa, mission, glidername_electa, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
 
 
@@ -67,12 +69,14 @@ end
 cacdir_sylvia = fromgliderdir_sylvia * "cache/";
 figoutdir_sylvia = rootdir_sylvia * "figures/";
 loadmode_sylvia = "uppercase";
-temprange = (19, 25);
+ctemprange = (19, 25);
 condrange = (4.9, 5.5);
-saltrange = (36.3, 37.1);
+saltArange = (36.3, 37.1);
 sigma0range = (24.5, 26.4);
 sndspdrange = (1522, 1536);
 spice0range = (4.2, 6.0);
+temprange = ctemprange;
+saltrange = saltArange;
 pst_sylvia = plotStruct(figoutdir_sylvia, mission, glidername_sylvia, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
 
 glidername_nrl641 = "nrl641";
@@ -103,11 +107,11 @@ glidername = glidername_sylvia;
 loadmode = loadmode_sylvia;
 
 electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, lonrange, latrange, datamode_electa, mission, glidername_electa, loadmode_electa);
-#plot_glider_ctd(electaCTDraw, ps, pst_electa);
+plot_glider_ctd(electaCTDraw, ps, pst_electa);
 
 sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, lonrange, latrange, datamode_sylvia, mission, glidername_sylvia, loadmode_sylvia);
+plot_glider_ctd(sylviaCTDraw, ps, pst_sylvia);
 #include("slocumLoadTest.jl")
-#plot_glider_ctd(sylviaCTDraw, ps, pst_sylvia);
 
 pst = pst_electa;
 glider1 = electaCTDraw;
