@@ -18,6 +18,9 @@ t0 = DateTime("2023-05-23");
 tN = DateTime("2023-06-20");
 trange = datetime2unix.([t0; tN]);
 
+lonrange = [-65.0 -55.0];
+latrange = [30.0 50.0]; 
+
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 1; # day intervals for plotting
 ms = 4; # marker size
@@ -41,6 +44,7 @@ elseif datamode_electa == "realtime"
 end
 cacdir_electa = fromgliderdir_electa * "cache/";
 figoutdir_electa = rootdir_electa * "figures/";
+loadmode_electa = "lowercase";
 temprange = (19, 25);
 condrange = (4.9, 5.5);
 saltrange = (36.3, 37.1);
@@ -62,6 +66,7 @@ end
 #datadir_sylvia = fromgliderdir_sylvia * datamode * "/" * "sylvia-from-glider-20230612T023321/";
 cacdir_sylvia = fromgliderdir_sylvia * "cache/";
 figoutdir_sylvia = rootdir_sylvia * "figures/";
+loadmode_sylvia = "uppercase";
 temprange = (19, 25);
 condrange = (4.9, 5.5);
 saltrange = (36.3, 37.1);
@@ -91,15 +96,18 @@ datadir_ru36 = fromgliderdir_ru36 * datamode * "/" * "ru36/from-glider/";
 cacdir_ru36 = fromgliderdir_ru36 * "cache/";
 figoutdir_ru36 = rootdir_ru36 * "figures/";
 
-datadir = datadir_electa;
-cacdir = cacdir_electa;
-datamode = datamode_electa;
-glidername = glidername_electa;
+datadir = datadir_sylvia;
+cacdir = cacdir_sylvia;
+datamode = datamode_sylvia;
+glidername = glidername_sylvia;
+loadmode = loadmode_sylvia;
 
-electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, datamode_electa, mission, glidername_electa, "lowercase");
-plot_glider_ctd(electaCTDraw, ps, pst_electa);
+electaCTDraw = load_glider_ctd(datadir_electa, cacdir_electa, trange, lonrange, latrange, datamode_electa, mission, glidername_electa, loadmode_electa);
+#plot_glider_ctd(electaCTDraw, ps, pst_electa);
 
-sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, datamode_sylvia, mission, glidername_sylvia, "uppercase");
-plot_glider_ctd(sylviaCTDraw, ps, pst_sylvia);
+sylviaCTDraw = load_glider_ctd(datadir_sylvia, cacdir_sylvia, trange, lonrange, latrange, datamode_sylvia, mission, glidername_sylvia, loadmode_sylvia);
+#include("slocumLoadTest.jl")
+#plot_glider_ctd(sylviaCTDraw, ps, pst_sylvia);
 
-plot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst_electa, pst_sylvia);
+pst = pst_electa;
+#aplot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst);

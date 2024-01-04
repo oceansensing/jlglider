@@ -31,25 +31,25 @@ function intersectalajulia4(a,b)
 end
 =#
 
-function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername, loadmode)
+function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, mission, glidername, loadmode)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
 
     if loadmode == "uppercase"
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
         end
     else
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
         end
     end
 
@@ -90,23 +90,34 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername,
     #sci_flbbcd_bb_units = dataGlider.get("sci_flbbcd_bb_units");
     #sci_bsipar_par = dataGlider.get("sci_bsipar_par");
 
-    # calculate derived values from CTD data
-    mlat = Statistics.mean(m_lat[2,:]);
-    mlon = Statistics.mean(m_lon[2,:]);
-    #llon = -73.4;
+    # set lon & lat limits and calculate mean lon and lat values.
+    #glonind = findall(-65 .< m_lon[2,:] .< -55); 
+    #glatind = findall(30 .< m_lat[2,:] .< 50);
+    #lonrange = [-65.0 -55.0];
+    #latrange = [30.0 50.0]; 
+    glonind = findall(lonrange[1] .< m_lon[2,:] .< lonrange[2]);
+    glatind = findall(latrange[1] .< m_lat[2,:] .< latrange[2]);  
+    mlat = Statistics.mean(m_lat[2,glatind]);
+    mlon = Statistics.mean(m_lon[2,glonind]);    #llon = -73.4;
     #llat = 38.0;
 
+    # calculate derived values from CTD data
     presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
     tempfunc, temptime, temppres, tempraw, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, mlat)
     condfunc, condtime, condpres, condraw, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, mlat)
+
+    lonfunc, lontime, lonpres, lonraw, lonz = glider_var_load(m_lon, trange, lonrange, sci_water_pressure, mlat);
+    latfunc, lattime, latpres, latraw, latz = glider_var_load(m_lat, trange, latrange, sci_water_pressure, mlat); 
 
     # find common glider values
     tctd = unique(intersect(prestime, temptime, condtime));
     tctdT = intersectalajulia2(tctd, temptime)[3];
     tctdC = intersectalajulia2(tctd, condtime)[3];
     tctdP = intersectalajulia2(tctd, prestime)[3];
+ 
+    lonf = lonfunc(tctd);
+    latf = latfunc(tctd);
 
-    tctd; 
     pres = presraw[tctdP];
     z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 
     temp = tempraw[tctdT];
@@ -119,7 +130,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername,
     spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
-    ctdData = ctdStruct(mission, glidername, tctd, pres, z, [mlon], [mlat], temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = ctdStruct(mission, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
