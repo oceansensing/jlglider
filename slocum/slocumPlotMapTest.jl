@@ -58,12 +58,6 @@ pvar = "saltA"
             pfname = pst.mission * "_" * pvar * "_" * string(abs(pz)) * "m.png";
         end
 
-        zlo, zhi = pz-10, pz+10;
-        z1ind = findall(zlo .<= z1 .<= zhi);
-        pind1 = z1ind;
-        z2ind = findall(zlo .<= z2 .<= zhi);
-        pind2 = z2ind;
-
         x1 = glider1.lon;
         y1 = glider1.lat;
         z1 = glider1.z;
@@ -71,6 +65,12 @@ pvar = "saltA"
         x2 = glider2.lon;
         y2 = glider2.lat;
         z2 = glider2.z;
+        
+        zlo, zhi = pz-10, pz+10;
+        z1ind = findall(zlo .<= z1 .<= zhi);
+        pind1 = z1ind;
+        z2ind = findall(zlo .<= z2 .<= zhi);
+        pind2 = z2ind;
 
         figoutdir = pst.figoutdir;
         bathypath = "/Users/gong/oceansensing Dropbox/C2PO/Data/bathy/ETOPO1/ETOPO_2022_v1_30s_N90W180_surface.nc";
