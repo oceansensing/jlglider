@@ -91,7 +91,7 @@ pvar = "spice0"
         lonind = findall(lonmin-0.1 .<= lon .<= lonmax+0.1);
         x = lon[lonind];
         y = lat[latind];
-        z = bathyds["z"][lonind, latind];
+        z = Float64.(bathyds["z"][lonind, latind]);
 
         zmin, zmax = -5400, 5400;
         z[1,1] = -5400;
@@ -105,9 +105,9 @@ pvar = "spice0"
             ylabel = "Latitude",
         )
         ms = 12
-        Makie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-5400, 5400))
-        Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
-        Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+        GLMakie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-5400, 5400))
+        GLMakie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+        GLMakie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
         Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * pfname, fig)

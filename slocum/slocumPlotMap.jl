@@ -128,7 +128,7 @@ ms = 15;
         latind = findall(latmin-0.1 .<= lat .<= latmax+0.1);
         lonind = findall(lonmin-0.1 .<= lon .<= lonmax+0.1);
 
-        z = bathyds["z"][lonind, latind];
+        z = Float64.(bathyds["z"][lonind, latind]); # recasting as Float64 to fix a StackOverFlow error seen in GLMakie 0.6.0.
         zmin, zmax = -5500, 5500;
         z[1,1] = -5500;
         z[end,end] = 5500;
