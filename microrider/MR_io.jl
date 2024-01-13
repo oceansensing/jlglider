@@ -3,21 +3,32 @@ module MR_io
 using Glob, MAT, JLD2
 import MR_types: MicroRiderRaw
 
-function MR_datasetup(project, mission)
+function MR_datasetup(project, mission, year)
     if project == "NORSE"
-        datadirJM = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/"
-        datadirLBE = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/"
-        if (mission == "JM") | (mission == "Jan Mayan")
-            datadir = datadirJM;
-        elseif (mission == "LBE") | (mission == "Lofoten Basin Eddy")
-            datadir = datadirLBE;
-        else
-            display("Unknown mission. Exit 0.")
-        end
+        datadirJM2022 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/"
+        datadirLBE2022 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/"
+        datadirJM2023 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20231127-norse-complete/"
+        
+        if year == 2022
+            if (mission == "JM") | (mission == "Jan Mayan")
+                datadir = datadirJM;
+            elseif (mission == "LBE") | (mission == "Lofoten Basin Eddy")
+                datadir = datadirLBE;
+            else
+                display("Unknown mission. Exit 0.")
+            end
 
-        pdir = datadir * "mr1000g/";
-        matdir = datadir * "mr1000g_processing/matfiles/";
-        jld2dir = datadir * "mr1000g_processing/jld2files/";
+            pdir = datadir * "mr1000g/";
+            matdir = datadir * "mr1000g_processing/matfiles/";
+            jld2dir = datadir * "mr1000g_processing/jld2files/";
+        elseif year == 2023
+            datadir = datadirJM2023;
+            pdir = datadir * "mr/";
+            matdir = datadir * "mr_processing/matfiles/";
+            jld2dir = datadir * "mr_processing/jld2files/";
+        else
+            display("Unknown year. Exit 0.")
+        end
     end
 
     if !isdir(matdir)
@@ -32,8 +43,12 @@ function MR_datasetup(project, mission)
     return jld2dir, matdir, pdir
 end
 
-function MR_mat2jld2(project::String, mission::String)
-    jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String)
+function MR_datasetup(project, mission)
+    MR_datasetup(project, mission, 2022)
+end
+
+function MR_mat2jld2(project::String, mission::String, year::Int)
+    jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String, year::Int)
 
     datafiles = Glob.glob("*.mat", matdir);
     global mrdata = MicroRiderRaw[];
