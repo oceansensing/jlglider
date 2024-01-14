@@ -1,19 +1,28 @@
-using NaNMath, GLMakie, ColorSchemes
+# MR_process_profile loads specific MicroRider profiles from NORSE project
 
-#import MR_types: MicroRiderRaw
-#import MR_io: MR_datasetup, MR_mat2jld2, MR_load_profile
-import MR_io: MR_load_profile
+include("MR_io.jl")
+include("MR_types.jl")
+
+import .MR_types: MicroRiderRaw
+
+using NaNMath, GLMakie, ColorSchemes
+#using .MR_io: MR_datasetup, MR_mat2jld2
+using .MR_io: MR_load_profile
+
+
+global mrp = MicroRiderRaw[];
 
 project = "NORSE"
-mission = "LBE"
-profileid = 100
+mission = "JM"
+year = 2023
+profileid = 101
 glider = "SEA064"
 
 reloadflag = 1
 
 if ((@isdefined mrr) != true) | (reloadflag == 1)
     display("Loading project " * project * ", mission " * mission * ", profile " * string(profileid) * ".")
-    mrp = MR_load_profile(project, mission, profileid); # microrider profile
+    mrp = MR_load_profile(project, mission, year, profileid); # microrider profile
     display("Loaded project " * project * ", mission " * mission * ", profile " * string(profileid) * ".");
 end
 

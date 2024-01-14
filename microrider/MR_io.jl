@@ -14,9 +14,9 @@ function MR_datasetup(project, mission, year)
         
         if year == 2022
             if (mission == "JM") | (mission == "Jan Mayan")
-                datadir = datadirJM;
+                datadir = datadirJM2022;
             elseif (mission == "LBE") | (mission == "Lofoten Basin Eddy")
-                datadir = datadirLBE;
+                datadir = datadirLBE2022;
             else
                 display("Unknown mission. Exit 0.")
             end
@@ -130,13 +130,13 @@ function MR_loadjld2(jld2datafilepath)
 end
 
 # load specific profiles based on what user desires
-function MR_load_profile(project::String, mission::String, profilename::String)
+function MR_load_profile(project::String, mission::String, year::Int, profilename::String)
     display(profilename)
-    jld2dir, matdir, pdir = MR_datasetup(project, mission);
+    jld2dir, matdir, pdir = MR_datasetup(project, mission, year);
     datafiles = Glob.glob("*.jld2", jld2dir);
     filenames = String[];
     for i = 1:length(datafiles)
-        push!(filenames, datafiles[i][end-12:end-5]);
+        push!(filenames, basename.(datafiles[i])[1:end-5]);
     end
     iprofile = findall(filenames .== profilename);
     if !isempty(iprofile)
@@ -148,9 +148,15 @@ function MR_load_profile(project::String, mission::String, profilename::String)
     return MRprofile;
 end
 
-function MR_load_profile(project::String, mission::String, profileid::Int)
-    datafilestr = "dat_" * string(profileid, base = 10, pad = 4);
-    MRprofile = MR_load_profile(project, mission, datafilestr);
+function MR_load_profile(project::String, mission::String, year::Int, profileid::Int)
+    if year == 2022
+        datafilestr = "dat_" * string(profileid, base = 10, pad = 4);
+    elseif year == 2023
+        datafilestr = "data_" * string(profileid, base = 10, pad = 4);
+    else
+        display("Unknown year. Exit 0.")
+    end
+    MRprofile = MR_load_profile(project, mission, year, datafilestr);
     return MRprofile;
 end
 
