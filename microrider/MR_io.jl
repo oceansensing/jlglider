@@ -1,7 +1,10 @@
 module MR_io
 
+include("MR_types.jl")
+include("moov.jl")
+
 using Glob, MAT, JLD2
-import MR_types: MicroRiderRaw
+import .MR_types: MicroRiderRaw
 
 function MR_datasetup(project, mission, year)
     if project == "NORSE"
@@ -49,6 +52,8 @@ end
 
 function MR_mat2jld2(project::String, mission::String, year::Int)
     jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String, year::Int)
+
+    moov("*.mat", pdir, matdir)
 
     datafiles = Glob.glob("*.mat", matdir);
     global mrdata = MicroRiderRaw[];
@@ -113,7 +118,7 @@ function MR_mat2jld2(project::String, mission::String, year::Int)
         params = read(mrfile, "params");
 
         mrprofile = MicroRiderRaw(fullPath, fs_fast, fs_slow, header_version, t_slow, t_fast, setupfilestr, cfgobj, header, filetime, date, time, Gnd, Ax, Ay, T1, T1_dT1, T2, T2_dT2, sh1, sh2, P, P_dP, PV, V_Bat, Incl_Y, Incl_X, Incl_T, odas_version, vehicle_info, t_fast_YD, t_slow_YD, Year, Month, Day, Hour, Minute, Second, Milli, T1_slow, T1_fast, T2_slow, T2_fast, P_slow, P_fast, temperature_fast, W_slow, W_fast, speed_slow, speed_fast, gradT1, gradT2, input_parameters, params);
-        jldsave(jld2dir * datafiles[i][end-11:end-4] * ".jld2", true; mrprofile);
+        jldsave(jld2dir * basename.(datafiles[i])[1:end-4] * ".jld2", true; mrprofile);
     end
 end
 
