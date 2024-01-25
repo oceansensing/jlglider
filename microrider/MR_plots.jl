@@ -2,10 +2,16 @@ using GLMakie
 
 figoutdir = "/Users/gong/GitHub/jlglider/microrider/figures/";
 
-xfast = mrp.t_fast[:];
-yfast = mrp.P_fast[:];
-z1fast = mrp.sh1[:];
-z2fast = mrp.sh2[:];
+zrange = [-100, 0];
+
+mrpz = gsw.gsw_z_from_p.(mrp.P_fast[:], 71.0, 0.0, 0.0);
+ind = findall((zrange[2] .>= mrpz .>= zrange[1]) .& (mrp.t_fast[:] .< maximum(mrp.t_fast)/2));
+
+xfast = mrp.t_fast[ind];
+#yfast = mrp.P_fast[:];
+yfast = mrpz[ind];
+z1fast = mrp.sh1[ind];
+z2fast = mrp.sh2[ind];
 
 x = xfast;
 y = yfast;
@@ -17,16 +23,54 @@ zmax = 0.02;
 pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
 iday = 3; # day intervals for plotting
 ms = 6;
-pres = (1200, 800)
+psize = (4000, 4000)
 
-fig = Figure(resolution = pres)
-ax = Axis(fig[1, 1],
-    title = project * ": " * mission * " " * glider * " - dat_" * string(profileid, pad = 4) * " Shear 1",
+
+figP = Figure(; size = psize, fontsize = 64)
+axP = Axis(figP[1, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " Shear 1",
     xlabel = "Time",
-    ylabel = "Pressure"
+    ylabel = "Depth (m)"
 )
-GLMakie.plot!(x, y, color=z, colormap=:jet, linewidth=ms, colorrange=(zmin, zmax))
+GLMakie.plot!(x, y, color=z, colormap=:jet, markersize=40, colorrange=(zmin, zmax))
 #ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
-Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
-fig
-save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid, pad = 4) * "_sh1.png", fig)
+Colorbar(figP[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
+figP
+save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid, pad = 4) * "_sh1.png", figP)
+GLMakie.closeall()
+
+
+figshear = Figure(size = psize, fontsize = 48)
+
+axsh1 = Axis(figshear[1, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " sh1",
+    xlabel = "Time",
+    ylabel = "Shear 1",
+)
+GLMakie.scatterlines!(mrp.t_fast[ind], mrp.sh1[ind], markersize = 3, linewidth = 0.5);
+
+axAx = Axis(figshear[2, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " sh2",
+    xlabel = "Time",
+    ylabel = "Shear 2"
+)
+GLMakie.scatterlines!(mrp.t_fast[ind], mrp.sh2[ind], markersize = 3, linewidth = 0.5);
+
+axAx = Axis(figshear[3, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " Ax",
+    xlabel = "Time",
+    ylabel = "Ax"
+)
+GLMakie.scatterlines!(mrp.t_fast[ind], mrp.Ax[ind], markersize = 3, linewidth = 0.5);
+
+axAx = Axis(figshear[4, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " Ay",
+    xlabel = "Time",
+    ylabel = "Ay"
+)
+GLMakie.scatterlines!(mrp.t_fast[ind], mrp.Ay[ind], markersize = 3, linewidth = 0.5);
+
+figshear
+save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid, pad = 4) * "_shear_ts.png", figshear)
+
+#GLMakie.closeall()
