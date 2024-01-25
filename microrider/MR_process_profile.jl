@@ -4,11 +4,10 @@ include("MR_io.jl")
 include("MR_types.jl")
 
 import .MR_types: MicroRiderRaw
-
-using NaNMath, GLMakie, ColorSchemes
 #using .MR_io: MR_datasetup, MR_mat2jld2
 using .MR_io: MR_load_profile
 
+using NaNMath, GLMakie, ColorSchemes
 
 global mrp = MicroRiderRaw[];
 
