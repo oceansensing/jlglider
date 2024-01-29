@@ -2,9 +2,13 @@ using GLMakie
 
 figoutdir = "/Users/gong/GitHub/jlglider/microrider/figures/";
 
-zrange = [-100, 0];
+ip = 1;
+mrp = norse23mr[ip].mr;
+mrpz = norse23mr[ip].z;
 
-mrpz = gsw.gsw_z_from_p.(mrp.P_fast[:], 71.0, 0.0, 0.0);
+zrange = [-150, 0];
+
+#mrpz = gsw.gsw_z_from_p.(mrp.P_fast[:], 71.0, 0.0, 0.0);
 ind = findall((zrange[2] .>= mrpz .>= zrange[1]) .& (mrp.t_fast[:] .< maximum(mrp.t_fast)/2));
 
 xfast = mrp.t_fast[ind];
@@ -36,7 +40,7 @@ GLMakie.plot!(x, y, color=z, colormap=:jet, markersize=40, colorrange=(zmin, zma
 #ax.xticks = (xf[1]:86400*iday:xf[end], string.(Date.(td[1]:Day(iday):td[end])))
 Colorbar(figP[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = false)
 figP
-save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid, pad = 4) * "_sh1.png", figP)
+save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid[ip], pad = 4) * "_sh1.png", figP)
 GLMakie.closeall()
 
 
@@ -49,7 +53,7 @@ axsh1 = Axis(figshear[1, 1],
 )
 GLMakie.scatterlines!(mrp.t_fast[ind], mrp.sh1[ind], markersize = 3, linewidth = 0.5);
 
-axAx = Axis(figshear[2, 1],
+axsh2 = Axis(figshear[2, 1],
     title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " sh2",
     xlabel = "Time",
     ylabel = "Shear 2"
@@ -63,14 +67,28 @@ axAx = Axis(figshear[3, 1],
 )
 GLMakie.scatterlines!(mrp.t_fast[ind], mrp.Ax[ind], markersize = 3, linewidth = 0.5);
 
-axAx = Axis(figshear[4, 1],
+axAy = Axis(figshear[4, 1],
     title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " Ay",
     xlabel = "Time",
     ylabel = "Ay"
 )
 GLMakie.scatterlines!(mrp.t_fast[ind], mrp.Ay[ind], markersize = 3, linewidth = 0.5);
 
+axGradT1 = Axis(figshear[5, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " gradT1",
+    xlabel = "Time",
+    ylabel = "gradT1"
+)
+GLMakie.scatterlines!(mrp.t_fast[ind], mrp.gradT1[ind], markersize = 3, linewidth = 0.5);
+
+axGradT2 = Axis(figshear[6, 1],
+    title = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]) * " gradT2",
+    xlabel = "Time",
+    ylabel = "gradT2"
+)
+GLMakie.scatterlines!(mrp.t_fast[ind], mrp.gradT2[ind], markersize = 3, linewidth = 0.5);
+
 figshear
-save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid, pad = 4) * "_shear_ts.png", figshear)
+save(figoutdir * project * "_" * mission * "_" * glider * "_" * string(profileid[ip], pad = 4) * "_shear_ts.png", figshear)
 
 #GLMakie.closeall()

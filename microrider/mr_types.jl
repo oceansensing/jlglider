@@ -57,4 +57,9 @@ mutable struct MicroRiderRaw
     params::Dict{String, Any}
 end
 
+mutable struct MicroRider{T}
+    mr::T
+    z::Array{Float64}
+end
+
 end
