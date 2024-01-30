@@ -16,7 +16,7 @@ project = "NORSE"
 mission = "JM"
 year = 2023
 #profileid = 1:511;
-profileid = 101;
+profileid = 150;
 #profileid = 150
 glider = "SEA064"
 
@@ -34,5 +34,5 @@ end
 
 #mrpz = gsw.gsw_z_from_p.(mrp.P_fast, 71.0, 0.0, 0.0);
 
-#include("MR_highpass_profile.jl")
+include("MR_despike_profile.jl")
 #include("MR_plots.jl")

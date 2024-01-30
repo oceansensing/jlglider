@@ -1,13 +1,15 @@
 using FFTW, DSP
 
 ii = 1
+ztop = -10;
 
 mrp = norse23mr[ii].mr;
 mrpz = norse23mr[ii].z[:];
 
-minind = findall(mrpz .== minimum(mrpz))
-tbott = round(mrp.t_fast[minind][1], RoundDown);
+minzind = findall(mrpz .== minimum(mrpz))[1]
+tbott = round(mrp.t_fast[minzind], RoundDown);
 tinddn = findall(tbott .>= mrp.t_fast[:] .>= 0);
+zinddn = findall(mrpz[minzind]+5 .<= mrpz[tinddn] .<= ztop);
 
 # Generate a sample signal (replace this with your actual signal)
 fs = 512  # Sample rate (Hz)
@@ -38,8 +40,17 @@ sh1_hp_cp = deepcopy(sh1_hp);
 # Applying the lowpass filter
 sh1_lp = DSP.filtfilt(digital_filter_lp, sh1_hp_cp);
 
-spikethreshold = 13.0;
+spikethreshold = 8.0;
 bind = findall(sh1_hp ./ sh1_lp .> spikethreshold);
 gind = findall(sh1_hp ./ sh1_lp .<= spikethreshold);
 
-Plots.plot(sh1_hp[gind])
+bzind = intersect(bind, zinddn);
+gzind = intersect(gind, zinddn);
+
+N = 40;
+for ii = 1:length(bzind)
+    local bseg = Int64.(bzind[ii]-N/2 : bzind[ii]+N);
+    sh1_hp[bseg] .= NaN;
+end
+
+Plots.plot(sh1_hp[zinddn])
