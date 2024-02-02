@@ -7,7 +7,9 @@ import .MR_types: MicroRiderRaw, MicroRider
 #using .MR_io: MR_datasetup, MR_mat2jld2
 using .MR_io: MR_load_profile
 
-using NaNMath, GLMakie, ColorSchemes, GibbsSeaWater
+using NaNMath, Statistics, GLMakie, Plots, ColorSchemes, GibbsSeaWater
+
+plotly()
 
 gsw = GibbsSeaWater;
 global norse23mr = MicroRider[];
@@ -16,7 +18,7 @@ project = "NORSE"
 mission = "JM"
 year = 2023
 #profileid = 1:511;
-profileid = 150;
+profileid = 154;
 #profileid = 150
 glider = "SEA064"
 
