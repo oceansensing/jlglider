@@ -3,7 +3,9 @@ if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
 end
 
-import seaexplorer_functions: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process
+include("seaexplorerFunc.jl")
+
+import .seaexplorerFunc: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process
 
 mission = 48; # M37 is Jan Mayen in 2022, M38 is Lofoten Basin in 2022, M48 is Jan Mayen in 2023
 #include("seaexplorer_load.jl");
@@ -20,7 +22,8 @@ lbe = lbe22;
 
 #include("freya_MR_laur_load.jl");
 #include("seaexplorer_processing.jl");
-include("seaexplorer_plotFast.jl")
-include("seaexplorer_plotMap.jl")
+#include("seaexplorer_plotFast.jl")
+#include("seaexplorer_plotMap.jl")
+include("seaexplorer_plotADCP.jl")
 
 
