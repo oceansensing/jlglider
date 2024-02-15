@@ -44,12 +44,12 @@ for i = 1:3
     tdt = unix2datetime.(t); 
     yday = yearday.(tdt);
 
-    pres = (1200, 800);
-    fs = 24;
+    pres = (1400, 500);
+    fs = 28;
     ms = 12;
     zmin, zmax = -0.5, 0.5;
 
-    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/Presentations/OSM2024/";
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/OSM2024/";
 
     figU = Figure(resolution = pres, fontsize = fs)
     ax = Axis(figU[1, 1],
@@ -59,7 +59,7 @@ for i = 1:3
     )
     GLMakie.scatter!(yday, z, color=u, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figU[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "u (m/s)")
-    fig
+    figU
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_U.png", figU)
     GLMakie.closeall()
 
@@ -71,7 +71,7 @@ for i = 1:3
     )
     GLMakie.scatter!(yday, z, color=v, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figV[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "v (m/s)")
-    fig
+    figV
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_V.png", figV)
     GLMakie.closeall()
 
@@ -83,7 +83,7 @@ for i = 1:3
     )
     GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=gdata.ad2cp_Ueast, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figUrt[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "u (m/s)")
-    fig
+    figUrt
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_Urt.png", figUrt)
     GLMakie.closeall()
 
@@ -95,7 +95,7 @@ for i = 1:3
     )
     GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=gdata.ad2cp_Unorth, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figVrt[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "v (m/s)")
-    fig
+    figVrt
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_Vrt.png", figVrt)
     GLMakie.closeall()
 end

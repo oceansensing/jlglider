@@ -18,8 +18,8 @@ sh2file = ["jm22_eps2.csv"; "lbe22_eps2.csv"; "jm23_eps2.csv"];
 presfile = ["jm22_pressure.csv"; "lbe22_pressure.csv"; "jm23_pressure.csv"];
 timefile = ["jm22_time.csv"; "lbe22_time.csv"; "jm23_time.csv"];
 
-#for i = 1:3
-i = 2
+for i = 1:3
+#i = 2
     display(i)
     if i == 1
         gdata = jm22;
@@ -77,8 +77,8 @@ i = 2
     tdt = unix2datetime.(t); 
     yday = yearday.(tdt);
 
-    pres = (1200, 800);
-    fs = 24;
+    pres = (1400, 600);
+    fs = 28;
     ms = 10;
     zmin, zmax = -11, -5;
 
@@ -92,7 +92,7 @@ i = 2
     )
     GLMakie.scatter!(yday, z, color=log10.(eps1), colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figeps1[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "log(W/kg)")
-    fig
+    figeps1
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_TKE_eps1.png", figeps1)
     GLMakie.closeall()
 
@@ -104,7 +104,7 @@ i = 2
     )
     GLMakie.scatter!(yday, z, color=log10.(eps2), colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figeps2[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "log(W/kg)")
-    fig
+    figeps2
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_TKE_eps2.png", figeps2)
     GLMakie.closeall()
 
@@ -116,7 +116,7 @@ i = 2
     )
     GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=log10.(gdata.mr_eps1), colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figeps1rt[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "log(W/kg)")
-    fig
+    figeps1rt
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_TKE_eps1rt.png", figeps1rt)
     GLMakie.closeall()
 
@@ -128,7 +128,7 @@ i = 2
     )
     GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=log10.(gdata.mr_eps2), colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     Colorbar(figeps2rt[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "log(W/kg)")
-    fig
+    figeps2rt
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_TKE_eps2rt.png", figeps2rt)
     GLMakie.closeall()
-#end
+end
