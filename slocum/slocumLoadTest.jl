@@ -3,8 +3,11 @@
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 
-import slocumType: ctdStruct, sciStruct
-import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
+include("slocumType.jl")
+include("slocumFunc.jl")
+
+import .slocumType: ctdStruct, sciStruct
+import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
 
 #dbdreaderdir = "/Users/gong/GitHub/dbdreader/";
 #pushfirst!(pyimport("sys")."path", dbdreaderdir);
@@ -16,18 +19,18 @@ import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_
     if loadmode == "uppercase"
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     else
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     end
 
@@ -72,21 +75,21 @@ import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_
     #sci_bsipar_par = dataGlider.get("sci_bsipar_par");
 
     # calculate derived values from CTD data
-    glonind = findall(-65 .< m_lon[2,:] .< -55); 
-    glatind = findall(30 .< m_lat[2,:] .< 50);
-    mlat = Statistics.mean(m_lat[2,glatind]);
-    mlon = Statistics.mean(m_lon[2,glonind]);
+    glonind = findall(lonrange[1] .< m_lon[2] .< lonrange[2]);
+    glatind = findall(latrange[1] .< m_lat[2] .< latrange[2]);  
+    mlat = Statistics.mean(m_lat[2][glatind]);
+    mlon = Statistics.mean(m_lon[2][glonind]);
     #llon = -73.4;
     #llat = 38.0;
 
     #t, C, T, P, mlon, mlat, mpresenttime = dataGlider.get_CTD_sync("m_lon", "m_lat", "m_present_time")
 
-    presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
-    tempfunc, temptime, temppres, tempraw, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, mlat)
-    condfunc, condtime, condpres, condraw, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, mlat)
+    presfunc, prestime, presraw = slocumFunc.glider_presfunc(sci_water_pressure, trange);
+    tempfunc, temptime, temppres, tempraw, tempz = slocumFunc.glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, mlat)
+    condfunc, condtime, condpres, condraw, condz = slocumFunc.glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, mlat)
 
-    lonfunc, lontime, lonpres, lonraw, lonz = glider_var_load(m_gps_lon, trange, [-65.0 -55.0], sci_water_pressure, mlat);
-    latfunc, lattime, latpres, latraw, latz = glider_var_load(m_gps_lat, trange, [30.0 50.0], sci_water_pressure, mlat); 
+    lonfunc, lontime, lonpres, lonraw, lonz = slocumFunc.glider_var_load(m_gps_lon, trange, lonrange, sci_water_pressure, mlat);
+    latfunc, lattime, latpres, latraw, latz = slocumFunc.glider_var_load(m_gps_lat, trange, latrange, sci_water_pressure, mlat); 
 
     # find common glider values
     tctd = unique(intersect(prestime, temptime, condtime));

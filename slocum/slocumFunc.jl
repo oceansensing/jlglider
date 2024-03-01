@@ -27,13 +27,15 @@ end
 
 function glider_presfunc(sci_water_pressure, trange)
     if isempty(sci_water_pressure) != true
-        presind = findall((trange[1] .<= sci_water_pressure[1,:] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[2,:] .>= 0.0));
-        prestime = sci_water_pressure[1,:][presind]; 
-        presraw = sci_water_pressure[2,:][presind];
+        presind = findall((trange[1] .<= sci_water_pressure[1] .<= trange[end]) .& (1000.0 .>= sci_water_pressure[2] .>= 0.0));
+        prestime = sci_water_pressure[1][presind]; 
+        presraw = sci_water_pressure[2][presind];
         sortedpind = sortperm(prestime);
         presrawval = presraw[sortedpind];
         prestime = prestime[sortedpind];
         presfunc = linear_interpolation(prestime, presrawval, extrapolation_bc=Line());
+        #BSpline(Linear())
+        #presfunc = Interpolations.extrapolate(Interpolations.scale(Interpolations.interpolate(presrawval, BSpline(Linear())), prestime));
         #presdtime = unix2datetime.(prestime);
         #prespres = presraw[:,2];
         #presz = gsw.gsw_z_from_p.(prespres*10, llat, 0.0, 0.0); 
@@ -84,9 +86,9 @@ function glider_var_load(glidervar, trange, varlim, p, lat)
     gsw = GibbsSeaWater;
     if isempty(glidervar) != true
         presfunc, prestime, presraw = glider_presfunc(p, trange);
-        varind = findall((trange[1] .<= glidervar[1,:] .<= trange[end]) .& (varlim[1] .<= glidervar[2,:] .<= varlim[end])); 
-        vartime = glidervar[1,:][varind];
-        varraw = glidervar[2,:][varind];
+        varind = findall((trange[1] .<= glidervar[1] .<= trange[end]) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
+        vartime = glidervar[1][varind];
+        varraw = glidervar[2][varind];
         sortedvarind = sortperm(vartime);
         varrawval = varraw[sortedvarind];
         vartime = vartime[sortedvarind];

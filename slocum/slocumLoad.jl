@@ -7,8 +7,11 @@ module slocumLoad
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
 
-import slocumType: ctdStruct, sciStruct
-import slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
+include("slocumType.jl")
+include("slocumFunc.jl")
+
+import .slocumType: ctdStruct, sciStruct
+import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
 
 #=
 # define function for converting an array from python row major to julia column major
@@ -38,18 +41,18 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     if loadmode == "uppercase"
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     else
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true, decimalLatLon = true, return_nans = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     end
 
@@ -97,10 +100,10 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     #glatind = findall(30 .< m_lat[2,:] .< 50);
     #lonrange = [-65.0 -55.0];
     #latrange = [30.0 50.0]; 
-    glonind = findall(lonrange[1] .< m_lon[2,:] .< lonrange[2]);
-    glatind = findall(latrange[1] .< m_lat[2,:] .< latrange[2]);  
-    mlat = Statistics.mean(m_lat[2,glatind]);
-    mlon = Statistics.mean(m_lon[2,glonind]);    #llon = -73.4;
+    glonind = findall(lonrange[1] .< m_lon[2] .< lonrange[2]);
+    glatind = findall(latrange[1] .< m_lat[2] .< latrange[2]);  
+    mlat = Statistics.mean(m_lat[2][glatind]);
+    mlon = Statistics.mean(m_lon[2][glonind]);    #llon = -73.4;
     #llat = 38.0;
 
     # calculate derived values from CTD data
@@ -343,8 +346,8 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     sci_bsipar_par = dataGlider.get("sci_bsipar_par");
 
     # calculate derived values from CTD data
-    mlat = Statistics.mean(m_lat[2,:]);
-    mlon = Statistics.mean(m_lon[2,:]);
+    mlat = Statistics.mean(m_lat[2]);
+    mlon = Statistics.mean(m_lon[2]);
 
     presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
     tempfunc, temptime, temppres, tempraw, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, mlat)

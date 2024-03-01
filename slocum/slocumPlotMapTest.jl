@@ -6,16 +6,19 @@ end
 using GLMakie, NCDatasets, NaNMath, Dates, Interpolations, ColorSchemes
 #import seaexplorer_functions: seaexplorer_MR_laur_load
 
-region = "GS"
+region = "JM"
 
-latmin, latmax = 37, 39.5;
-lonmin, lonmax = -65, -61;
+lonrange = [-9.5 -6.0];
+latrange = [70.5 71.5]; 
+
+latmin, latmax = latrange[1], latrange[2];
+lonmin, lonmax = lonrange[1], lonrange[2];
 
 pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150];
 pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0"];
 
-pz = -150;
-pvar = "spice0"
+pz = -50;
+pvar = "sndspd"
 #for pvar in pvarlist
 #    for pz in pzlist
         if pvar == "ctemp"
@@ -50,7 +53,7 @@ pvar = "spice0"
 
         plotflag = pvar * "-" * string(abs(pz)) * "m";
 
-        ptitle = pst.mission * " " * pvar * " (" * string(abs(pz)) * "m)";
+        ptitle = pst.mission * " " * pst.glidername * " " * pvar * " (" * string(abs(pz)) * "m)";
 
         if region in ["JM", "LBE", "GS", "MAB"]
             pfname = pst.mission * "_" * region * "_" * pvar * "_" * string(abs(pz)) * "m.png";
