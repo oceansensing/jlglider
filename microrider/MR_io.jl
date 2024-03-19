@@ -10,7 +10,7 @@ function MR_datasetup(project, mission, year)
     if project == "NORSE"
         datadirJM2022 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221021-norse-janmayen-complete/"
         datadirLBE2022 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20221102-norse-lofoten-complete/"
-        datadirJM2023 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20231127-norse-complete/"
+        datadirJM2023 = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20231112-norse-janmayen-complete/"
         
         if year == 2022
             if (mission == "JM") | (mission == "Jan Mayan")

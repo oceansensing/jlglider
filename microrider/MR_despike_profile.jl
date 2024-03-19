@@ -45,6 +45,9 @@ zedge = 10;
 mrp = norse23mr[ii].mr;
 mrpz = norse23mr[ii].z[:];
 
+sh1_raw = mrp.sh1;
+sh2_raw = mrp.sh2;
+
 minzind = findall(mrpz .== minimum(mrpz))[1]
 tbott = round(mrp.t_fast[minzind], RoundDown);
 tinddn = findall(tbott .>= mrp.t_fast[:] .>= 0);
@@ -54,28 +57,27 @@ zindInner = findall(mrpz[minzind]+zedge .<= mrpz[tinddn] .<= -zedge);
 # Generate a sample signal (replace this with your actual signal)
 fs = 512  # Sample rate (Hz)
 #t = 0:1/fs:tbott  # Time vector
+nyquist_rate = fs / 2
 spikethreshold = 8.0;
 
 # Design a high-pass filter
 cutoff_frequency_hp = 0.1  # Cutoff frequency (Hz)
-nyquist_rate = fs / 2
 normalized_cutoff_hp = cutoff_frequency_hp / nyquist_rate
 digital_filter_hp = digitalfilter(DSP.Highpass(normalized_cutoff_hp), DSP.Butterworth(1))
 
 # Design a low-pass filter
-cutoff_frequency_lp = 0.5; # Cuttoff frequency (Hz)
+cutoff_frequency_lp = 0.3; # Cuttoff frequency (Hz)
 normalized_cutoff_lp = cutoff_frequency_lp / nyquist_rate
-digital_filter_lp = digitalfilter(DSP.Lowpass(normalized_cutoff_lp), DSP.Butterworth(4))
+digital_filter_lp = digitalfilter(DSP.Lowpass(normalized_cutoff_lp), DSP.Butterworth(1))
 
 global sh1_hp = abs.(DSP.filtfilt(digital_filter_hp, mrp.sh1[tinddn[zindOuter]]));
 global sh2_hp = abs.(DSP.filtfilt(digital_filter_hp, mrp.sh2[tinddn[zindOuter]]));
 #global sh1_hp = sh1_hp ./ maximum(sh1_hp);
 
-# rectifying the signal (take ABS value)
 global itr = 0;
 nbadind = 1;
 #while ((nbadind == 0) & (itr <= 2)) | (nbadind > 0)
-for ii = 1:22
+for ii = 1:10
     global itr = itr + 1;
     global sh1_hp, nbadind = mr_despike(sh1_hp, spikethreshold);
     global sh2_hp, nbadind = mr_despike(sh2_hp, spikethreshold);
@@ -98,7 +100,7 @@ psize = (2000, 1000);
 figsh = Figure(size = psize, fontsize = 32)
 
 axsh1 = Axis(figsh[1, 1],
-    title = "Shear 1",
+    title = "Shear 1 (HP, filtered)",
     xlabel = "Shear 1",
     ylabel = "Depth (m)",
 )
@@ -107,7 +109,7 @@ GLMakie.scatterlines!(sh1_hp[zind], zinner, markersize = 3, linewidth = 0.5);
 #GLMakie.ylims!(-12,-11.7);
 
 axsh2 = Axis(figsh[1, 2],
-    title = "Shear 2",
+    title = "Shear 2 (HP, filtered)",
     xlabel = "Shear 2",
     ylabel = "Depth (m)"
 )
@@ -119,6 +121,13 @@ axAx = Axis(figsh[1, 3],
     ylabel = "Depth (m)"
 )
 GLMakie.scatterlines!(mrp.Ax[tinddn[zindOuter[zind]]], mrpz[tinddn[zindOuter[zind]]], markersize = 3, linewidth = 0.5);
+
+axAx = Axis(figsh[1, 4],
+    title = "Shear 1 (Raw)",
+    xlabel = "Sh1",
+    ylabel = "Depth (m)"
+)
+GLMakie.scatterlines!(sh1_raw[zind], zinner, markersize = 3, linewidth = 0.5);
 
 GLMakie.Label(figsh[0, :], text = project * ": " * mission * " " * glider * " - " * basename.(mrp.fullPath[1:end-2]), fontsize = 50)
 

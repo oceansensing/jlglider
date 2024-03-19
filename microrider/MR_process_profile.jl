@@ -5,7 +5,7 @@ include("MR_types.jl")
 
 import .MR_types: MicroRiderRaw, MicroRider
 #using .MR_io: MR_datasetup, MR_mat2jld2
-using .MR_io: MR_load_profile
+using .MR_io: MR_load_profile, MR_datasetup
 
 using NaNMath, Statistics, GLMakie, Plots, ColorSchemes, GibbsSeaWater
 
@@ -18,7 +18,7 @@ project = "NORSE"
 mission = "JM"
 year = 2023
 #profileid = 1:511;
-profileid = 154;
+profileid = [154];
 #profileid = 150
 glider = "SEA064"
 
@@ -36,5 +36,5 @@ end
 
 #mrpz = gsw.gsw_z_from_p.(mrp.P_fast, 71.0, 0.0, 0.0);
 
-include("MR_despike_profile.jl")
+#include("MR_despike_profile.jl")
 #include("MR_plots.jl")
