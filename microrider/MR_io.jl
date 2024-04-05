@@ -4,7 +4,7 @@ include("MR_types.jl")
 include("moov.jl")
 
 using Glob, MAT, JLD2, GibbsSeaWater
-import .MR_types: MicroRiderRaw
+using .MR_types: MicroRiderRaw
 
 function MR_datasetup(project, mission, year)
     if project == "NORSE"
@@ -127,13 +127,15 @@ function MR_mat2jld2(project::String, mission::String, year::Int, lat::Float64)
     end
 end
 
-function MR_loadjld2(jld2datafilepath::String, loadflag::Int)
-    if loadflag == 0
-        mrr = MicroRiderRaw[];
-        data = jldopen(jld2datafilepath, "r");
-        mrr = data["mrprofile"];
-        return mrr;
-    else
+function MR_loadjld2(jld2datafilepath::String; loadflag = 1)
+    #if (@isdefined loadflag) == 0
+    #    loadflag = 1;
+    #end
+
+    if loadflag == 0 # for some reason, running jlopen more than once lead to type issues when using push!(), 20240404 DG
+        mrr = jldopen(jld2datafilepath, "r");
+        return mrr["mrprofile"];
+    else # this is the preferred way to load the MR .jld2 files, 20240404 DG
         mrr = load(jld2datafilepath);
         return mrr["mrprofile"];
     end
@@ -150,7 +152,7 @@ function MR_load_profile(project::String, mission::String, year::Int, profilenam
     end
     iprofile = findall(filenames .== profilename);
     if !isempty(iprofile)
-        MRprofile = MR_loadjld2(datafiles[iprofile[1]], 1);
+        MRprofile = MR_loadjld2(datafiles[iprofile[1]]; loadflag = 1);
     else
         display("Profile " * profilename * " not found, there are " * string(length(filenames)) * " available, exit 0.")
         MRprofile = 0;

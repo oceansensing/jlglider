@@ -19,8 +19,8 @@ mission = "JM"
 year = 2023
 #profileid = 1:511;
 #profileid = 400:511;
-profileid = [5; 154; 427];
-#profileid = 331:332;
+#profileid = [5; 154; 427];
+profileid = 331:332;
 glider = "SEA064"
 
 reloadflag = 1
