@@ -1,5 +1,7 @@
 module MR_types
 
+export MicroRiderRaw
+
 mutable struct MicroRiderRaw
     fullPath::String
     fs_fast::AbstractFloat
@@ -46,6 +48,8 @@ mutable struct MicroRiderRaw
     T2_fast::Array{Float64}
     P_slow::Array{Float64}
     P_fast::Array{Float64}
+    z_slow::Array{Float64}
+    z_fast::Array{Float64}
     temperature_fast::Array{Float64}
     W_slow::Array{Float64}
     W_fast::Array{Float64}

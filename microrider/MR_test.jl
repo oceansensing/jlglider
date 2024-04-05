@@ -1,21 +1,25 @@
-#localpath = ENV["HOME"] * "/Users/gong/GitHub/jlglider/microrider"
-#if (localpath in LOAD_PATH) == false
-#    push!(LOAD_PATH, localpath);
-#end
-
 include("MR_types.jl")
 include("MR_io.jl")
-import .MR_types: MicroRiderRaw
-using .MR_io: MR_datasetup
-using Glob, MAT, JLD2
+include("moov.jl")
 
-#MR_mat2jld2("NORSE", "JM", 2023, 71.0)
+using Glob, MAT, JLD2, GibbsSeaWater
+using .MR_types: MicroRiderRaw
+#using .MR_io: MR_load_profile, MR_datasetup, MR_loadjld2
 
+
+mrpath = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20231112-norse-janmayen-complete/mr_processing/jld2files/data_0003.jld2";
+#mrp = MR_loadjld2(mrpath, 1);
+mrr = load(mrpath);
+mrp = mrr["mrprofile"];
+
+#=
 project = "NORSE"
 mission = "JM"
 year = 2023
+profileid = [1; 2; 3; 4; 5];
 glider = "SEA064"
 
+project, mission, year
 lat = 71.0
 
 jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String, year::Int)
@@ -23,10 +27,9 @@ jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String, year::Int
 moov("*.mat", pdir, matdir)
 
 datafiles = Glob.glob("*.mat", matdir);
+global mrdata = MicroRiderRaw[];
 
-#profileid = 1:5
-Threads.@threads for i = 1:length(datafiles)
-#for i in profileid
+for i in profileid
 
     display(i)
     mrfile = matopen(datafiles[i]);
@@ -90,4 +93,8 @@ Threads.@threads for i = 1:length(datafiles)
 
     mrprofile = MicroRiderRaw(fullPath, fs_fast, fs_slow, header_version, t_slow, t_fast, setupfilestr, cfgobj, header, filetime, date, time, Gnd, Ax, Ay, T1, T1_dT1, T2, T2_dT2, sh1, sh2, P, P_dP, PV, V_Bat, Incl_Y, Incl_X, Incl_T, odas_version, vehicle_info, t_fast_YD, t_slow_YD, Year, Month, Day, Hour, Minute, Second, Milli, T1_slow, T1_fast, T2_slow, T2_fast, P_slow, P_fast, z_slow, z_fast, temperature_fast, W_slow, W_fast, speed_slow, speed_fast, gradT1, gradT2, input_parameters, params);
     jldsave(jld2dir * basename.(datafiles[i])[1:end-4] * ".jld2", true; mrprofile);
+
+
+    #mrr = load(mrpath)
 end
+=#

@@ -3,7 +3,7 @@ module MR_io
 include("MR_types.jl")
 include("moov.jl")
 
-using Glob, MAT, JLD2
+using Glob, MAT, JLD2, GibbsSeaWater
 import .MR_types: MicroRiderRaw
 
 function MR_datasetup(project, mission, year)
@@ -50,7 +50,8 @@ function MR_datasetup(project, mission)
     MR_datasetup(project, mission, 2022)
 end
 
-function MR_mat2jld2(project::String, mission::String, year::Int)
+# DO NOT use this function! use the MR_mat2jld2.jl script instead. there is a type import/export issue with jldsave. 2024-04-04 DG
+function MR_mat2jld2(project::String, mission::String, year::Int, lat::Float64)
     jld2dir, matdir, pdir = MR_datasetup(project::String, mission::String, year::Int)
 
     moov("*.mat", pdir, matdir)
@@ -59,6 +60,8 @@ function MR_mat2jld2(project::String, mission::String, year::Int)
     global mrdata = MicroRiderRaw[];
 
     Threads.@threads for i = 1:length(datafiles)
+    #for i = 11:15
+
         display(i)
         mrfile = matopen(datafiles[i]);
 
@@ -107,6 +110,8 @@ function MR_mat2jld2(project::String, mission::String, year::Int)
         T2_fast = read(mrfile, "T2_fast");
         P_slow = read(mrfile, "P_slow");
         P_fast = read(mrfile, "P_fast");
+        z_slow = GibbsSeaWater.gsw_z_from_p.(P_slow, lat, 0.0, 0.0);
+        z_fast = GibbsSeaWater.gsw_z_from_p.(P_fast, lat, 0.0, 0.0);
         temperature_fast = read(mrfile, "temperature_fast");
         W_slow = read(mrfile, "W_slow");
         W_fast = read(mrfile, "W_fast");
@@ -117,16 +122,21 @@ function MR_mat2jld2(project::String, mission::String, year::Int)
         input_parameters = read(mrfile, "input_parameters");
         params = read(mrfile, "params");
 
-        mrprofile = MicroRiderRaw(fullPath, fs_fast, fs_slow, header_version, t_slow, t_fast, setupfilestr, cfgobj, header, filetime, date, time, Gnd, Ax, Ay, T1, T1_dT1, T2, T2_dT2, sh1, sh2, P, P_dP, PV, V_Bat, Incl_Y, Incl_X, Incl_T, odas_version, vehicle_info, t_fast_YD, t_slow_YD, Year, Month, Day, Hour, Minute, Second, Milli, T1_slow, T1_fast, T2_slow, T2_fast, P_slow, P_fast, temperature_fast, W_slow, W_fast, speed_slow, speed_fast, gradT1, gradT2, input_parameters, params);
+        mrprofile = MicroRiderRaw(fullPath, fs_fast, fs_slow, header_version, t_slow, t_fast, setupfilestr, cfgobj, header, filetime, date, time, Gnd, Ax, Ay, T1, T1_dT1, T2, T2_dT2, sh1, sh2, P, P_dP, PV, V_Bat, Incl_Y, Incl_X, Incl_T, odas_version, vehicle_info, t_fast_YD, t_slow_YD, Year, Month, Day, Hour, Minute, Second, Milli, T1_slow, T1_fast, T2_slow, T2_fast, P_slow, P_fast, z_slow, z_fast, temperature_fast, W_slow, W_fast, speed_slow, speed_fast, gradT1, gradT2, input_parameters, params);
         jldsave(jld2dir * basename.(datafiles[i])[1:end-4] * ".jld2", true; mrprofile);
     end
 end
 
-function MR_loadjld2(jld2datafilepath)
-    mrr = MicroRiderRaw[];
-    data = jldopen(jld2datafilepath, "r");
-    mrr = data["mrprofile"];
-    return mrr;
+function MR_loadjld2(jld2datafilepath::String, loadflag::Int)
+    if loadflag == 0
+        mrr = MicroRiderRaw[];
+        data = jldopen(jld2datafilepath, "r");
+        mrr = data["mrprofile"];
+        return mrr;
+    else
+        mrr = load(jld2datafilepath);
+        return mrr["mrprofile"];
+    end
 end
 
 # load specific profiles based on what user desires
@@ -140,7 +150,7 @@ function MR_load_profile(project::String, mission::String, year::Int, profilenam
     end
     iprofile = findall(filenames .== profilename);
     if !isempty(iprofile)
-        MRprofile = MR_loadjld2(datafiles[iprofile[1]]);
+        MRprofile = MR_loadjld2(datafiles[iprofile[1]], 1);
     else
         display("Profile " * profilename * " not found, there are " * string(length(filenames)) * " available, exit 0.")
         MRprofile = 0;

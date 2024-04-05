@@ -12,24 +12,27 @@ using NaNMath, Statistics, GLMakie, Plots, ColorSchemes, GibbsSeaWater
 plotly()
 
 gsw = GibbsSeaWater;
-global norse23mr = MicroRider[];
+global mr = MR_types.MicroRiderRaw[]; # NOTE!!! if declaring a composite type array as global, then the module name must be included instantiation.
 
 project = "NORSE"
 mission = "JM"
 year = 2023
 #profileid = 1:511;
-profileid = [154];
-#profileid = 150
+#profileid = 400:511;
+#profileid = [5; 154; 427];
+profileid = 331:332;
 glider = "SEA064"
 
 reloadflag = 1
 
-for ii = 1:length(profileid)
-    if ((@isdefined norse23mr) != true) | (reloadflag == 1)
-        display("Loading project " * project * ", mission " * mission * ", profile " * string(profileid[ii]) * ".")
-        mrp = MR_load_profile(project, mission, year, profileid[ii]); # microrider profile
-        mrpz = gsw.gsw_z_from_p.(mrp.P_fast, 71.0, 0.0, 0.0); 
-        global norse23mr = push!(norse23mr, MicroRider(mrp, mrpz));
+#for ii = 1:length(profileid)
+for pid in profileid
+    if ((@isdefined mr) != true) | (reloadflag == 1)
+        display("Loading project " * project * ", mission " * mission * ", profile " * string(pid) * ".")
+        mrp = MR_load_profile(project, mission, year, pid); # microrider profile
+        #mrpz = gsw.gsw_z_from_p.(mrp.P_fast, 71.0, 0.0, 0.0); 
+        #global mre = push!(mre, MicroRider(mrp, mrpz)); # microrider extended
+        push!(mr, mrp);
         #display("Loaded project " * project * ", mission " * mission * ", profile " * string(profileid[ii]) * ".");
     end
 end
