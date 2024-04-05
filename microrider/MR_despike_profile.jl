@@ -3,11 +3,18 @@ using FFTW, DSP
 figoutdir = "/Users/gong/GitHub/jlglider/microrider/figures/";
 
 function mr_despike(sh1_hp, spikethreshold)
+
+    # Apply the highpass filter & rectify
+    sh1_hp = abs.(DSP.filtfilt(digital_filter_hp, sh1_hp));
+
     # Applying the lowpass filter
     sh1_lp = DSP.filtfilt(digital_filter_lp, sh1_hp);
 
+    # calculate the spike ratio
+    sh1_sr = sh1_hp ./ sh1_lp; 
+
     # find the indices in the cast that exceed the spike threshold (typically 8)
-    badind = findall(sh1_hp ./ sh1_lp .> spikethreshold);
+    badind = findall(sh1_sr .> spikethreshold);
 
     # find the indices in the cast that stays below the spike threshold (typically 8)
     #godind = findall(sh1_hp ./ sh1_lp .<= spikethreshold);
@@ -17,9 +24,6 @@ function mr_despike(sh1_hp, spikethreshold)
     #gzind = godind;
     #bzind = intersect(badind, zinddn);
     #gzind = intersect(godind, zinddn);
-
-    # Apply the highpass filter
-    sh1_hp = abs.(DSP.filtfilt(digital_filter_hp, sh1_hp));
 
     N = 20;
     for ii = 1:length(bzind)
@@ -35,15 +39,15 @@ function mr_despike(sh1_hp, spikethreshold)
 
     #sh1_hp = sh1_hp ./ maximum(sh1_hp);
 
-    nbadind = length(findall(sh1_hp ./ sh1_lp .> spikethreshold)); 
-    return sh1_hp, nbadind;
+    nbadind = length(badind); 
+    return sh1_hp, sh1_sr, nbadind;
 end
 
 ii = 1
 zedge = 10;
 
-mrp = norse23mr[ii].mr;
-mrpz = norse23mr[ii].z[:];
+mrp = mr[ii];
+mrpz = mr[ii].z_fast[:];
 
 sh1_raw = mrp.sh1;
 sh2_raw = mrp.sh2;
@@ -70,8 +74,12 @@ cutoff_frequency_lp = 0.3; # Cuttoff frequency (Hz)
 normalized_cutoff_lp = cutoff_frequency_lp / nyquist_rate
 digital_filter_lp = digitalfilter(DSP.Lowpass(normalized_cutoff_lp), DSP.Butterworth(1))
 
-global sh1_hp = abs.(DSP.filtfilt(digital_filter_hp, mrp.sh1[tinddn[zindOuter]]));
-global sh2_hp = abs.(DSP.filtfilt(digital_filter_hp, mrp.sh2[tinddn[zindOuter]]));
+#global sh1_hp = abs.(DSP.filtfilt(digital_filter_hp, mrp.sh1[tinddn[zindOuter]]));
+#global sh2_hp = abs.(DSP.filtfilt(digital_filter_hp, mrp.sh2[tinddn[zindOuter]]));
+
+global sh1_hp = mrp.sh1[tinddn[zindOuter]];
+global sh2_hp = mrp.sh2[tinddn[zindOuter]];
+
 #global sh1_hp = sh1_hp ./ maximum(sh1_hp);
 
 global itr = 0;
@@ -79,8 +87,8 @@ nbadind = 1;
 #while ((nbadind == 0) & (itr <= 2)) | (nbadind > 0)
 for ii = 1:10
     global itr = itr + 1;
-    global sh1_hp, nbadind = mr_despike(sh1_hp, spikethreshold);
-    global sh2_hp, nbadind = mr_despike(sh2_hp, spikethreshold);
+    global sh1_hp, sh1_sr, nbadind = mr_despike(sh1_hp, spikethreshold);
+    global sh2_hp, sh1_sr, nbadind = mr_despike(sh2_hp, spikethreshold);
     #if itr <= 4
     #    nbadind = 1;
     #end
