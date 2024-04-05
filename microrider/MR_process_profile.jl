@@ -19,8 +19,8 @@ mission = "JM"
 year = 2023
 #profileid = 1:511;
 #profileid = 400:511;
-#profileid = [5; 154; 427];
-profileid = 331:332;
+profileid = [5; 154; 427];
+#profileid = 331:332;
 glider = "SEA064"
 
 reloadflag = 1
@@ -30,14 +30,9 @@ for pid in profileid
     if ((@isdefined mr) != true) | (reloadflag == 1)
         display("Loading project " * project * ", mission " * mission * ", profile " * string(pid) * ".")
         mrp = MR_load_profile(project, mission, year, pid); # microrider profile
-        #mrpz = gsw.gsw_z_from_p.(mrp.P_fast, 71.0, 0.0, 0.0); 
-        #global mre = push!(mre, MicroRider(mrp, mrpz)); # microrider extended
         push!(mr, mrp);
-        #display("Loaded project " * project * ", mission " * mission * ", profile " * string(profileid[ii]) * ".");
     end
 end
-
-#mrpz = gsw.gsw_z_from_p.(mrp.P_fast, 71.0, 0.0, 0.0);
 
 #include("MR_despike_profile.jl")
 #include("MR_plots.jl")
