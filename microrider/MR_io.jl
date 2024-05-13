@@ -135,7 +135,7 @@ function MR_loadjld2(jld2datafilepath::String; loadflag = 1)
     if loadflag == 0 # for some reason, running jlopen more than once lead to type issues when using push!(), 20240404 DG
         mrr = jldopen(jld2datafilepath, "r");
         return mrr["mrprofile"];
-    else # this is the preferred way to load the MR .jld2 files, 20240404 DG
+    else # this is the preferred way to load the MR .jld2 files to avoid type mismatch issues, 20240404 DG
         mrr = load(jld2datafilepath);
         return mrr["mrprofile"];
     end
