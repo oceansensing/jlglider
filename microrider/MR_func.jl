@@ -1,10 +1,26 @@
-module MR_io
+module MR_func
 
 include("MR_types.jl")
-include("moov.jl")
+#include("moov.jl")
 
 using Glob, MAT, JLD2, GibbsSeaWater
 using .MR_types: MicroRiderRaw
+
+
+# the moov function moves files matching a specified string pattern from fromdir to todir
+# Donglai Gong, 2024-01-14 : initial write
+#
+# example usage:
+#stringpattern = "*.txt";
+#fromdir = "directory1";
+#todir = "directory2";
+#moov(stringpattern, fromdir, todir)
+
+function moov(stringpattern::String, fromdir::String, todir::String)
+    frompath = readdir(Glob.GlobMatch(stringpattern), fromdir);
+    topath = joinpath.(todir, basename.(frompath));
+    mv.(frompath, topath, force=true);
+end
 
 function MR_datasetup(project, mission, year)
     if project == "NORSE"

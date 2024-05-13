@@ -1,11 +1,11 @@
 # MR_process_profile loads specific MicroRider profiles from NORSE project
 
-include("MR_io.jl")
+include("MR_func.jl")
 include("MR_types.jl")
 
 import .MR_types: MicroRiderRaw, MicroRider
-#using .MR_io: MR_datasetup, MR_mat2jld2
-using .MR_io: MR_load_profile, MR_datasetup
+#using .MR_func: MR_datasetup, MR_mat2jld2
+using .MR_func: MR_load_profile, MR_datasetup
 
 using NaNMath, Statistics, GLMakie, Plots, ColorSchemes, GibbsSeaWater
 
