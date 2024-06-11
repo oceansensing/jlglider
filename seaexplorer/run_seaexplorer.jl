@@ -17,8 +17,8 @@ lbe22 = seaexplorer_process(lbe22pld1d);
 jm23 = seaexplorer_process(jm23pld1d);
 
 #sea064pld1d = jm23;
-#jm = jm23;
-#lbe = lbe22;
+jm = jm23;
+lbe = lbe22;
 
 #include("freya_MR_laur_load.jl");
 #include("seaexplorer_processing.jl");

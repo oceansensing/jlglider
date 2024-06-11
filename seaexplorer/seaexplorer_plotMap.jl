@@ -1,10 +1,13 @@
 # gong@vims.edu 2023-04-28
 # this script plots glider data from SEA064's NORSE project
 
-using CairoMakie, NCDatasets, NaNMath, Dates, Interpolations
-import seaexplorer_functions: seaexplorer_MR_laur_load
+include("seaexplorerFunc.jl")
+
+using CairoMakie, NCDatasets, NaNMath, Dates, Interpolations, ColorSchemes
+using .seaexplorerFunc: seaexplorer_MR_laur_load
 
 figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/sea064-20231112-norse/figures/";
+figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/sea064-20231112-norse-janmayen-complete/figures/";
 ms = 15;
 
 workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
@@ -23,7 +26,7 @@ display("NORSE data loaded, begin plotting...")
 #pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150, -200, -300, -400, -600, -800];
 #pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -90, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -450, -500, -550, -600, -650, -700, -750, -800, -850, -900];
 pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -90, -100, -125, -150, -175, -200, -225, -250, -275, -300, -325, -350, -375, -400, -450, -500, -550, -600]; 
-
+#pzlist = [0, -20, -50, -100];
 
 #pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0", "epsilon"];
 pvarlist = ["ctemp", "saltA", "sndspd", "epsilon"];
@@ -33,8 +36,8 @@ region = "JM" # JM, LBE, or ALL
 
 # define plot boundaries
 if region == "JM"
-    latmin, latmax = 70.5, 71.5;
-    lonmin, lonmax = -10, -5;
+    latmin, latmax = 70.2, 71.5;
+    lonmin, lonmax = -10, -5.5;
 elseif region == "LBE"
     latmin, latmax = 69, 71;
     lonmin, lonmax = 0, 10;
@@ -86,7 +89,7 @@ for pvar in pvarlist
         c1 = jm.ctemp;
         c2 = lbe.ctemp;
         if region == "JM"
-            cmin, cmax = -0.5, 5; # max temp observed at JM in 2023 was 5 deg C
+            cmin, cmax = -0.25, 4.25; # max temp observed at JM in 2023 was 5 deg C
         elseif region == "LBE"
             cmin, cmax = 0.0, 8.0;
         else
@@ -181,30 +184,41 @@ for pvar in pvarlist
             xlabel = "Longitude",
             ylabel = "Latitude",
         )
-        Makie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-4000, 4000))
-        if pvar != "epsilon"
-            if region != "LBE"
-                Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+        Makie.xlims!(ax, lonmin, lonmax);
+        Makie.ylims!(ax, latmin, latmax);
+        #Makie.contourf!(x, y, z, levels = 128, colormap = :bukavu, colorrange = (-4000, 4000))
+        Makie.contourf!(x, y, z, levels = 128, colormap = :bukavu)
+        if (pvar != "epsilon") && (pvar != "ctemp")
+            if region == "JM"
+                Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms*2, colorrange=(cmin, cmax))
             end
-            if region != "JM"
-                Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+            if region == "LBE"
+                Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms*2, colorrange=(cmin, cmax))
             end
+            Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
+        elseif pvar == "ctemp"
+            if region == "JM"
+                Makie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:thermal, markersize=ms*2, colorrange=(cmin, cmax))
+            elseif region == "LBE"
+                Makie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:thermal, markersize=ms*2, colorrange=(cmin, cmax))
+            end
+            Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :thermal, flipaxis = false)
         elseif pvar == "epsilon"
             gind1 = findall(isnan.(log10eps1[pind1]) .!= true);
             gind2 = findall(isnan.(log10eps2[pind2]) .!= true);
             c1 = log10eps1[pind1][gind1];
             c2 = log10eps2[pind2][gind2];
     
-            if region != "LBE"
+            if region == "JM"
                 #Makie.scatter!(lon1[end,gind1], lat1[end,gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
                 Makie.scatter!(x1[pind1][gind1], y1[pind1][gind1], color = c1, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
             end
-            if region != "JM"
+            if region == "LBE"
                 #Makie.scatter!(lon2[end,gind2], lat2[end,gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
                 Makie.scatter!(x2[pind2][gind2], y2[pind2][gind2], color = c2, colormap=:jet, markersize=ceil(ms*1.2), colorrange=(cmin, cmax), nan_color = RGBAf(0,0,0,0));
             end
+            Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         end
-        Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * pfname, fig)
     end #pzlist
