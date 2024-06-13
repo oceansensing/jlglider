@@ -1,5 +1,6 @@
 #include("seaexplorer_load_rt.jl")
-import seaexplorer_functions: cleanEPS, cleanTemp, cleanSalt
+include("seaexplorerFunc.jl")
+using .seaexplorerFunc: cleanEPS, cleanTemp, cleanSalt
 
 using Plots, NaNMath, Dates, ColorSchemes, GibbsSeaWater
 #plotly()
@@ -36,7 +37,7 @@ elseif mission == 37 # Jan Mayen 2022
 elseif mission == 48 # Jan Mayen 2023
     region = "JM"
     #lims_temp = (-0.5, 6.0);
-    lims_temp = (-0.5, 4.5);
+    lims_temp = (-0.25, 4.25);
     lims_salt = (33.8, 35.2);
     lims_sigma0 = (26.9, 28.1);
     lims_spice0 = (-0.2, 0.5);
@@ -49,7 +50,7 @@ elseif mission == 48 # Jan Mayen 2023
 end
 
 ms = 4;
-ps = (1200,600);
+ps = (1200,300);
 
 #l8out8 = @layout([a; b; c; d; e; f; g; h])
 #l8out7 = @layout([a; b; c; d; e; f; g])
@@ -72,7 +73,8 @@ loadcolorscheme(:harpercm, revSpectral.colors, revSpectral.notes);
 tind = findall(t1 .<= sea064pld1d.t .<= t2);
 tindmid = findall((t1 .<= sea064pld1d.tmid .<= t2) .&& (sea064pld1d.zmid .<= -2.0));
 
-htemp = Plots.plot(sea064pld1d.t[tind], sea064pld1d.z[tind], zcolor = sea064pld1d.ctemp[tind], seriestype=:scatter, seriescolor=:harpercm, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_temp, colorbar = true, size=ps, dpi=300, framestyle=:box, title="SEA064 Conservative Temperature");
+#htemp = Plots.plot(sea064pld1d.t[tind], sea064pld1d.z[tind], zcolor = sea064pld1d.ctemp[tind], seriestype=:scatter, seriescolor=:harpercm, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_temp, colorbar = true, size=ps, dpi=300, framestyle=:box, title="SEA064 Conservative Temperature");
+htemp = Plots.plot(sea064pld1d.t[tind], sea064pld1d.z[tind], zcolor = sea064pld1d.ctemp[tind], seriestype=:scatter, seriescolor=:thermal, ylims = (-500, 0), markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_temp, colorbar = true, size=ps, dpi=300, framestyle=:box, title="SEA064 Conservative Temperature");
 #Plots.contour!(sea064pld1d.t, sea064pld1d.z, sigma0);
 hsalt = Plots.plot(sea064pld1d.t[tind], sea064pld1d.z[tind], zcolor = sea064pld1d.saltA[tind], seriestype=:scatter, c=:haline, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_salt, colorbar = true, size=ps, dpi=300, framestyle=:box, title="SEA064 Absolute Salinity")
 hsigma0 = Plots.plot(sea064pld1d.t[tind], sea064pld1d.z[tind], zcolor = sea064pld1d.sigma0[tind], seriestype=:scatter, c=:dense, markersize = ms, markerstrokewidth = 0, legend = false, label="", clims=lims_sigma0, colorbar = true, size=ps, dpi=300, framestyle=:box, title="SEA064 Potential Density Anomaly")

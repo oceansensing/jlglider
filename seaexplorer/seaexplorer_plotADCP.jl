@@ -27,6 +27,7 @@ for i = 1:3
     gliderADCPdir = gliderDataDir * gliderMissionDir * "/ad2cp/" * "m" * missionid[i] * "_processed/";
     gliderADCPpath = gliderADCPdir * "abs_dive_ocean_vel.csv";
     figoutdir = gliderADCPdir * "figures/";
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/sea064-20231112-norse/figures/";
 
     #        df = CSV.read(navfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
@@ -44,12 +45,13 @@ for i = 1:3
     tdt = unix2datetime.(t); 
     yday = yearday.(tdt);
 
-    pres = (1400, 500);
-    fs = 28;
+    pres = (1200, 300);
+    fs = 16;
     ms = 12;
-    zmin, zmax = -0.5, 0.5;
+    cmin, cmax = -0.5, 0.5;
+    ymin, ymax = -500, 0;
 
-    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/OSM2024/";
+    #figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/OSM2024/";
 
     figU = Figure(resolution = pres, fontsize = fs)
     ax = Axis(figU[1, 1],
@@ -57,8 +59,9 @@ for i = 1:3
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
-    GLMakie.scatter!(yday, z, color=u, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-    Colorbar(figU[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "u (m/s)")
+    GLMakie.ylims!(ax, ymin, ymax);
+    GLMakie.scatter!(yday, z, color=u, colormap=:balance, markersize=ms, colorrange=(cmin, cmax))
+    Colorbar(figU[1, 2], limits = (cmin, cmax), colormap = :balance, flipaxis = true, label = "u (m/s)")
     figU
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_U.png", figU)
     GLMakie.closeall()
@@ -69,8 +72,8 @@ for i = 1:3
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
-    GLMakie.scatter!(yday, z, color=v, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-    Colorbar(figV[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "v (m/s)")
+    GLMakie.scatter!(yday, z, color=v, colormap=:balance, markersize=ms, colorrange=(cmin, cmax))
+    Colorbar(figV[1, 2], limits = (cmin, cmax), colormap = :balance, flipaxis = true, label = "v (m/s)")
     figV
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_V.png", figV)
     GLMakie.closeall()
@@ -81,8 +84,8 @@ for i = 1:3
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
-    GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=gdata.ad2cp_Ueast, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-    Colorbar(figUrt[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "u (m/s)")
+    GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=gdata.ad2cp_Ueast, colormap=:balance, markersize=ms, colorrange=(cmin, cmax))
+    Colorbar(figUrt[1, 2], limits = (cmin, cmax), colormap = :balance, flipaxis = true, label = "u (m/s)")
     figUrt
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_Urt.png", figUrt)
     GLMakie.closeall()
@@ -93,8 +96,8 @@ for i = 1:3
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
-    GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=gdata.ad2cp_Unorth, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
-    Colorbar(figVrt[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "v (m/s)")
+    GLMakie.scatter!(yearday.(gdata.t), gdata.z, color=gdata.ad2cp_Unorth, colormap=:balance, markersize=ms, colorrange=(cmin, cmax))
+    Colorbar(figVrt[1, 2], limits = (cmin, cmax), colormap = :balance, flipaxis = true, label = "v (m/s)")
     figVrt
     save(figoutdir * projectname * "_" * glidername * "_M" * missionid[i] * "_" * region[i] * "_Vrt.png", figVrt)
     GLMakie.closeall()

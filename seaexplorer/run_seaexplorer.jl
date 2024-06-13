@@ -16,7 +16,7 @@ jm22 = seaexplorer_process(jm22pld1d);
 lbe22 = seaexplorer_process(lbe22pld1d);
 jm23 = seaexplorer_process(jm23pld1d);
 
-#sea064pld1d = jm23;
+sea064pld1d = jm23;
 jm = jm23;
 lbe = lbe22;
 
