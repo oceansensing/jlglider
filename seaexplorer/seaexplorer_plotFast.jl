@@ -6,8 +6,6 @@ using Plots, NaNMath, Dates, ColorSchemes, GibbsSeaWater
 #plotly()
 gr()
 
-figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/sea064-20231112-norse/figures/"
-
 if mission == 38 # LBE
     region = "LBE"
     #lims_temp = (-0.3, 8.7);
@@ -21,6 +19,7 @@ if mission == 38 # LBE
     lims_epsilon = (-11, -5);
     t1 = Dates.DateTime(2022,11,02,12,0,0);
     t2 = Dates.DateTime(2022,11,30,12,0,0);
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/sea064-20221102-norse-lofoten/figures/"
 elseif mission == 37 # Jan Mayen 2022
     region = "JM"
     #lims_temp = (-0.5, 6.0);
@@ -34,6 +33,7 @@ elseif mission == 37 # Jan Mayen 2022
     lims_epsilon = (-11, -5);
     t1 = Dates.DateTime(2022,10,21,12,0,0);
     t2 = Dates.DateTime(2022,10,31,12,0,0);
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/sea064-20221021-norse-janmayen/figures/"
 elseif mission == 48 # Jan Mayen 2023
     region = "JM"
     #lims_temp = (-0.5, 6.0);
@@ -47,6 +47,7 @@ elseif mission == 48 # Jan Mayen 2023
     lims_epsilon = (-11.5, -5.5);
     t1 = Dates.DateTime(2023,11,12,0,0,0);
     t2 = Dates.DateTime(2023,11,27,0,0,0);
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/NORSE/sea064-20231112-norse/figures/"
 end
 
 ms = 4;
