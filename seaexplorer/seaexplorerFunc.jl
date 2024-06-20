@@ -12,6 +12,13 @@ using GibbsSeaWater, MAT
 import .seaexplorerType: NAV_RT, PLD_RT, SeaExplorerData
 import .gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
 
+# https://discourse.julialang.org/t/indices-of-intersection-of-two-arrays/23043/20
+function intersectalajulia2(a,b)
+    ia = findall(in(b), a)
+    ib = findall(in(view(a,ia)), b)
+    return unique(view(a,ia)), ia, ib[indexin(view(a,ia), view(b,ib))]
+end
+
 function yearday(xdt::DateTime)
     yday = Dates.dayofyear(xdt);
     seconds_in_day = 86400;
@@ -280,14 +287,6 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::String)
     for i = 1:length(glilist)
         #yostring = glilist[i][end-2:end];
 
-        if dataflag == "all"
-        #    yo = parse.(Int, glilist_suffix[yolist]);
-            yo = yos;
-        else
-        #    yo = [parse(Int, yostring)];
-            yo = [yos[i]];
-        end
-
         # load nav files, handle .gz if they are compressed
         ##navfilepath = navdir * gliroot_rt * string(i, pad=3); 
         #navfilepath = navdir * gliroot_rt * yostring * ".gz"; 
@@ -299,6 +298,14 @@ function load_NAV(gliderSN::Int, mission::Int, navdir::String, dataflag::String)
         print(navfilepath * "\n")
         df = CSV.read(navfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
+        if dataflag == "all"
+        #    yo = parse.(Int, glilist_suffix[yolist]);
+            yo = df.YO_NUMBER;
+        else
+        #    yo = [parse(Int, yostring)];
+            yo = [yos[i]];
+        end
+    
         t = DateTime.(df.Timestamp, timeformat);
         z = df.Depth;
         navlon = df.Lon;
@@ -519,15 +526,6 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
     for i = 1:length(pldlist)
         #yostring = pldlist[i][end-2:end];
 
-        # separating '.all' from '.###' files
-        if dataflag == "all"
-        #    yo = parse.(Int, pldlist_suffix[yolist]);
-            yo = yos
-        else
-        #    yo = [parse(Int, yostring)];
-            yo = [yos[i]];
-        end
-
         # load science files, handle .gz if they are compressed
         ##pldfilepath = scidir * pldroot_rt * string(i, pad=3); 
         #pldfilepath = scidir * pldroot_rt * yostring * ".gz";
@@ -539,6 +537,15 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
 
+        # separating '.all' from '.###' files
+        if dataflag == "all"
+        #    yo = parse.(Int, pldlist_suffix[yolist]);
+            yo = df.YO_NUMBER;
+        else
+        #    yo = [parse(Int, yostring)];
+            yo = [yos[i]];
+        end
+    
         # extract location data from data frame
         t = DateTime.(df.PLD_REALTIMECLOCK, timeformat);
         z = missing2nan(df.NAV_DEPTH);
@@ -630,7 +637,7 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
 
         display(yo)
 
-        yo1d = cat(yo1d, yo[1], dims = 1);
+        yo1d = cat(yo1d, yo, dims = 1);
         t1d = cat(t1d, t, dims = 1);
         z1d = cat(z1d, z, dims = 1);
         lon1d = cat(lon1d, lon, dims = 1);
@@ -766,6 +773,7 @@ function seaexplorer_process(sea064pld1d)
     lon = sea064pld1d.lon;
     lat = sea064pld1d.lat;
     t = sea064pld1d.t;
+    yo = sea064pld1d.yo;
 
     badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< DateTime(2020,1,1,0,0,0)));
     if isempty(badind) != true
@@ -806,7 +814,7 @@ function seaexplorer_process(sea064pld1d)
     bb700 = cleanFLBBCDbb700(sea064pld1d.flbbcd_bb_700_scaled);
     cdom = cleanFLBBCDcdom(sea064pld1d.flbbcd_cdom_scaled);
 
-    SEAdata = SeaExplorerData(t, lon, lat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
+    SEAdata = SeaExplorerData(yo, t, lon, lat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
 end
 
 function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)

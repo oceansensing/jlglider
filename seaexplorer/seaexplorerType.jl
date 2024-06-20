@@ -180,6 +180,7 @@ mutable struct SeaExplorer
 end
 
 mutable struct SeaExplorerData
+    yo::Array{Int64}
     t::Array{DateTime};
     lon::Array{Float64};
     lat::Array{Float64};
