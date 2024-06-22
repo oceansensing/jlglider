@@ -1,3 +1,6 @@
+# Usage Example:
+# write_glider_data(glider = "SEA064", mission = 48, csvdir = "./")
+
 workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
 if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
@@ -9,9 +12,6 @@ using Dates, DataFrames, CSV, Plots, Interpolations
 
 function write_glider_data(; glider = "SEA064", mission = "48", csvdir = "./")
 # DG: this function writes out the seaexplorer glider mission data for use with gliderad2cp library
-    #glider = "SEA064";
-    #mission = 48;
-    #csvdir = "./";
 
     nav, nav1d, pld, pld1d = seaexplorer_load_mission(mission);
     seadata = seaexplorer_process(pld1d);
@@ -28,5 +28,3 @@ function write_glider_data(; glider = "SEA064", mission = "48", csvdir = "./")
     CSV.write(csvdir * glider * "_M" * string(mission) * ".csv", seadf);
 
 end
-
-# write_glider_data(glider = "SEA064", mission = 48, csvdir = "./")
