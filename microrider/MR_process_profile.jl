@@ -12,7 +12,7 @@ using NaNMath, Statistics, GLMakie, Plots, ColorSchemes, GibbsSeaWater
 plotly()
 
 gsw = GibbsSeaWater;
-global mr = MR_types.MicroRiderRaw[]; # NOTE!!! if declaring a composite type array as global, then the module name must be included instantiation.
+global mr = MR_types.MicroRiderRaw[]; # NOTE!!! if declaring a composite type array as global, then the module name must be included for instantiation.
 
 project = "NORSE"
 mission = "JM"
