@@ -711,7 +711,7 @@ function load_PLD(gliderSN::Int, mission::Int, scidir::String, dataflag::String)
     return pld_rt, pld1d_rt
 end
 
-function seaexplorer_load_mission(mission)
+function seaexplorer_load_mission(gliderSN, mission)
 
     # setting src and data directory paths
     srcdir = "/Users/gong/GitHub/jlglider/";
@@ -720,7 +720,7 @@ function seaexplorer_load_mission(mission)
     #dataroot = "/Users/gong/Research/sea064/";
 
     if (@isdefined gliderSN) != true
-        gliderSN = 64
+        gliderSN = "SEA064"
     end
 
     if (@isdefined mission) != true
@@ -735,24 +735,36 @@ function seaexplorer_load_mission(mission)
     #deploydate = "20220311"
     #suffix = "data"
 
-    if (gliderSN == 64) & (mission == 37)
+    if (gliderSN == "SEA064") & (mission == 37)
         projectname = "norse"
         deploydate = "20221021"
         suffix = "deployment"
         datadir = dataroot * "sea064-20221021-norse-janmayen-complete/";
         dataflag = "all";
-    elseif (gliderSN == 64) & (mission == 38)
+    elseif (gliderSN == "SEA064") & (mission == 38)
         projectname = "norse"
         deploydate = "20221102"
         suffix = "deployment"
         datadir = dataroot * "sea064-20221102-norse-lofoten-complete/";
         dataflag = "all";
-    elseif (gliderSN == 64) & (mission == 48)
+    elseif (gliderSN == "SEA064") & (mission == 48)
         projectname = "norse"
         deploydate = "20231112"
         suffix = "deployment"
         datadir = dataroot * "sea064-20231112-norse/";
-        dataflag = "all";    
+        dataflag = "all";
+    elseif (gliderSN == "SEA064") & (mission == 58)
+        projectname = "nesma"
+        deploydate = "20240709"
+        suffix = "deployment"
+        datadir = dataroot * "sea064-20240709-nesma";
+        dataflag = "realtime";
+    elseif (gliderSN == "SEA094") & (mission == 41)
+        projectname = "nesma"
+        deploydate = "20240709"
+        suffix = "deployment"
+        datadir = dataroot * "sea094-20240709-nesma";
+        dataflag = "realtime";
     end
 
     if (dataflag == "realtime") | (dataflag == "all")
@@ -763,10 +775,10 @@ function seaexplorer_load_mission(mission)
         scidir = datadir * "science/logs/";
     end
 
-    (sea064nav, sea064nav1d) = load_NAV(gliderSN, mission, navdir, dataflag);
-    (sea064pld, sea064pld1d) = load_PLD(gliderSN, mission, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    (SEAnav, SEAnav1d) = load_NAV(gliderSN, mission, navdir, dataflag);
+    (SEApld, SEApld1d) = load_PLD(gliderSN, mission, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
 
-    return sea064nav, sea064nav1d, sea064pld, sea064pld1d
+    return SEAnav, SEAnav1d, SEApld, SEApld1d
 end
 
 function seaexplorer_process(sea064pld1d)

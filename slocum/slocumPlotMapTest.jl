@@ -6,21 +6,24 @@ end
 using GLMakie, NCDatasets, NaNMath, Dates, Interpolations, ColorSchemes
 #import seaexplorer_functions: seaexplorer_MR_laur_load
 
-region = "JM"
+region = "GS"
 
-lonrange = [-9.5 -6.0];
-latrange = [70.5 71.5]; 
+#lonrange = [-9.5 -6.0];
+#latrange = [70.5 71.5]; 
+
+lonrange = [-65.5 -61.0];
+latrange = [38.0 40.0]; 
 
 latmin, latmax = latrange[1], latrange[2];
 lonmin, lonmax = lonrange[1], lonrange[2];
 
-pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150];
+pzlist = [0, -10, -20, -30, -40, -50, -60, -80, -100, -150, -200];
 pvarlist = ["ctemp", "saltA", "sigma0", "sndspd", "spice0"];
 
-pz = -50;
-pvar = "sndspd"
-#for pvar in pvarlist
-#    for pz in pzlist
+#pz = -50;
+#pvar = "sndspd"
+for pvar in pvarlist
+    for pz in pzlist
         if pvar == "ctemp"
             c1 = glider1.ctemp;
             c2 = glider2.ctemp;
@@ -108,11 +111,14 @@ pvar = "sndspd"
             ylabel = "Latitude",
         )
         ms = 12
-        GLMakie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-5400, 5400))
+        #GLMakie.contourf!(x, y, z, xlims = (lonmin, lonmax), ylims = (latmin, latmax), levels = 128, colormap = :bukavu, colorrange = (-5400, 5400))
+        GLMakie.contourf!(x, y, z, levels = 128, colormap = :bukavu)
+        GLMakie.xlims!(ax, lonmin, lonmax);
+        GLMakie.ylims!(ax, latmin, latmax);
         GLMakie.scatter!(x1[pind1], y1[pind1], color = c1[pind1], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
         GLMakie.scatter!(x2[pind2], y2[pind2], color = c2[pind2], colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
         Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = false)
         fig
         save(figoutdir * pfname, fig)
-#    end
-#end
+    end
+end
