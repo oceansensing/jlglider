@@ -181,9 +181,13 @@ end
 
 mutable struct SeaExplorerData
     yo::Array{Int64}
-    t::Array{DateTime};
-    lon::Array{Float64};
-    lat::Array{Float64};
+    ns::Array{Int64}
+    t::Array{DateTime}
+    lon::Array{Float64}
+    lat::Array{Float64}
+    gpst::Array{DateTime}
+    gpslon::Array{Float64}
+    gpslat::Array{Float64}
     p::Array{Float64}
     z::Array{Float64}
     temp::Array{Float64}

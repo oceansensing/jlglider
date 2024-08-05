@@ -1,0 +1,9 @@
+---
+  gliderName: SEA064
+  gliderSN: 64
+  missionID: 37
+  projectname: norse-janmayen
+  deploydate: 20221021
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: complete
+  dataflag: all

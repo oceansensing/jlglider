@@ -1,0 +1,9 @@
+---
+  gliderName: SEA064
+  gliderSN: 64
+  missionID: 38
+  projectname: norse-lofoten
+  deploydate: 20221102
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: complete
+  dataflag: all
