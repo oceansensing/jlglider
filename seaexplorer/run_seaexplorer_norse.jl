@@ -35,9 +35,8 @@ sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missio
 #sea064 = seaexplorer_process(sea064pld1d);
 jm23 = seaexplorer_process(sea064pld1d);
 
-
-jm = jm22;
-lbe = lbe22;
+#jm = jm22;
+#lbe = lbe22;
 
 #include("freya_MR_laur_load.jl");
 #include("seaexplorer_processing.jl");
