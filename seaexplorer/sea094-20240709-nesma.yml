@@ -2,7 +2,7 @@
   gliderName: SEA094
   gliderSN: 94
   missionID: 41
-  projectname: NESMA
+  project: NESMA
   deploydate: 20240709
   dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
   suffix: complete
