@@ -11,9 +11,9 @@ missionYAML = "sea064-20240720-nesma.yml";
 sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAML);
 sea064nesma0720 = seaexplorer_process(sea064pld1d);
 
-missionYAML = "sea094-20240720-nesma.yml";
-sea094nav, sea094nav1d, sea094pld, sea094pld1d = seaexplorer_load_mission(missionYAML);
-sea094nesma0709 = seaexplorer_process(sea064pld1d);
+#missionYAML = "sea094-20240709-nesma.yml";
+#sea094nav, sea094nav1d, sea094pld, sea094pld1d = seaexplorer_load_mission(missionYAML);
+#sea094nesma0709 = seaexplorer_process(sea064pld1d);
 
 
 # SEA064: M37 is Jan Mayen in 2022, M38 is Lofoten Basin in 2022, M48 is Jan Mayen in 2023, M58 is NESMA 2024
