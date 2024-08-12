@@ -5,6 +5,9 @@ module seaexplorerType
 using Dates
 
 mutable struct NAV_RT
+    gliderSN::Int64
+    missionID::Int64
+    project::String    
     yo::Array{Int64};
     t::Array{DateTime};
     z::Array{Float64};
@@ -29,6 +32,9 @@ mutable struct NAV_RT
 end
 
 mutable struct PLD_RT
+    gliderSN::Int64
+    missionID::Int64
+    project::String    
     yo::Array{Int64};
     t::Array{DateTime};
     z::Array{Float64};
@@ -180,6 +186,9 @@ mutable struct SeaExplorer
 end
 
 mutable struct SeaExplorerData
+    gliderSN::Int64
+    missionID::Int64
+    project::String
     yo::Array{Int64}
     ns::Array{Int64}
     t::Array{DateTime}
