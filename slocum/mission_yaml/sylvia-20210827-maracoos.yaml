@@ -1,0 +1,10 @@
+---
+  gliderType: slocum
+  gliderName: sylvia
+  gliderSN: 417
+  project: maracoos
+  deploydate: 20210827
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: delayed
+  dataflag: delayed
+  

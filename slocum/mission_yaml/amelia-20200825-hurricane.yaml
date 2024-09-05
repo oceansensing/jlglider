@@ -1,0 +1,10 @@
+---
+  gliderType: slocum
+  gliderName: amelia
+  gliderSN: 392
+  project: hurricane
+  deploydate: 20200825
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: delayed
+  dataflag: delayed
+  

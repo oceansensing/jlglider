@@ -60,7 +60,7 @@ function glider_var_load(varin, varrange)
     return varind, varout;
 end
 
-function glider_ctd_load(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
+function glider_ctd_qc(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
     gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 1000.0) .& (17.5 .<= temp .<= 40.0) .& (4.0 .<= cond .<= 6.0)); 
     return t[gind], pres[gind], temp[gind], cond[gind];
 end

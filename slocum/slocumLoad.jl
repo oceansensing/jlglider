@@ -5,13 +5,13 @@
 module slocumLoad
 
 using PyCall
-using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
+using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 
 include("slocumType.jl")
 include("slocumFunc.jl")
 
 import .slocumType: ctdStruct, sciStruct
-import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_load, glider_presfunc
+import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
 
 #=
 # define function for converting an array from python row major to julia column major
@@ -34,6 +34,11 @@ function intersectalajulia4(a,b)
 end
 =#
 
+function glider_ctd_qc(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
+    gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 1000.0) .& (-2.0 .<= temp .<= 40.0) .& (2.0 .<= cond .<= 7.0)); 
+    return t[gind], pres[gind], temp[gind], cond[gind];
+end
+
 function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, mission, glidername, loadmode)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
@@ -41,18 +46,18 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     if loadmode == "uppercase"
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[ST]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[DE]BD", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     else
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     end
 
@@ -139,6 +144,62 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     return ctdData
 end
 
+# new function to load glider CTD data using YAML metadata file (2024-09-05)
+function load_glider_ctd(missionYAMLpath::String)
+    dbdreader = pyimport("dbdreader");
+    gsw = GibbsSeaWater;
+
+    # load mission YAML file
+    missionYAML = YAML.load(IOBuffer(read(missionYAMLpath, String)));
+    glidertype = missionYAML["gliderType"];
+    glidername = missionYAML["gliderName"];
+    gliderSN = missionYAML["gliderSN"];
+    project = missionYAML["project"];
+    dataroot = missionYAML["dataroot"];
+    deploydate = string(missionYAML["deploydate"]);
+    datamode = missionYAML["dataflag"];
+    suffix = missionYAML["suffix"];
+
+    datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
+    cacdir = datadir * "cache/";
+
+    if datamode == "realtime"
+        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+    else
+        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+    end
+
+    engvars = dataGlider.parameterNames["eng"];
+    scivars = dataGlider.parameterNames["sci"];
+
+    t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
+    #t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
+    tis = sortperm(sci_m_present_time);
+
+    mlon = NaNMath.mean(lon);
+    mlat = NaNMath.mean(lat);
+
+    # this step set the glider mission's time limits to +/- 200 days of the median time value, should apply to most glider missions except for extremely long ones.
+    tmedian = median(t);
+    trange = [tmedian - 3600*24*200; tmedian + 3600*24*200];
+
+    tctd, pres, temp, cond = glider_ctd_qc(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
+    #tctd2, pres2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
+
+    z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 
+    salt = gsw.gsw_sp_from_c.(cond*10, temp, pres*10);
+    saltA = gsw.gsw_sa_from_sp.(salt, pres*10, mlon, mlat);
+    ctemp = gsw.gsw_ct_from_t.(saltA, temp, pres*10);
+    rho = gsw.gsw_rho.(saltA, ctemp, pres*10);
+    sigma0 = gsw.gsw_sigma0.(saltA, ctemp);
+    spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
+    sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
+
+    ctdData = ctdStruct(project, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    return ctdData
+end
 
 function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     dbdreader = pyimport("dbdreader");
@@ -163,10 +224,10 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     # setup glider data loading using dbdreader
    if datamode == "realtime"
         #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT]*", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
     else
         #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
+        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE]*", cacheDir = cacdir, complement_files_only = true, skip_initial_line = true);
     end
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
@@ -178,7 +239,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     mlon = NaNMath.mean(lon);
     mlat = NaNMath.mean(lat);
 
-    tctd, pres, temp, cond = glider_ctd_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
+    tctd, pres, temp, cond = glider_ctd_qc(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
     #tctd2, pres2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
 
     z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 

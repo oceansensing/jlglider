@@ -1,0 +1,10 @@
+---
+  gliderType: slocum
+  gliderName: striper
+  gliderSN: 415
+  project: maracoos
+  deploydate: 20170518
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: delayed
+  dataflag: delayed
+  
