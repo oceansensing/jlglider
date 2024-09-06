@@ -10,7 +10,8 @@ using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 include("slocumType.jl")
 include("slocumFunc.jl")
 
-import .slocumType: ctdStruct, sciStruct
+#import .slocumType: ctdStruct, sciStruct
+using .slocumType: ctdStruct, sciStruct
 import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
 
 #=
@@ -46,18 +47,18 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     if loadmode == "uppercase"
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     else
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE]*[dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     end
 
@@ -140,7 +141,7 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
-    ctdData = ctdStruct(mission, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = slocumType.ctdStruct(mission, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 

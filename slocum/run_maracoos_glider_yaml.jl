@@ -7,12 +7,13 @@
 using PyCall
 using Glob, YAML, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 
-include("slocumType.jl")
+#include("slocumType.jl")
 include("slocumFunc.jl")
 include("slocumLoad.jl")
 include("slocumPlot.jl")
 
-import .slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
+using Main.slocumLoad.slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
+#using Main.slocumLoad.slocumType: ctdStruct
 import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_qc, glider_presfunc
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc
 import .slocumPlot: plot_glider_ctd
@@ -20,9 +21,16 @@ import .slocumPlot: plot_glider_ctd
 missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
 missionYAMLpath = Glob.glob("*.yaml", missionYAMLdir);
 
-for i = 1:length(missionYAMLpath)
-    gliderCTDraw = load_glider_ctd(missionYAMLpath[i]);
+gliderCTDarray = ctdStruct[];
 
+for i = 1:length(missionYAMLpath)
+#for i = 6:6    
+    display(missionYAMLpath[i])
+    push!(gliderCTDarray, load_glider_ctd(missionYAMLpath[i]));
+end
+
+for i = 1:length(gliderCTDarray)
+    gliderCTDraw = gliderCTDarray[i];
     lonrange = [NaNMath.minimum(gliderCTDraw.lon) NaNMath.maximum(gliderCTDraw.lon)];
     latrange = [NaNMath.minimum(gliderCTDraw.lat) NaNMath.maximum(gliderCTDraw.lat)]; 
 
