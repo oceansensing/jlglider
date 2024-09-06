@@ -20,36 +20,46 @@ import .slocumPlot: plot_glider_ctd
 missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
 missionYAMLpath = Glob.glob("*.yaml", missionYAMLdir);
 
-i = 1;
-gliderCTDraw = load_glider_ctd(missionYAMLpath[i]);
+for i = 1:length(missionYAMLpath)
+    gliderCTDraw = load_glider_ctd(missionYAMLpath[i]);
 
-lonrange = [NaNMath.minimum(gliderCTDraw.lon) NaNMath.maximum(gliderCTDraw.lon)];
-latrange = [NaNMath.minimum(gliderCTDraw.lat) NaNMath.maximum(gliderCTDraw.lat)]; 
+    lonrange = [NaNMath.minimum(gliderCTDraw.lon) NaNMath.maximum(gliderCTDraw.lon)];
+    latrange = [NaNMath.minimum(gliderCTDraw.lat) NaNMath.maximum(gliderCTDraw.lat)]; 
 
-pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
-iday = 1; # day intervals for plotting
-ms = 6; # marker size
-tsms = 6; # time series marker size
-pres = (1200, 800); # plot resolution
-tspres = (1000, 1000); # time series plot resolution
-fs = 24; # font size
-ps = plotSetting(pint, iday, ms, tsms, pres, tspres, fs);
+    pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+    iday = 1; # day intervals for plotting
+    ms = 6; # marker size
+    tsms = 6; # time series marker size
+    pres = (1200, 800); # plot resolution
+    tspres = (1000, 1000); # time series plot resolution
+    fs = 24; # font size
+    ps = plotSetting(pint, iday, ms, tsms, pres, tspres, fs);
 
-figoutdir = "/Users/gong/GitHub/jlglider/slocum/figures/";
-ctemprange = (minimum(gliderCTDraw.ctemp), maximum(gliderCTDraw.ctemp));
-condrange = (minimum(gliderCTDraw.cond), maximum(gliderCTDraw.cond));
-saltArange = (minimum(gliderCTDraw.saltA), maximum(gliderCTDraw.saltA));
-sigma0range = (minimum(gliderCTDraw.sigma0), maximum(gliderCTDraw.sigma0));
-sndspdrange = (minimum(gliderCTDraw.sndspd), maximum(gliderCTDraw.sndspd));
-spice0range = (minimum(gliderCTDraw.spice0), maximum(gliderCTDraw.spice0));
-temprange = ctemprange;
-saltrange = saltArange;
-pst_glider = plotStruct(figoutdir, gliderCTDraw.mission, gliderCTDraw.glidername, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+    ctempstd = std(gliderCTDraw.ctemp);
+    condstd = std(gliderCTDraw.cond);
+    saltAstd = std(gliderCTDraw.saltA);
+    sigma0std = std(gliderCTDraw.sigma0);
+    sndspdstd = std(gliderCTDraw.sndspd);
+    spice0std = std(gliderCTDraw.spice0);
 
-plot_glider_ctd(gliderCTDraw, ps, pst_glider);
+    nsig = 2.5
 
+    figoutdir = "/Users/gong/GitHub/jlglider/slocum/figures/";
+    ctemprange = (NaNMath.mean(gliderCTDraw.ctemp) .- nsig*ctempstd, NaNMath.mean(gliderCTDraw.ctemp) .+ nsig*ctempstd);
+    condrange = (NaNMath.mean(gliderCTDraw.cond) .- nsig*condstd, NaNMath.mean(gliderCTDraw.cond) .+ nsig*condstd);
+    saltArange = (NaNMath.mean(gliderCTDraw.saltA) .- nsig*saltAstd, NaNMath.mean(gliderCTDraw.saltA) .+ nsig*saltAstd);
+    sigma0range = (NaNMath.mean(gliderCTDraw.sigma0) .- nsig*sigma0std, NaNMath.mean(gliderCTDraw.sigma0) .+ nsig*sigma0std);
+    sndspdrange = (NaNMath.mean(gliderCTDraw.sndspd) .- nsig*sndspdstd, NaNMath.mean(gliderCTDraw.sndspd) .+ nsig*sndspdstd);
+    spice0range = (NaNMath.mean(gliderCTDraw.spice0) .- nsig*spice0std, NaNMath.mean(gliderCTDraw.spice0) .+ nsig*spice0std);
+    temprange = ctemprange;
+    saltrange = saltArange;
+    pst_glider = plotStruct(figoutdir, gliderCTDraw.mission, gliderCTDraw.glidername, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+
+    plot_glider_ctd(gliderCTDraw, ps, pst_glider);
+end
 
 # old code below 2024-09-05
+#=
 datamode = "delayed"; # delayed or realtime
 mission = "MARACOOS";
 
@@ -100,3 +110,4 @@ glider1 = electaCTDraw;
 glider2 = glider1;
 #plot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst);
 include("slocumPlotMapTest.jl");
+=#
