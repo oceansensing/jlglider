@@ -164,7 +164,7 @@ function datetime2yearday(xdt::DateTime)
     return ydayfrac;
 end
 
-# DG 2024-09-06, ChatGPT 4o
+# DG 2024-09-06, with help from ChatGPT 4o
 function yearday2datetime(yyyy::Int, yearday::Float64)
     # Separate integer part (day) and fractional part (time of day)
     int_day = Int(floor(yearday))  # Get the integer part of the day
