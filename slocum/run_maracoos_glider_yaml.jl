@@ -1,9 +1,7 @@
-# this script loads Slocum glider data as configured for MARACOOS W missions using dbdreader
+# this script loads Slocum glider data using dbdreader
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
-# gong@vims.edu 2024-09-05: added a function to load glider data from a yaml metadata file
+# gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
 #
-# setup directories
-
 using PyCall
 using Glob, YAML, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 
