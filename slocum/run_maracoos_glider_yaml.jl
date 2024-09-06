@@ -2,32 +2,40 @@
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
 # gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
 #
-using PyCall
-using Glob, YAML, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 
-#include("slocumType.jl")
+using PyCall
+using Glob, YAML, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML, JLD2
+
+include("slocumType.jl")
 include("slocumFunc.jl")
 include("slocumLoad.jl")
 include("slocumPlot.jl")
 
-using Main.slocumLoad.slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
+using .slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
 #using Main.slocumLoad.slocumType: ctdStruct
-import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd_qc, glider_presfunc
-import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc
+import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
+import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .slocumPlot: plot_glider_ctd
 
+reloadflag = false
+
+gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
 missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
-missionYAMLpath = Glob.glob("*.yaml", missionYAMLdir);
 
-gliderCTDarray = ctdStruct[];
-
-for i = 1:length(missionYAMLpath)
-#for i = 6:6    
-    display(missionYAMLpath[i])
-    push!(gliderCTDarray, load_glider_ctd(missionYAMLpath[i]));
+if @isdefined(gliderCTDarray) == false
+    if reloadflag == true
+        gliderCTDarray = slocumYAMLload(missionYAMLdir);
+        jldsave(gliderdatadir * "slocumCTDdata.jld2"; gliderCTDarray);
+        display("Done reloading data.")
+    else
+        gliderCTDarray = load(gliderdatadir * "slocumCTDdata.jld2")["gliderCTDarray"];
+        display("Done loading data.")
+    end
 end
 
+
 for i = 1:length(gliderCTDarray)
+    #i = 6
     gliderCTDraw = gliderCTDarray[i];
     lonrange = [NaNMath.minimum(gliderCTDraw.lon) NaNMath.maximum(gliderCTDraw.lon)];
     latrange = [NaNMath.minimum(gliderCTDraw.lat) NaNMath.maximum(gliderCTDraw.lat)]; 
@@ -50,7 +58,8 @@ for i = 1:length(gliderCTDarray)
 
     nsig = 2.5
 
-    figoutdir = "/Users/gong/GitHub/jlglider/slocum/figures/";
+    #figoutdir = "/Users/gong/GitHub/jlglider/slocum/figures/";
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
     ctemprange = (NaNMath.mean(gliderCTDraw.ctemp) .- nsig*ctempstd, NaNMath.mean(gliderCTDraw.ctemp) .+ nsig*ctempstd);
     condrange = (NaNMath.mean(gliderCTDraw.cond) .- nsig*condstd, NaNMath.mean(gliderCTDraw.cond) .+ nsig*condstd);
     saltArange = (NaNMath.mean(gliderCTDraw.saltA) .- nsig*saltAstd, NaNMath.mean(gliderCTDraw.saltA) .+ nsig*saltAstd);
@@ -59,9 +68,9 @@ for i = 1:length(gliderCTDarray)
     spice0range = (NaNMath.mean(gliderCTDraw.spice0) .- nsig*spice0std, NaNMath.mean(gliderCTDraw.spice0) .+ nsig*spice0std);
     temprange = ctemprange;
     saltrange = saltArange;
-    pst_glider = plotStruct(figoutdir, gliderCTDraw.mission, gliderCTDraw.glidername, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+    pst = plotStruct(figoutdir, gliderCTDraw.mission, gliderCTDraw.glidername, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
 
-    plot_glider_ctd(gliderCTDraw, ps, pst_glider);
+    plot_glider_ctd(gliderCTDraw, ps, pst);
 end
 
 # old code below 2024-09-05
