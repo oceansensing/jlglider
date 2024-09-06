@@ -60,10 +60,12 @@ function glider_var_load(varin, varrange)
     return varind, varout;
 end
 
+#=
 function glider_ctd_qc(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
     gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 1000.0) .& (17.5 .<= temp .<= 40.0) .& (4.0 .<= cond .<= 6.0)); 
     return t[gind], pres[gind], temp[gind], cond[gind];
 end
+=#
 
 function glider_var_load(t::Array{Float64}, pres::Array{Float64}, glidervar::Array{Float64}, trange::Array{Float64}, varlim::Array{Float64})
     if isempty(glidervar) != true
@@ -104,6 +106,35 @@ function glider_var_load(glidervar, trange, varlim, p, lat)
         varfunc = [];
     end
     return varfunc, vartime, varpres, varraw, varz
+end
+
+# DG 2024-09-06, adopted from seaexplorer
+function datetime2yearday(xdt::DateTime)
+    year = Dates.year(xdt);
+    yday = Dates.dayofyear(xdt);
+    seconds_in_day = 86400;
+    ydayfrac = yday + (Dates.hour(xdt) * 3600 .+ Dates.minute(xdt) * 60 .+ Dates.second(xdt)) ./ seconds_in_day;
+    return ydayfrac;
+end
+
+# DG 2024-09-06, ChatGPT 4o
+function yearday2datetime(yyyy::Int, yearday::Float64)
+    # Separate integer part (day) and fractional part (time of day)
+    int_day = Int(floor(yearday))  # Get the integer part of the day
+    fractional_day = yearday - int_day  # Get the fractional part of the day
+
+    # Convert fractional day into hours, minutes, and seconds
+    total_seconds = Int(round(fractional_day * 86400))  # 86400 seconds in a day
+    hours = div(total_seconds, 3600)  # Number of full hours
+    minutes = div(total_seconds % 3600, 60)  # Number of full minutes
+    seconds = total_seconds % 60  # Remaining seconds
+
+    # Start from January 1st of the given year and add the number of days
+    dateint = Date(yyyy, 1, 1) + Day(int_day - 1)  # Subtract 1 because days start from 1
+
+    # Create the final DateTime with the computed hours, minutes, and seconds
+    return DateTime(year(dateint), month(dateint), day(dateint), hours, minutes, seconds)
+    #return DateTime(date) + Time(hours, minutes, seconds)
 end
 
 end #slocumFunc module

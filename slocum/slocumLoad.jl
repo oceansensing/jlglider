@@ -12,7 +12,7 @@ include("slocumFunc.jl")
 
 #import .slocumType: ctdStruct, sciStruct
 using .slocumType: ctdStruct, sciStruct
-import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
+using .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc, yearday2datetime, datetime2yearday
 
 #=
 # define function for converting an array from python row major to julia column major
@@ -477,6 +477,22 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     end
 
     return chlaData, cdomData, bb700Data, bparData;
+end
+
+# this function load the glider CTD data from the gliderData directory using metadata from YAML file for each mission
+function slocumYAMLload(missionYAMLdir::String)
+    if (@isdefined missionYAMLdir) == false
+        missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
+    end
+    missionYAMLpath = Glob.glob("*.yaml", missionYAMLdir);
+
+    gliderCTDarray = ctdStruct[];
+
+    for i = 1:length(missionYAMLpath)
+        display(missionYAMLpath[i])
+        push!(gliderCTDarray, load_glider_ctd(missionYAMLpath[i]));
+    end
+    return gliderCTDarray;
 end
 
 end
