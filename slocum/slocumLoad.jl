@@ -36,7 +36,7 @@ end
 =#
 
 function glider_ctd_qc(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
-    gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 1000.0) .& (-2.0 .<= temp .<= 40.0) .& (2.0 .<= cond .<= 7.0)); 
+    gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 105.0) .& (-2.0 .<= temp .<= 40.0) .& (2.0 .<= cond .<= 7.0)); 
     return t[gind], pres[gind], temp[gind], cond[gind];
 end
 
@@ -175,21 +175,97 @@ function load_glider_ctd(missionYAMLpath::String)
     engvars = dataGlider.parameterNames["eng"];
     scivars = dataGlider.parameterNames["sci"];
 
-    t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
+    tbound = 3600*24*365.0;
+
+    # load engineering and CTD data from raw glider DBD and EBD files
+    m_present_time = dataGlider.get("m_present_time")[1];
+    m_present_time_ind = findall(median(m_present_time) - tbound .< m_present_time .< median(m_present_time) + tbound);
+    m_present_time = m_present_time[m_present_time_ind];
+    
+    sci_m_present_time = dataGlider.get("sci_m_present_time")[1];
+    sci_m_present_time_ind = findall(median(sci_m_present_time) - tbound .< sci_m_present_time .< median(sci_m_present_time) + tbound);
+    sci_m_present_time = sci_m_present_time[sci_m_present_time_ind];
+    
+    #m_lat = dataGlider.get("m_lat", return_nans=true);
+    m_gps_lat = dataGlider.get("m_gps_lat", return_nans=false);
+    #m_lat_t = m_lat[1];
+    #m_lat = m_lat[2];
+    #m_lat_ind = findall((median(m_lat_t) - tbound .< m_lat_t .< median(m_lat_t) + tbound) .& (0.1 .< m_lat .< 90.0));
+    #m_lat_t = m_lat_t[m_lat_ind];
+    #m_lat = m_lat[m_lat_ind];
+    
+    #m_lon = dataGlider.get("m_lon", return_nans=true); 
+    m_gps_lon = dataGlider.get("m_gps_lon", return_nans=false);
+    #m_lon_t = m_lon[1];
+    #m_lon = m_lon[2];
+    #m_lon_ind = findall((median(m_lon_t) - tbound .< m_lon_t .< median(m_lon_t) + tbound) .& (-180.0 .< m_lon .< 180.0));
+    #m_lon_t = m_lon_t[m_lon_ind];
+    #m_lon = m_lon[m_lon_ind];
+    
+    sci_water_pressure = dataGlider.get("sci_water_pressure", return_nans=true);
+    #sci_water_pressure_t = sci_water_pressure[1];
+    #sci_water_pressure = sci_water_pressure[2];
+    #sci_water_pressure_ind = findall((median(sci_water_pressure_t) - tbound .< sci_water_pressure_t .< median(sci_water_pressure_t) + tbound) .& (0.0 .< sci_water_pressure .< 105.0));
+    #sci_water_pressure_t = sci_water_pressure_t[sci_water_pressure_ind];
+    #sci_water_pressure = sci_water_pressure[sci_water_pressure_ind];
+    
+    sci_water_temp = dataGlider.get("sci_water_temp", return_nans=true);
+    #sci_water_temp_t = sci_water_temp[1];
+    #sci_water_temp = sci_water_temp[2];
+    #sci_water_temp_ind = findall((median(sci_water_temp_t) - tbound .< sci_water_temp_t .< median(sci_water_temp_t) + tbound) .& (0.1 .< sci_water_temp .< 40.0));
+    #sci_water_temp_t = sci_water_temp_t[sci_water_temp_ind];
+    #sci_water_temp = sci_water_temp[sci_water_temp_ind];
+    
+    sci_water_cond = dataGlider.get("sci_water_cond", return_nans=true);
+    #sci_water_cond_t = sci_water_cond[1];
+    #sci_water_cond = sci_water_cond[2];
+    #sci_water_cond_ind = findall((median(sci_water_cond_t) - tbound .< sci_water_cond_t .< median(sci_water_cond_t) + tbound) .& (2.0 .< sci_water_cond .< 7.0));
+    #sci_water_cond_t = sci_water_cond_t[sci_water_cond_ind];
+    #sci_water_cond = sci_water_cond[sci_water_cond_ind];
+    
+    #t, sci_m_present_time, lon, lat, m_pressure, sci_water_pressure, sci_water_temp, sci_water_cond = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "m_pressure", "sci_water_pressure", "sci_water_temp", "sci_water_cond");
     #t2, sci_m_present_time2, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
-    tis = sortperm(sci_m_present_time);
+    
+    mlon = NaNMath.mean(m_gps_lon[2]);
+    mlat = NaNMath.mean(m_gps_lat[2]);
 
-    mlon = NaNMath.mean(lon);
-    mlat = NaNMath.mean(lat);
+    presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, tbound);
 
-    # this step set the glider mission's time limits to +/- 200 days of the median time value, should apply to most glider missions except for extremely long ones.
-    tmedian = median(t);
-    trange = [tmedian - 3600*24*200; tmedian + 3600*24*200];
+    lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, tbound, [-80.0 -50.0], presfunc, mlat);
+    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, tbound, [20.0 60.0], presfunc, mlat); 
+ 
+    tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, tbound, [0.1 40.0], presfunc, mlat)
+    condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, tbound, [0.01 100.0], presfunc, mlat)
 
-    tctd, pres, temp, cond = glider_ctd_qc(sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis], trange);
-    #tctd2, pres2, temp2, temp2ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_water_temp, trange, [0.1 40.0]);
 
+    # find common glider values
+    tctd = unique(intersect(prestime, temptime, condtime));
+    tctdT = intersectalajulia2(tctd, temptime)[3];
+    tctdC = intersectalajulia2(tctd, condtime)[3];
+    tctdP = intersectalajulia2(tctd, prestime)[3];
+ 
+    lonf = lonfunc(tctd);
+    latf = latfunc(tctd);
+
+    pres = presraw[tctdP];
     z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 
+    temp = tempraw[tctdT];
+    cond = condraw[tctdC];
+
+    
+    # this step set the glider mission's time limits to +/- 365 days of the median time value, should apply to most glider missions except for extremely long ones.
+    #tmedian = median(t);
+    #trange = [tmedian - tbound; tmedian + tbound];
+
+    # QC the loaded CTD data
+    #sci_m_present_time, sci_water_pressure, sci_water_temp, sci_water_cond = glider_ctd_qc(sci_m_present_time, sci_water_pressure, sci_water_temp, sci_water_cond, trange);
+
+    # sort the data by time
+    #tis = sortperm(sci_m_present_time);
+    #tctd, pres, temp, cond = sci_m_present_time[tis], sci_water_pressure[tis], sci_water_temp[tis], sci_water_cond[tis];
+
+    # apply Gibbs SeaWater functions to calculate derived values
+    #z = gsw.gsw_z_from_p.(pres*10, mlat, 0.0, 0.0); 
     salt = gsw.gsw_sp_from_c.(cond*10, temp, pres*10);
     saltA = gsw.gsw_sa_from_sp.(salt, pres*10, mlon, mlat);
     ctemp = gsw.gsw_ct_from_t.(saltA, temp, pres*10);
@@ -198,7 +274,8 @@ function load_glider_ctd(missionYAMLpath::String)
     spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
-    ctdData = ctdStruct(project, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    # save glider CTD data to a ctdStruct object
+    ctdData = ctdStruct(project, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
