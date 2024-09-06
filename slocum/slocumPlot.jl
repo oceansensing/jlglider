@@ -1,14 +1,9 @@
 module slocumPlot
 
+include("slocumFunc.jl")
+using .slocumFunc: yearday2datetime, datetime2yearday
 using NaNMath, GibbsSeaWater, Dates, Interpolations
 using GLMakie, ColorSchemes
-
-function yearday(xdt::DateTime)
-    yday = Dates.dayofyear(xdt);
-    seconds_in_day = 86400;
-    ydayfrac = yday + (Dates.hour(xdt) * 3600 .+ Dates.minute(xdt) * 60 .+ Dates.second(xdt)) ./ seconds_in_day;
-    return ydayfrac;
-end
 
 function datetick(unix_t)
     x = unix_t
@@ -77,11 +72,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #end
     #x = tctd;
     #x0 = datetime2unix.(DateTime(string(Dates.year(unix2datetime(gliderCTD.t[1]))) * "-01-01"));
-    yyyy0 = string(Dates.year(unix2datetime(gliderCTD.t[1])));
-    mm0 = string(Dates.month(unix2datetime(gliderCTD.t[1])));
-    dd0 = string(Dates.day(unix2datetime(gliderCTD.t[1])));
+    yyyy0 = string(Dates.year(unix2datetime(gliderCTD.t[1])), pad=4);
+    mm0 = string(Dates.month(unix2datetime(gliderCTD.t[1])), pad=2);
+    dd0 = string(Dates.day(unix2datetime(gliderCTD.t[1])), pad=2);
     tdt = unix2datetime.(gliderCTD.t); 
-    yday = yearday.(tdt);
+    yday = datetime2yearday.(tdt);
 
     x = yday;
     xdt, xtick, xticklabel = datetick(x);
@@ -94,9 +89,9 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.tempmin;
     zmax = pst.tempmax;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Temperature",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Temperature",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -120,10 +115,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.condmin;
     zmax = pst.condmax;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Conductivity",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conductivity",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conductivity",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -146,10 +141,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.saltmin;
     zmax = pst.saltmax;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Salinity",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Salinity",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Salinity",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -172,10 +167,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.tempmin;
     zmax = pst.tempmax;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Conservative Temperature",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conservative Temperature",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conservative Temperature",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -199,10 +194,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.saltmin;
     zmax = pst.saltmax;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Absolute Salinity",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Absolute Salinity",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Absolute Salinity",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -226,10 +221,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.sigma0min;
     zmax = pst.sigma0max;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Potential Density",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Potential Density",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Potential Density",
 
         xlabel = "Year Day",
         ylabel = "Depth (m)"
@@ -254,10 +249,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z);
     zmin = pst.spice0min;
     zmax = pst.spice0max;
-    fig = Figure(resolution = pres, fontsize = fs)
+    fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Spiciness0",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Spice0",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Spice0",
 
         xlabel = "Year Day",
         ylabel = "Depth (m)"
@@ -283,10 +278,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.sndspdmin;
     zmax = pst.sndspdmax;
-    fig = Figure(resolution = pres, fontsize = fs);
+    fig = Figure(; size = pres, fontsize = fs);
     ax = Axis(fig[1, 1],
         #title = mission * " – " * uppercasefirst(glidername) * " sound speed",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sound Speed",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sound Speed",
         #title =  uppercasefirst(glidername) * " Sound Speed",
         xlabel = "Year Day",
         ylabel = "Depth (m)",
@@ -315,10 +310,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sigma0;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres, fontsize = fs)
+    fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " CT/SA",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " CT/SA",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " CT/SA",
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
@@ -338,10 +333,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sndspd;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres, fontsize = fs)
+    fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
         xlabel = "Spiciness",
         ylabel = "Potential Density Anomaly"
     )
@@ -362,10 +357,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sigma0;
     zmin = NaNMath.minimum(z);
     zmax = NaNMath.maximum(z); 
-    fig = Figure(resolution = tspres, fontsize = fs)
+    fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " T/S",
-        title = uppercasefirst(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " T/S",
+        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " T/S",
         xlabel = "Practical Salinity",
         ylabel = "In-Situ Temperature"
     )
