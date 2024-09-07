@@ -178,11 +178,11 @@ function load_glider_ctd(missionYAMLpath::String)
 
     # load engineering and CTD data from raw glider DBD and EBD files
     m_present_time = dataGlider.get("m_present_time")[1];
-    m_present_time_ind = findall(median(m_present_time) - tbound .< m_present_time .< median(m_present_time) + tbound);
+    m_present_time_ind = findall((NaNMath.median(m_present_time) - tbound) .< m_present_time .< (NaNMath.median(m_present_time) + tbound));
     m_present_time = m_present_time[m_present_time_ind];
     
     sci_m_present_time = dataGlider.get("sci_m_present_time")[1];
-    sci_m_present_time_ind = findall(median(sci_m_present_time) - tbound .< sci_m_present_time .< median(sci_m_present_time) + tbound);
+    sci_m_present_time_ind = findall((NaNMath.median(sci_m_present_time) - tbound) .< sci_m_present_time .< (NaNMath.median(sci_m_present_time) + tbound));
     sci_m_present_time = sci_m_present_time[sci_m_present_time_ind];
     
     m_gps_lat = dataGlider.get("m_gps_lat", return_nans=false);

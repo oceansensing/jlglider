@@ -134,7 +134,7 @@ function glider_var_load(glidervar, tbound::Float64, varlim, presfunc, lat)
     gsw = GibbsSeaWater;
     if isempty(glidervar) != true
         #presfunc, prestime, presraw = glider_presfunc(p, trange);
-        varind = findall((median(glidervar[1]) - tbound .<= glidervar[1] .<= median(glidervar[1]) + tbound) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
+        varind = findall(((NaNMath.median(glidervar[1]) - tbound) .<= glidervar[1] .<= (NaNMath.median(glidervar[1]) + tbound)) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
         vartime = glidervar[1][varind];
         varraw = glidervar[2][varind];
         sortedvarind = sortperm(vartime);

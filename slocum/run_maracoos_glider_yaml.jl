@@ -35,7 +35,8 @@ end
 
 
 for i = 1:length(gliderCTDarray)
-    #i = 6
+    #i = 8
+    display(i)
     gliderCTDraw = gliderCTDarray[i];
     lonrange = [NaNMath.minimum(gliderCTDraw.lon) NaNMath.maximum(gliderCTDraw.lon)];
     latrange = [NaNMath.minimum(gliderCTDraw.lat) NaNMath.maximum(gliderCTDraw.lat)]; 
