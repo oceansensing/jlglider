@@ -17,7 +17,7 @@ import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_pre
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .slocumPlot: plot_glider_ctd
 
-reloadflag = false
+reloadflag = true
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
 missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
