@@ -8,7 +8,7 @@ include("slocumFunc.jl")
 using .slocumType: ctdStruct, sciStruct
 using .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc, yearday2datetime, datetime2yearday
 
-missionYAMLpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/electa-20210827-maracoos.yaml"
+missionYAMLpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/electa-20230321-maracoos.yaml"
 
 dbdreader = pyimport("dbdreader");
 gsw = GibbsSeaWater;
@@ -149,4 +149,4 @@ sigma0 = gsw.gsw_sigma0.(saltA, ctemp);
 spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
 sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
-ctdData = ctdStruct(project, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+ctdData = ctdStruct(project, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);

@@ -49,7 +49,7 @@ end
 
 function glider_presfunc(sci_water_pressure, tbound::Float64)
     if isempty(sci_water_pressure) != true
-        presind = findall((median(sci_water_pressure[1]) - tbound .<= sci_water_pressure[1] .<= median(sci_water_pressure[1]) + tbound) .& (300.0 .>= sci_water_pressure[2] .>= 0.0));
+        presind = findall(((NaNMath.median(sci_water_pressure[1]) - tbound) .<= sci_water_pressure[1] .<= (NaNMath.median(sci_water_pressure[1]) + tbound)) .& (300.0 .>= sci_water_pressure[2] .>= 0.0));
         prestime = sci_water_pressure[1][presind]; 
         presraw = sci_water_pressure[2][presind];
         sortedpind = sortperm(prestime);
