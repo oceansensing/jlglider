@@ -102,6 +102,20 @@ latfunc, lattime, latpres, latraw, latz = glider_var_load(m_gps_lat, tbound, [20
 tempfunc, temptime, temppres, tempraw, tempz = glider_var_load(sci_water_temp, tbound, [0.1 40.0], presfunc, mlat)
 condfunc, condtime, condpres, condraw, condz = glider_var_load(sci_water_cond, tbound, [0.01 100.0], presfunc, mlat)
 
+glidervar = sci_water_temp;
+varlim = [0.1 40.0];
+
+varind = findall(((NaNMath.median(glidervar[1]) - tbound) .<= glidervar[1] .<= (NaNMath.median(glidervar[1]) + tbound)) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
+vartime = glidervar[1][varind];
+varraw = glidervar[2][varind];
+sortedvarind = sortperm(vartime);
+varrawval = varraw[sortedvarind];
+vartime = vartime[sortedvarind];
+varfunc = linear_interpolation(vartime, varrawval, extrapolation_bc=Line()); 
+vardtime = unix2datetime.(vartime);
+varpres = presfunc(vartime);
+
+
 tctd = unique(intersect(prestime, temptime, condtime));
 tctdT = intersectalajulia2(tctd, temptime)[3];
 tctdC = intersectalajulia2(tctd, condtime)[3];
