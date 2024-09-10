@@ -6,9 +6,9 @@ include("slocumFunc.jl")
 
 #import .slocumType: ctdStruct, sciStruct
 using .slocumType: ctdStruct, sciStruct
-using .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc, yearday2datetime, datetime2yearday
+using .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc, yearday2datetime, datetime2yearday, unix2yearday, yearday2unix
 
-missionYAMLpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/electa-20230321-maracoos.yaml"
+missionYAMLpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/sylvia-20210827-maracoos.yaml"
 
 dbdreader = pyimport("dbdreader");
 gsw = GibbsSeaWater;
@@ -28,59 +28,59 @@ datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffi
 cacdir = datadir * "cache/";
 
 if datamode == "realtime"
-    #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = true, skip_initial_line = true);
+    dataGliderEng = dbdreader.MultiDBD(pattern = datadir * "*.[sS][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+    dataGliderSci = dbdreader.MultiDBD(pattern = datadir * "*.[tT][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
 else
-    #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-    dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = true, skip_initial_line = true);
+    dataGliderEng = dbdreader.MultiDBD(pattern = datadir * "*.[dD][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+    dataGliderSci = dbdreader.MultiDBD(pattern = datadir * "*.[eE][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
 end
 
-engvars = dataGlider.parameterNames["eng"];
-scivars = dataGlider.parameterNames["sci"];
+engvars = dataGliderEng.parameterNames["eng"];
+scivars = dataGliderSci.parameterNames["sci"];
 
-swt = dataGlider.get("sci_water_temp", decimalLatLon=true, discardBadLatLon=true, return_nans=true, include_source=false, max_values_to_read=-1)[1]
-gswt = findall(1.0 .< swt .< 40)
+#swt = dataGlider.get("sci_water_temp", decimalLatLon=true, discardBadLatLon=true, return_nans=true, include_source=false, max_values_to_read=-1)[1]
+#gswt = findall(1.0 .< swt .< 40)
 
 tbound = 3600*24*365.0;
 
 # load engineering and CTD data from raw glider DBD and EBD files
-m_present_time = dataGlider.get("m_present_time")[1];
+m_present_time = dataGliderEng.get("m_present_time")[1];
 m_present_time_ind = findall(NaNMath.median(m_present_time) - tbound .< m_present_time .< NaNMath.median(m_present_time) + tbound);
 m_present_time = m_present_time[m_present_time_ind];
 
-sci_m_present_time = dataGlider.get("sci_m_present_time")[1];
+sci_m_present_time = dataGliderSci.get("sci_m_present_time")[1];
 sci_m_present_time_ind = findall(NaNMath.median(sci_m_present_time) - tbound .< sci_m_present_time .< NaNMath.median(sci_m_present_time) + tbound);
 sci_m_present_time = sci_m_present_time[sci_m_present_time_ind];
 
-m_gps_lat = dataGlider.get("m_gps_lat", return_nans=false);
+m_gps_lat = dataGliderEng.get("m_gps_lat", return_nans=false);
 #m_lat_t = m_lat[1];
 #m_lat = m_lat[2];
 #m_lat_ind = findall((median(m_lat_t) - tbound .< m_lat_t .< median(m_lat_t) + tbound) .& (0.1 .< m_lat .< 90.0));
 #m_lat_t = m_lat_t[m_lat_ind];
 #m_lat = m_lat[m_lat_ind];
 
-m_gps_lon = dataGlider.get("m_gps_lon", return_nans=false); 
+m_gps_lon = dataGliderEng.get("m_gps_lon", return_nans=false); 
 #m_lon_t = m_lon[1];
 #m_lon = m_lon[2];
 #m_lon_ind = findall((median(m_lon_t) - tbound .< m_lon_t .< median(m_lon_t) + tbound) .& (-180.0 .< m_lon .< 180.0));
 #m_lon_t = m_lon_t[m_lon_ind];
 #m_lon = m_lon[m_lon_ind];
 
-sci_water_pressure = dataGlider.get("sci_water_pressure", return_nans=true);
+sci_water_pressure = dataGliderSci.get("sci_water_pressure", return_nans=true);
 #sci_water_pressure_t = sci_water_pressure[1];
 #sci_water_pressure = sci_water_pressure[2];
 #sci_water_pressure_ind = findall((median(sci_water_pressure_t) - tbound .< sci_water_pressure_t .< median(sci_water_pressure_t) + tbound) .& (0.0 .< sci_water_pressure .< 105.0));
 #sci_water_pressure_t = sci_water_pressure_t[sci_water_pressure_ind];
 #sci_water_pressure = sci_water_pressure[sci_water_pressure_ind];
 
-sci_water_temp = dataGlider.get("sci_water_temp", return_nans=true);
+sci_water_temp = dataGliderSci.get("sci_water_temp", return_nans=true);
 #sci_water_temp_t = sci_water_temp[1];
 #sci_water_temp = sci_water_temp[2];
 #sci_water_temp_ind = findall((median(sci_water_temp_t) - tbound .< sci_water_temp_t .< median(sci_water_temp_t) + tbound) .& (0.1 .< sci_water_temp .< 40.0));
 #sci_water_temp_t = sci_water_temp_t[sci_water_temp_ind];
 #sci_water_temp = sci_water_temp[sci_water_temp_ind];
 
-sci_water_cond = dataGlider.get("sci_water_cond", return_nans=true);
+sci_water_cond = dataGliderSci.get("sci_water_cond", return_nans=true);
 #sci_water_cond_t = sci_water_cond[1];
 #sci_water_cond = sci_water_cond[2];
 #sci_water_cond_ind = findall((median(sci_water_cond_t) - tbound .< sci_water_cond_t .< median(sci_water_cond_t) + tbound) .& (2.0 .< sci_water_cond .< 7.0));

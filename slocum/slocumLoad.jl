@@ -164,32 +164,32 @@ function load_glider_ctd(missionYAMLpath::String)
     cacdir = datadir * "cache/";
 
     if datamode == "realtime"
-        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+        dataGliderEng = dbdreader.MultiDBD(pattern = datadir * "*.[sS][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+        dataGliderSci = dbdreader.MultiDBD(pattern = datadir * "*.[tT][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
     else
-        #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-        dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+        dataGliderEng = dbdreader.MultiDBD(pattern = datadir * "*.[dD][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+        dataGliderSci = dbdreader.MultiDBD(pattern = datadir * "*.[eE][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
     end
 
-    engvars = dataGlider.parameterNames["eng"];
-    scivars = dataGlider.parameterNames["sci"];
+    engvars = dataGliderEng.parameterNames["eng"];
+    scivars = dataGliderSci.parameterNames["sci"];
 
     tbound = 3600*24*365.0;
 
     # load engineering and CTD data from raw glider DBD and EBD files
-    m_present_time = dataGlider.get("m_present_time")[1];
+    m_present_time = dataGliderEng.get("m_present_time")[1];
     m_present_time_ind = findall((NaNMath.median(m_present_time) - tbound) .< m_present_time .< (NaNMath.median(m_present_time) + tbound));
     m_present_time = m_present_time[m_present_time_ind];
     
-    sci_m_present_time = dataGlider.get("sci_m_present_time")[1];
+    sci_m_present_time = dataGliderEng.get("sci_m_present_time")[1];
     sci_m_present_time_ind = findall((NaNMath.median(sci_m_present_time) - tbound) .< sci_m_present_time .< (NaNMath.median(sci_m_present_time) + tbound));
     sci_m_present_time = sci_m_present_time[sci_m_present_time_ind];
     
-    m_gps_lat = dataGlider.get("m_gps_lat", return_nans=false);
-    m_gps_lon = dataGlider.get("m_gps_lon", return_nans=false);
-    sci_water_pressure = dataGlider.get("sci_water_pressure", return_nans=true);
-    sci_water_temp = dataGlider.get("sci_water_temp", return_nans=true);
-    sci_water_cond = dataGlider.get("sci_water_cond", return_nans=true);
+    m_gps_lat = dataGliderEng.get("m_gps_lat", return_nans=false);
+    m_gps_lon = dataGliderEng.get("m_gps_lon", return_nans=false);
+    sci_water_pressure = dataGliderSci.get("sci_water_pressure", return_nans=true);
+    sci_water_temp = dataGliderSci.get("sci_water_temp", return_nans=true);
+    sci_water_cond = dataGliderSci.get("sci_water_cond", return_nans=true);
     
     mlon = NaNMath.mean(m_gps_lon[2]);
     mlat = NaNMath.mean(m_gps_lat[2]);
