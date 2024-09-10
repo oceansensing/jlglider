@@ -1,8 +1,10 @@
 module slocumPlot
 
 include("slocumFunc.jl")
+include("slocumType.jl")
 using .slocumFunc: yearday2datetime, datetime2yearday
-using NaNMath, GibbsSeaWater, Dates, Interpolations
+using .slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
+using NaNMath, GibbsSeaWater, Dates, Interpolations, Statistics
 using GLMakie, ColorSchemes
 
 function datetick(unix_t)
@@ -471,6 +473,48 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         save(figoutdir * gliderBPAR.mission * "_" * gliderBPAR.glidername * "_bsipar.png", fig);
     end
     =#
+end
+
+function plotSlocumCTD(gliderCTDarray)
+    for i = 1:length(gliderCTDarray)
+        #i = 8
+        display(i)
+        gliderCTDraw = gliderCTDarray[i];
+        lonrange = [NaNMath.minimum(gliderCTDraw.lon) NaNMath.maximum(gliderCTDraw.lon)];
+        latrange = [NaNMath.minimum(gliderCTDraw.lat) NaNMath.maximum(gliderCTDraw.lat)]; 
+
+        pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+        iday = 1; # day intervals for plotting
+        ms = 6; # marker size
+        tsms = 6; # time series marker size
+        pres = (1600, 800); # plot resolution
+        tspres = (1000, 1000); # time series plot resolution
+        fs = 42; # font size
+        ps = plotSetting(pint, iday, ms, tsms, pres, tspres, fs);
+
+        ctempstd = std(gliderCTDraw.ctemp);
+        condstd = std(gliderCTDraw.cond);
+        saltAstd = std(gliderCTDraw.saltA);
+        sigma0std = std(gliderCTDraw.sigma0);
+        sndspdstd = std(gliderCTDraw.sndspd);
+        spice0std = std(gliderCTDraw.spice0);
+
+        nsig = 2.5
+
+        #figoutdir = "/Users/gong/GitHub/jlglider/slocum/figures/";
+        figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+        ctemprange = (NaNMath.mean(gliderCTDraw.ctemp) .- nsig*ctempstd, NaNMath.mean(gliderCTDraw.ctemp) .+ nsig*ctempstd);
+        condrange = (NaNMath.mean(gliderCTDraw.cond) .- nsig*condstd, NaNMath.mean(gliderCTDraw.cond) .+ nsig*condstd);
+        saltArange = (NaNMath.mean(gliderCTDraw.saltA) .- nsig*saltAstd, NaNMath.mean(gliderCTDraw.saltA) .+ nsig*saltAstd);
+        sigma0range = (NaNMath.mean(gliderCTDraw.sigma0) .- nsig*sigma0std, NaNMath.mean(gliderCTDraw.sigma0) .+ nsig*sigma0std);
+        sndspdrange = (NaNMath.mean(gliderCTDraw.sndspd) .- nsig*sndspdstd, NaNMath.mean(gliderCTDraw.sndspd) .+ nsig*sndspdstd);
+        spice0range = (NaNMath.mean(gliderCTDraw.spice0) .- nsig*spice0std, NaNMath.mean(gliderCTDraw.spice0) .+ nsig*spice0std);
+        temprange = ctemprange;
+        saltrange = saltArange;
+        pst = plotStruct(figoutdir, gliderCTDraw.mission, gliderCTDraw.glidername, temprange[1], temprange[2], condrange[1], condrange[2], saltrange[1], saltrange[2], sigma0range[1], sigma0range[2], spice0range[1], spice0range[2], sndspdrange[1], sndspdrange[2]);
+
+        plot_glider_ctd(gliderCTDraw, ps, pst);
+    end
 end
 
 end
