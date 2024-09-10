@@ -184,4 +184,12 @@ function yearday2datetime(yyyy::Int, yearday::Float64)
     #return DateTime(date) + Time(hours, minutes, seconds)
 end
 
+function unix2yearday(unixt::Float64)
+    return datetime2yearday(unix2datetime(unixt));
+end
+
+function yearday2unix(yyyy::Int, yearday::Float64)
+    return unix2datetime(yearday2datetime(yyyy, yearday));
+end
+
 end #slocumFunc module
