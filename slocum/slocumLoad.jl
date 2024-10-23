@@ -511,11 +511,19 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
 end
 
 # this function load the glider CTD data from the gliderData directory using metadata from YAML file for each mission
-function slocumYAMLload(missionYAMLdir::String)
-    if (@isdefined missionYAMLdir) == false
-        missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
+function slocumYAMLload(missionYAMLdirpath::String)
+    if (@isdefined missionYAMLdirpath) == false
+        missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
     end
-    missionYAMLpath = Glob.glob("*.yaml", missionYAMLdir);
+
+    if missionYAMLdirpath[end-4:end] != ".yaml"
+        if missionYAMLdirpath[end] != '/'
+         missionYAMLdirpath *= "/";
+        end
+        missionYAMLpath = Glob.glob("*.yaml", missionYAMLdirpath);
+    else
+        missionYAMLpath = [missionYAMLdirpath];
+    end
 
     gliderCTDarray = ctdStruct[];
 
