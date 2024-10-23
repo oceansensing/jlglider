@@ -160,15 +160,17 @@ function load_glider_ctd(missionYAMLpath::String)
     datamode = missionYAML["dataflag"];
     suffix = missionYAML["suffix"];
 
-    datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
+    datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/"; 
+    dataENGdir = datadir * "eng/";
+    dataSCIdir = datadir * "sci/";
     cacdir = datadir * "cache/";
 
     if datamode == "realtime"
-        dataGliderEng = dbdreader.MultiDBD(pattern = datadir * "*.[sS][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
-        dataGliderSci = dbdreader.MultiDBD(pattern = datadir * "*.[tT][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+        dataGliderEng = dbdreader.MultiDBD(pattern = dataENGdir * "*.[sS][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+        dataGliderSci = dbdreader.MultiDBD(pattern = dataSCIdir * "*.[tT][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
     else
-        dataGliderEng = dbdreader.MultiDBD(pattern = datadir * "*.[dD][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
-        dataGliderSci = dbdreader.MultiDBD(pattern = datadir * "*.[eE][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+        dataGliderEng = dbdreader.MultiDBD(pattern = dataENGdir * "*.[dD][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
+        dataGliderSci = dbdreader.MultiDBD(pattern = dataSCIdir * "*.[eE][bB][dD]", cacheDir = cacdir, skip_initial_line = true);
     end
 
     engvars = dataGliderEng.parameterNames["eng"];

@@ -50,6 +50,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     tspres = ps.tspres;
     fs = ps.fs;
     figoutdir = pst.figoutdir;
+
+    nsig = 2.5; # number of standard deviations for color range
     #end
 
     # setting x and y axes for plotting
@@ -280,6 +282,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #zmax = NaNMath.maximum(z); 
     zmin = pst.sndspdmin;
     zmax = pst.sndspdmax;
+
     fig = Figure(; size = pres, fontsize = fs);
     ax = Axis(fig[1, 1],
         #title = mission * " – " * uppercasefirst(glidername) * " sound speed",
@@ -310,8 +313,14 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     x = gliderCTD.saltA;
     y = gliderCTD.ctemp;
     z = gliderCTD.sigma0;
-    zmin = NaNMath.minimum(z);
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z);
+    xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
+    xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
+    ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
+    ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y); 
+    zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
+    zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " CT/SA",
@@ -319,6 +328,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
@@ -333,8 +344,14 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     x = gliderCTD.spice0;
     y = gliderCTD.sigma0;
     z = gliderCTD.sndspd;
-    zmin = NaNMath.minimum(z);
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z); 
+    xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
+    xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
+    ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
+    ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y);
+    zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
+    zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
@@ -342,6 +359,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Spiciness",
         ylabel = "Potential Density Anomaly"
     )
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sound Speed")
@@ -357,8 +376,14 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     x = gliderCTD.salt;
     y = gliderCTD.temp;
     z = gliderCTD.sigma0;
-    zmin = NaNMath.minimum(z);
-    zmax = NaNMath.maximum(z); 
+    #zmin = NaNMath.minimum(z);
+    #zmax = NaNMath.maximum(z);
+    xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
+    xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
+    ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
+    ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y);
+    zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
+    zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " T/S",
@@ -366,6 +391,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Practical Salinity",
         ylabel = "In-Situ Temperature"
     )
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
