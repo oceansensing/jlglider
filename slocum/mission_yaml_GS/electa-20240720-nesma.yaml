@@ -1,10 +1,10 @@
 ---
   gliderType: slocum
-  gliderName: sylvia
-  gliderSN: 417
-  project: hurricane
-  deploydate: 20230911
+  gliderName: electa
+  gliderSN: 926
+  project: nesma
+  deploydate: 20240720
   dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
-  suffix: delayed
+  suffix: complete
   dataflag: delayed
   

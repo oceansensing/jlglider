@@ -17,18 +17,18 @@ import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_pre
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .slocumPlot: plot_glider_ctd, plotSlocumCTD
 
-reloadflag = false
+reloadflag = true
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml_MAB/";
+missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml_GS/";
 
 if @isdefined(gliderCTDarray) == false
     if reloadflag == true
         gliderCTDarray = slocumYAMLload(missionYAMLdir);
-        jldsave(gliderdatadir * "MARACOOS_slocumCTDdata.jld2"; gliderCTDarray);
+        jldsave(gliderdatadir * "PASSENGERS_slocumCTDdata.jld2"; gliderCTDarray);
         display("Done reloading data.")
     else
-        gliderCTDarray = load(gliderdatadir * "MARACOOS_slocumCTDdata.jld2")["gliderCTDarray"];
+        gliderCTDarray = load(gliderdatadir * "PASSENGERS_slocumCTDdata.jld2")["gliderCTDarray"];
         display("Done loading data.")
     end
 end
@@ -41,13 +41,13 @@ bathyds = Dataset(bathypath,"r");
 lon = bathyds["lon"][:];
 lat = bathyds["lat"][:];
 
-latmin, latmax = 35, 42;
-lonmin, lonmax = -77.5, -69;
+latmin, latmax = 37, 40;
+lonmin, lonmax = -65, -60;
 
 # approximate x-axis scaling to make it look "normal"
 dlat = latmax - latmin;
 dlon = lonmax - lonmin;
-lat0 = NaNMath.mean([38.0]);
+lat0 = NaNMath.mean([38.5]);
 xfac = sind(90-lat0);
 yres = 2000;
 pres = (abs(ceil(yres * (xfac/(dlat/dlon)))), abs(yres));
@@ -72,7 +72,7 @@ log10z[zzind] .= 0;
 fig = Figure(size = pres, fontsize = 54)
 ax = Axis(
     fig[1, 1];
-    title = "SMAB MARACOOS Glider Deployments (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "--" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")",
+    title = "Gulf Stream PASSENGERS Glider Deployments (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "--" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")",
     xlabel = "Longitude",
     ylabel = "Latitude",
 )
@@ -92,7 +92,7 @@ for ii = 1:length(gliderCTDarray)
         )
 end
 fig
-save("/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/SMAB_MARACOOS_glider.png", fig)
+save("/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/GS_PASSENGERS_glider.png", fig)
 GLMakie.closeall()
 
 #=pst = pst_electa;

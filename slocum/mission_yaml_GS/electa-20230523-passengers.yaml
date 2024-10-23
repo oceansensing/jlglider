@@ -1,0 +1,10 @@
+---
+  gliderType: slocum
+  gliderName: electa
+  gliderSN: 926
+  project: passengers
+  deploydate: 20230523
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: complete
+  dataflag: delayed
+  
