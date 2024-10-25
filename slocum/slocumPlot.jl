@@ -328,8 +328,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
-    xlims!(ax, xmin, xmax);
-    ylims!(ax, ymin, ymax);
+    #xlims!(ax, xmin, xmax);
+    #ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
@@ -359,8 +359,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Spiciness",
         ylabel = "Potential Density Anomaly"
     )
-    xlims!(ax, xmin, xmax);
-    ylims!(ax, ymin, ymax);
+    #xlims!(ax, xmin, xmax);
+    #ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sound Speed")
@@ -391,8 +391,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Practical Salinity",
         ylabel = "In-Situ Temperature"
     )
-    xlims!(ax, xmin, xmax);
-    ylims!(ax, ymin, ymax);
+    #xlims!(ax, xmin, xmax);
+    #ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")

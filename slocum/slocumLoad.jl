@@ -146,6 +146,8 @@ end
 
 # new function to load glider CTD data using YAML metadata file (2024-09-05)
 function load_glider_ctd(missionYAMLpath::String)
+    tbound = 3600*24*365.0 * 0.4; 
+
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
 
@@ -176,15 +178,19 @@ function load_glider_ctd(missionYAMLpath::String)
     engvars = dataGliderEng.parameterNames["eng"];
     scivars = dataGliderSci.parameterNames["sci"];
 
-    tbound = 3600*24*365.0;
+    # unix time of the mission start time
+    unixt0 = Dates.datetime2unix(Dates.DateTime(deploydate[1:4] * "-" * deploydate[5:6] * "-" * deploydate[7:8]));
+    trange = [unixt0, unixt0 + tbound/2]; # mission start time + 6 months
 
     # load engineering and CTD data from raw glider DBD and EBD files
     m_present_time = dataGliderEng.get("m_present_time")[1];
     m_present_time_ind = findall((NaNMath.median(m_present_time) - tbound) .< m_present_time .< (NaNMath.median(m_present_time) + tbound));
+    #m_present_time_ind = findall(trange[1] .< m_present_time .< trange[end]);
     m_present_time = m_present_time[m_present_time_ind];
     
     sci_m_present_time = dataGliderEng.get("sci_m_present_time")[1];
     sci_m_present_time_ind = findall((NaNMath.median(sci_m_present_time) - tbound) .< sci_m_present_time .< (NaNMath.median(sci_m_present_time) + tbound));
+    #sci_m_present_time_ind = findall(trange[1] .< sci_m_present_time .< trange[end]);
     sci_m_present_time = sci_m_present_time[sci_m_present_time_ind];
     
     m_gps_lat = dataGliderEng.get("m_gps_lat", return_nans=false);
@@ -197,12 +203,16 @@ function load_glider_ctd(missionYAMLpath::String)
     mlat = NaNMath.mean(m_gps_lat[2]);
 
     presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, tbound);
-
     lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, tbound, [-80.0 -50.0], presfunc, mlat);
-    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, tbound, [20.0 60.0], presfunc, mlat); 
- 
+    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, tbound, [20.0 60.0], presfunc, mlat);  
     tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, tbound, [0.1 40.0], presfunc, mlat)
     condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, tbound, [0.01 100.0], presfunc, mlat)
+
+    #presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
+    #lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, trange, [-80.0 -50.0], sci_water_pressure, mlat);
+    #latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, trange, [20.0 60.0], sci_water_pressure, mlat);  
+    #tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], sci_water_pressure, mlat)
+    #condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], sci_water_pressure, mlat)
 
 
     # find common glider values
