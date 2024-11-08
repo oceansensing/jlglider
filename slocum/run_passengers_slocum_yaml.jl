@@ -81,18 +81,19 @@ xlims!(lonmin, lonmax);
 ylims!(latmin, latmax);
 
 for ii = 1:length(gliderCTDarray)
+    zind = findall(-40 .<= gliderCTDarray[ii].z .<= -30);
     display(ii)
     Makie.scatter!(
-        gliderCTDarray[ii].lon, 
-        gliderCTDarray[ii].lat, 
-        color = gliderCTDarray[ii].t, 
+        gliderCTDarray[ii].lon[zind], 
+        gliderCTDarray[ii].lat[zind], 
+        color = gliderCTDarray[ii].saltA[zind], 
         colorrange = (minimum(gliderCTDarray[1].t), maximum(gliderCTDarray[end].t)), 
         colormap=:heat, 
         markersize=8
         )
 end
 fig
-save("/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/GS_PASSENGERS_glider.png", fig)
+save("/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/GS_PASSENGERS_glider_saltA.png", fig)
 GLMakie.closeall()
 
 #=pst = pst_electa;
