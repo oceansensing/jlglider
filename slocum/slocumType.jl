@@ -13,7 +13,7 @@ end
 
 mutable struct plotStruct
     figoutdir::String
-    mission::String
+    project::String
     glidername::String
     #resolution::Tuple{Int64, Int64}
     #markersize::Float64

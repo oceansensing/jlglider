@@ -38,7 +38,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #    rootdir = "~/GitHub/jlglider/slocum/";
     #    figoutdir = figoutdir;
     #end
-    mission = pst.mission;
+    project = pst.project;
     glidername = pst.glidername;
 
     #if (@isdefined ps) == false
@@ -95,7 +95,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     zmax = pst.tempmax;
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Temperature",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Temperature",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -111,7 +111,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
 
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Temperature (°C)")
     fig
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_temp.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_temp.png", fig)
 
     # plotting conductivity
     z = gliderCTD.cond;
@@ -122,7 +122,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Conductivity",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conductivity",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conductivity",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -137,7 +137,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conductivity (S/m)")
     fig
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_cond.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_cond.png", fig)
 
     # plotting salinity
     z = gliderCTD.salt;
@@ -148,7 +148,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Salinity",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Salinity",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Salinity",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -163,7 +163,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Salinity (psu)")
     fig
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_salt.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_salt.png", fig)
 
     # plotting conservative temperature
     z = gliderCTD.ctemp;
@@ -174,7 +174,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Conservative Temperature",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conservative Temperature",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conservative Temperature",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -189,7 +189,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conservative Temperature (°C)")
     fig
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_ctemp.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_ctemp.png", fig)
 
     # plotting absolute salinity
     #z = saltAraw[1:pint:end];
@@ -201,7 +201,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Absolute Salinity",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Absolute Salinity",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Absolute Salinity",
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
@@ -216,7 +216,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Absolute Salinity (g/kg)")
     fig
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_saltA.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_saltA.png", fig)
 
     # plotting sigma0
     #z = sigma0raw[1:pint:end];
@@ -227,8 +227,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     zmax = pst.sigma0max;
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        #title = mission * " " * uppercasefirst(glidername) * " Potential Density",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Potential Density",
+        #title = project * " " * uppercasefirst(glidername) * " Potential Density",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Potential Density",
 
         xlabel = "Year Day",
         ylabel = "Depth (m)"
@@ -244,7 +244,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Potential Density (kg/m^3)")
     fig
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0.png", fig)
 
     # plotting spice0
     #z = spice0raw[1:pint:end];
@@ -256,7 +256,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Spiciness0",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Spice0",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Spice0",
 
         xlabel = "Year Day",
         ylabel = "Depth (m)"
@@ -272,8 +272,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "Spice0")
     fig
-    #save(figoutdir * mission * "_" * glidername * "_spice0.png", fig)
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_spice0.png", fig)
+    #save(figoutdir * project * "_" * glidername * "_spice0.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_spice0.png", fig)
 
     # plotting sound speed
     #z = sndspdraw[1:pint:end];
@@ -286,7 +286,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs);
     ax = Axis(fig[1, 1],
         #title = mission * " – " * uppercasefirst(glidername) * " sound speed",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sound Speed",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sound Speed",
         #title =  uppercasefirst(glidername) * " Sound Speed",
         xlabel = "Year Day",
         ylabel = "Depth (m)",
@@ -302,8 +302,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     =#
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Sound Speed (m/s)")
     fig
-    #save(figoutdir * mission * "_" * glidername * "_soundspeed.png", fig)
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_soundspeed.png", fig)
+    #save(figoutdir * project * "_" * glidername * "_soundspeed.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_soundspeed.png", fig)
 
 
     # plotting CT/SA diagram
@@ -324,7 +324,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " CT/SA",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " CT/SA",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " CT/SA",
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
@@ -334,8 +334,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
     fig
-    #save(figoutdir * mission * "_" * glidername * "_CT-SA.png", fig)
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_CA-SA.png", fig)
+    #save(figoutdir * project * "_" * glidername * "_CT-SA.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_CA-SA.png", fig)
 
     # plotting Density-Spiciness diagram
     #x = spice0raw[1:pint:end]; 
@@ -355,7 +355,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
         xlabel = "Spiciness",
         ylabel = "Potential Density Anomaly"
     )
@@ -365,8 +365,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sound Speed")
     fig
-    #save(figoutdir * mission * "_" * glidername * "_sigma0spice0.png", fig)
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0spice0.png", fig)
+    #save(figoutdir * project * "_" * glidername * "_sigma0spice0.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0spice0.png", fig)
 
 
 # plotting T/S diagram
@@ -386,8 +386,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        #title = mission * " " * uppercasefirst(glidername) * " T/S",
-        title = uppercase(mission) * " " * yyyy0 * " " * uppercasefirst(glidername) * " T/S",
+        #title = project * " " * uppercasefirst(glidername) * " T/S",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " T/S",
         xlabel = "Practical Salinity",
         ylabel = "In-Situ Temperature"
     )
@@ -397,8 +397,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
     fig
-    #save(figoutdir * mission * "_" * glidername * "_TSraw.png", fig)
-    save(figoutdir * mission * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_TSraw.png", fig)
+    #save(figoutdir * project * "_" * glidername * "_TSraw.png", fig)
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_TSraw.png", fig)
 
     #=
     # plotting Chl-a
