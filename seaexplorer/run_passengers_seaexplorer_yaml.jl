@@ -4,16 +4,17 @@ if (workdir in LOAD_PATH) == false
 end
 
 include("seaexplorerFunc.jl")
+import .seaexplorerFunc: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process, seaexplorerYAMLload
 
-import .seaexplorerFunc: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process
+using JLD2
 
 reloadflag = true
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdir = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_NESMA/";
+missionYAMLdir = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_PASSENGERS/";
 
 if @isdefined(gliderCTDarray) == false
-    if reloadingflag == true
+    if reloadflag == true
         gliderCTDarray = seaexplorerYAMLload(missionYAMLdir);
         jldsave(gliderdatadir * "PASSENGERS_seaexplorerCTDdata.jld2"; gliderCTDarray);
         display("Done reloading data.")
@@ -25,9 +26,9 @@ end
 
 #plotSeaExplorerCTD(gliderCTDarray)
 
-missionYAML = "sea064-20240720-nesma.yml";
-sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAML);
-sea064nesma0720 = seaexplorer_process(sea064pld1d);
+#missionYAML = "sea064-20240720-nesma.yaml";
+#sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAMLdir * missionYAML);
+#sea064nesma0720 = seaexplorer_process(sea064pld1d);
 
 #missionYAML = "sea094-20240709-nesma.yml";
 #sea094nav, sea094nav1d, sea094pld, sea094pld1d = seaexplorer_load_mission(missionYAML);

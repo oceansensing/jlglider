@@ -9,7 +9,7 @@ include("gsw_c2po.jl");
 using Glob, DataFrames, CSV, Dates, Missings, NaNMath, Interpolations, YAML
 using NCDatasets
 using GibbsSeaWater, MAT
-import .seaexplorerType: NAV_RT, PLD_RT, SeaExplorerData
+import .seaexplorerType: NAV_RT, PLD_RT, SeaExplorerData, SeaExplorerCTD, LEGATO
 import .gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
 
 # https://discourse.julialang.org/t/indices-of-intersection-of-two-arrays/23043/20
@@ -362,7 +362,152 @@ function load_NAV(gliderSN::Int, missionID::Int, project::String, navdir::String
     return nav_rt, nav1d_rt
 end
 
+function load_LEGATO(gliderSN::Int, missionID::Int, project::String, scidir::String, dataflag::String)
+    legato_flag = 1;
+    ctd = LEGATO[];
+    if (dataflag == "sub") | (dataflag == "realtime") | (dataflag == "all")
+        datatype = "sub"
+    elseif (dataflag == "raw") | (dataflag == "delayed")
+        datatype = "raw"
+    end
+    pldlist = Glob.glob("*" * string(gliderSN; pad=3) * "." * string(missionID) * ".pld1." * datatype * ".*", scidir);
+
+    yos = [];
+    yolist = [];
+    allindx = 1;
+    for i = 1:length(pldlist)
+        suffix2 = pldlist[i][end-1:end]
+        fnlen = length(pldlist[i]) - length(scidir);
+        if suffix2 == "gz"
+            if fnlen == 22+1  # sea064.37.pld1.sub.1.gz
+                yo = parse(Int,pldlist[i][end-3:end-3]);
+            elseif fnlen == 23+1 # sea064.37.pld1.sub.10.gz
+                yo = parse(Int,pldlist[i][end-4:end-3]);
+            elseif fnlen == 24+1 # sea064.37.pld1.sub.100.gz
+                yo = parse(Int,pldlist[i][end-5:end-3]);
+            elseif fnlen == 25+1 # sea064.37.pld1.sub.1000.gz
+                yo = parse(Int,pldlist[i][end-6:end-3]);
+            end
+            yos = push!(yos, yo);
+            yolist = push!(yolist, pldlist[i]);
+        elseif (suffix2 != "gz") & (suffix2 != "ll") & (suffix2 != "sv")
+            if fnlen == 19+1  # sea064.37.pld1.sub.1
+                yo = parse(Int,pldlist[i][end:end]);
+            elseif fnlen == 20+1 # sea064.37.pld1.sub.10
+                yo = parse(Int,pldlist[i][end-1:end]);
+            elseif fnlen == 21+1 # sea064.37.pld1.sub.100
+                yo = parse(Int,pldlist[i][end-2:end]);
+            elseif fnlen == 22+1 # sea064.37.pld1.sub.1000
+                yo = parse(Int,pldlist[i][end-3:end]);
+            end
+            yos = push!(yos, yo);
+            yolist = push!(yolist, pldlist[i]);
+        elseif suffix2 == "ll"
+            if fnlen == 21+1 # SEA064.37.pld1.sub.all
+                allindx = i;
+            end
+            yos = [-1];
+        elseif suffix2 == "sv"
+            if fnlen == 25 # SEA064.37.gli.sub.all.csv
+                allindx = i;
+            end
+            yos = [-1];
+        end
+        #glilist_suffix = push!(glilist_suffix, glilist[i][end-2:end]);
+    end
+    #yolist = findall(glilist_suffix .!= "all");
+    #allindx = findall(glilist_suffix .== "all");
+    yosi = sortperm(Int.(yos));
+    yos = yos[yosi];
+
+    if !isempty(yolist)
+        yolist = yolist[yosi];
+    end
+
+    if dataflag == "all"
+        pldlist = [pldlist[allindx]];
+    else
+        pldlist = yolist;
+    end
+
+    timeformat = "dd/mm/yyyy HH:MM:SS.sss"
+
+    yo1d = [];
+    t1d = [];
+    z1d = [];
+    lon1d = [];
+    lat1d = [];
+    nav_resource1d = [];
+    legato_conductivity_1d = [];
+    legato_temperature_1d = [];
+    legato_pressure_1d = [];
+    legato_salinity_1d = [];
+    legato_condtemp_1d = [];
+
+    for i = 1:length(pldlist)
+        pldfilepath = pldlist[i];
+        print(pldfilepath * "\n")
+        df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
+
+        # separating '.all' from '.###' files
+        if dataflag == "all"
+        #    yo = parse.(Int, pldlist_suffix[yolist]);
+            yo = df.YO_NUMBER;
+        else
+        #    yo = [parse(Int, yostring)];
+            yo = [yos[i]];
+        end
+    
+        # extract location data from data frame
+        t = DateTime.(df.PLD_REALTIMECLOCK, timeformat);
+        z = missing2nan(df.NAV_DEPTH);
+        navlon = df.NAV_LONGITUDE;
+        navlat = df.NAV_LATITUDE;
+        lon = trunc.(navlon ./ 100) + (navlon .- trunc.(navlon ./ 100)*100) / 60;
+        lat = trunc.(navlat ./ 100) + (navlat .- trunc.(navlat ./ 100)*100) / 60;
+        lon = missing2nan(lon);
+        lat = missing2nan(lat);
+        nav_resource = missing2nan(df.NAV_RESOURCE);
+
+        yo1d = cat(yo1d, yo, dims = 1);
+        t1d = cat(t1d, t, dims = 1);
+        z1d = cat(z1d, z, dims = 1);
+        lon1d = cat(lon1d, lon, dims = 1);
+        lat1d = cat(lat1d, lat, dims = 1);
+        nav_resource1d = cat(nav_resource1d, nav_resource, dims = 1);
+
+        if legato_flag == 1
+            legato_conductivity = missing2nan(df.LEGATO_CONDUCTIVITY);
+            legato_temperature = missing2nan(df.LEGATO_TEMPERATURE);
+            legato_pressure = missing2nan(df.LEGATO_PRESSURE);
+            legato_salinity = missing2nan(df.LEGATO_SALINITY);
+            legato_condtemp = missing2nan(df.LEGATO_CONDTEMP);
+
+            legato_conductivity_1d = cat(legato_conductivity_1d, legato_conductivity, dims = 1);
+            legato_temperature_1d = cat(legato_temperature_1d, legato_temperature, dims = 1);
+            legato_pressure_1d = cat(legato_pressure_1d, legato_pressure, dims = 1);
+            legato_salinity_1d = cat(legato_salinity_1d, legato_salinity, dims = 1);
+            legato_condtemp_1d = cat(legato_condtemp_1d, legato_condtemp, dims = 1);    
+        end   
+
+        display(yo)
+        
+        push!(ctd, LEGATO(gliderSN, missionID, project, yo, t, z, lon, lat, nav_resource, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp));    
+    end #for
+    ctd1d = LEGATO(gliderSN, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, nav_resource1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d);
+
+    # combinating NAV_RT and PLD_RT data into one glider data structure
+    #gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
+
+    return ctd, ctd1d
+end
+
 function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String, dataflag::String)
+    legato_flag = 1
+    ad2cp_flag = 1
+    flbbcd_flag = 1
+    m1000g_flag = 1
+
     pld_rt = PLD_RT[];
 
     #if dataflag < 2
@@ -556,86 +701,6 @@ function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String
         lon = missing2nan(lon);
         lat = missing2nan(lat);
         nav_resource = df.NAV_RESOURCE;
-        #ad2cp_time = DateTime.(cleanAD2CPtime(collect(df.AD2CP_TIME), collect(df.PLD_REALTIMECLOCK)), ad2cptimeformat) .+ Dates.Year(2000);
-        ad2cp_time = t;
-        ad2cp_heading = missing2nan(df.AD2CP_HEADING);
-        ad2cp_pitch = missing2nan(df.AD2CP_PITCH);
-        ad2cp_roll = missing2nan(df.AD2CP_ROLL);
-        ad2cp_pressure = missing2nan(df.AD2CP_PRESSURE);
-        ad2cp_alt = missing2nan(df.AD2CP_ALT);
-        ad2cp_v1_cn1 = cleanAD2CP(df.AD2CP_V1_CN1);
-        ad2cp_v2_cn1 = cleanAD2CP(df.AD2CP_V2_CN1);
-        ad2cp_v3_cn1 = cleanAD2CP(df.AD2CP_V3_CN1);
-        ad2cp_v4_cn1 = cleanAD2CP(df.AD2CP_V4_CN1);
-        ad2cp_v1_cn2 = cleanAD2CP(df.AD2CP_V1_CN2);
-        ad2cp_v2_cn2 = cleanAD2CP(df.AD2CP_V2_CN2);
-        ad2cp_v3_cn2 = cleanAD2CP(df.AD2CP_V3_CN2);
-        ad2cp_v4_cn2 = cleanAD2CP(df.AD2CP_V4_CN2);
-        ad2cp_v1_cn3 = cleanAD2CP(df.AD2CP_V1_CN3);
-        ad2cp_v2_cn3 = cleanAD2CP(df.AD2CP_V2_CN3);
-        ad2cp_v3_cn3 = cleanAD2CP(df.AD2CP_V3_CN3);
-        ad2cp_v4_cn3 = cleanAD2CP(df.AD2CP_V4_CN3);
-        ad2cp_v1_cn4 = cleanAD2CP(df.AD2CP_V1_CN4);
-        ad2cp_v2_cn4 = cleanAD2CP(df.AD2CP_V2_CN4);
-        ad2cp_v3_cn4 = cleanAD2CP(df.AD2CP_V3_CN4);
-        ad2cp_v4_cn4 = cleanAD2CP(df.AD2CP_V4_CN4);
-        ad2cp_v1_cn5 = cleanAD2CP(df.AD2CP_V1_CN5);
-        ad2cp_v2_cn5 = cleanAD2CP(df.AD2CP_V2_CN5);
-        ad2cp_v3_cn5 = cleanAD2CP(df.AD2CP_V3_CN5);
-        ad2cp_v4_cn5 = cleanAD2CP(df.AD2CP_V4_CN5);
-        ad2cp_v1_cn6 = cleanAD2CP(df.AD2CP_V1_CN6);
-        ad2cp_v2_cn6 = cleanAD2CP(df.AD2CP_V2_CN6);
-        ad2cp_v3_cn6 = cleanAD2CP(df.AD2CP_V3_CN6);
-        ad2cp_v4_cn6 = cleanAD2CP(df.AD2CP_V4_CN6);
-
-        #flbbcd_chl_count = missing2nan(df.FLBBCD_CHL_COUNT);
-        #flbbcd_chl_scaled = missing2nan(df.FLBBCD_CHL_SCALED);
-        #flbbcd_bb_700_count = missing2nan(df.FLBBCD_BB_700_COUNT);
-        #flbbcd_bb_700_scaled = missing2nan(df.FLBBCD_BB_700_SCALED);
-        #flbbcd_cdom_count = missing2nan(df.FLBBCD_CDOM_COUNT);
-        #flbbcd_cdom_scaled = missing2nan(df.FLBBCD_CDOM_SCALED);
-
-        flbbcd_chl_count = [];
-        flbbcd_chl_scaled = [];
-        flbbcd_bb_700_count = [];
-        flbbcd_bb_700_scaled = [];
-        flbbcd_cdom_count = [];
-        flbbcd_cdom_scaled = [];
-
-        legato_conductivity = missing2nan(df.LEGATO_CONDUCTIVITY);
-        legato_temperature = missing2nan(df.LEGATO_TEMPERATURE);
-        legato_pressure = missing2nan(df.LEGATO_PRESSURE);
-        legato_salinity = missing2nan(df.LEGATO_SALINITY);
-        legato_condtemp = missing2nan(df.LEGATO_CONDTEMP);
-        mr1000g_t1_avg = missing2nan(df."MR1000G-RDL_T1_AVG");
-        mr1000g_t2_avg = missing2nan(df."MR1000G-RDL_T2_AVG");
-        mr1000g_sh1_std = missing2nan(df."MR1000G-RDL_SH1_STD");
-        mr1000g_sh2_std = missing2nan(df."MR1000G-RDL_SH2_STD");
-        mr1000g_press_avg = missing2nan(df."MR1000G-RDL_PRESS_AVG");
-        mr1000g_incly_avg = missing2nan(df."MR1000G-RDL_INCLY_AVG");
-        mr1000g_eps1 = missing2nan(df."MR1000G-RDL_EPS1");
-        mr1000g_qc1 = missing2nan(df."MR1000G-RDL_QC1");
-        mr1000g_eps2 = missing2nan(df."MR1000G-RDL_EPS2");
-        mr1000g_qc2 = missing2nan(df."MR1000G-RDL_QC2");
-
-        tmpvar = Array{Float64,1}(undef, length(ad2cp_alt));
-        tmpvar .= NaN;
-
-        if dataflag == "all"
-            ad2cp_Unorth = missing2nan(df.AD2CP_Unorth_c);
-            ad2cp_Ueast = missing2nan(df.AD2CP_Ueast_c);
-            ad2cp_Utot = missing2nan(df.AD2CP_Utot_c);
-            ad2cp_Udir = missing2nan(df.AD2CP_Udir_c);
-            ad2cp_qf = missing2nan(df.AD2CP_QF_c);
-        else
-            ad2cp_Unorth = tmpvar;
-            ad2cp_Ueast = tmpvar;
-            ad2cp_Utot = tmpvar;
-            ad2cp_Udir = tmpvar;
-            ad2cp_qf = tmpvar;
-        end
-
-        display(yo)
 
         yo1d = cat(yo1d, yo, dims = 1);
         t1d = cat(t1d, t, dims = 1);
@@ -643,63 +708,157 @@ function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String
         lon1d = cat(lon1d, lon, dims = 1);
         lat1d = cat(lat1d, lat, dims = 1);
         nav_resource1d = cat(nav_resource1d, nav_resource, dims = 1);
-        ad2cp_time1d = cat(ad2cp_time1d, ad2cp_time, dims = 1);
-        ad2cp_heading1d = cat(ad2cp_heading1d, ad2cp_heading, dims = 1);
-        ad2cp_pitch1d = cat(ad2cp_pitch1d, ad2cp_pitch, dims = 1);
-        ad2cp_roll1d = cat(ad2cp_roll1d, ad2cp_roll, dims = 1);
-        ad2cp_pressure1d = cat(ad2cp_pressure1d, ad2cp_pressure, dims = 1);
-        ad2cp_alt1d = cat(ad2cp_alt1d, ad2cp_alt, dims = 1);
-        ad2cp_v1_cn1_1d = cat(ad2cp_v1_cn1_1d, ad2cp_v1_cn1, dims = 1);
-        ad2cp_v2_cn1_1d = cat(ad2cp_v2_cn1_1d, ad2cp_v2_cn1, dims = 1);
-        ad2cp_v3_cn1_1d = cat(ad2cp_v3_cn1_1d, ad2cp_v3_cn1, dims = 1);
-        ad2cp_v4_cn1_1d = cat(ad2cp_v4_cn1_1d, ad2cp_v4_cn1, dims = 1);
-        ad2cp_v1_cn2_1d = cat(ad2cp_v1_cn2_1d, ad2cp_v1_cn2, dims = 1);
-        ad2cp_v2_cn2_1d = cat(ad2cp_v2_cn2_1d, ad2cp_v2_cn2, dims = 1);
-        ad2cp_v3_cn2_1d = cat(ad2cp_v3_cn2_1d, ad2cp_v3_cn2, dims = 1);
-        ad2cp_v4_cn2_1d = cat(ad2cp_v4_cn2_1d, ad2cp_v4_cn2, dims = 1);
-        ad2cp_v1_cn3_1d = cat(ad2cp_v1_cn3_1d, ad2cp_v1_cn3, dims = 1);
-        ad2cp_v2_cn3_1d = cat(ad2cp_v2_cn3_1d, ad2cp_v2_cn3, dims = 1);
-        ad2cp_v3_cn3_1d = cat(ad2cp_v3_cn3_1d, ad2cp_v3_cn3, dims = 1);
-        ad2cp_v4_cn3_1d = cat(ad2cp_v4_cn3_1d, ad2cp_v4_cn3, dims = 1);
-        ad2cp_v1_cn4_1d = cat(ad2cp_v1_cn4_1d, ad2cp_v1_cn4, dims = 1);
-        ad2cp_v2_cn4_1d = cat(ad2cp_v2_cn4_1d, ad2cp_v2_cn4, dims = 1);
-        ad2cp_v3_cn4_1d = cat(ad2cp_v3_cn4_1d, ad2cp_v3_cn4, dims = 1);
-        ad2cp_v4_cn4_1d = cat(ad2cp_v4_cn4_1d, ad2cp_v4_cn4, dims = 1);
-        ad2cp_v1_cn5_1d = cat(ad2cp_v1_cn5_1d, ad2cp_v1_cn5, dims = 1);
-        ad2cp_v2_cn5_1d = cat(ad2cp_v2_cn5_1d, ad2cp_v2_cn5, dims = 1);
-        ad2cp_v3_cn5_1d = cat(ad2cp_v3_cn5_1d, ad2cp_v3_cn5, dims = 1);
-        ad2cp_v4_cn5_1d = cat(ad2cp_v4_cn5_1d, ad2cp_v4_cn5, dims = 1);
-        ad2cp_v1_cn6_1d = cat(ad2cp_v1_cn6_1d, ad2cp_v1_cn6, dims = 1);
-        ad2cp_v2_cn6_1d = cat(ad2cp_v2_cn6_1d, ad2cp_v2_cn6, dims = 1);
-        ad2cp_v3_cn6_1d = cat(ad2cp_v3_cn6_1d, ad2cp_v3_cn6, dims = 1);
-        ad2cp_v4_cn6_1d = cat(ad2cp_v4_cn6_1d, ad2cp_v4_cn6, dims = 1);
-        flbbcd_chl_count_1d = cat(flbbcd_chl_count_1d, flbbcd_chl_count, dims = 1);
-        flbbcd_chl_scaled_1d = cat(flbbcd_chl_scaled_1d, flbbcd_chl_scaled, dims = 1);
-        flbbcd_bb_700_count_1d = cat(flbbcd_bb_700_count_1d, flbbcd_bb_700_count, dims = 1);
-        flbbcd_bb_700_scaled_1d = cat(flbbcd_bb_700_scaled_1d, flbbcd_bb_700_scaled, dims = 1);
-        flbbcd_cdom_count_1d = cat(flbbcd_cdom_count_1d, flbbcd_cdom_count, dims = 1);
-        flbbcd_cdom_scaled_1d = cat(flbbcd_cdom_scaled_1d, flbbcd_cdom_scaled, dims = 1);
-        legato_conductivity_1d = cat(legato_conductivity_1d, legato_conductivity, dims = 1);
-        legato_temperature_1d = cat(legato_temperature_1d, legato_temperature, dims = 1);
-        legato_pressure_1d = cat(legato_pressure_1d, legato_pressure, dims = 1);
-        legato_salinity_1d = cat(legato_salinity_1d, legato_salinity, dims = 1);
-        legato_condtemp_1d = cat(legato_condtemp_1d, legato_condtemp, dims = 1);
-        mr1000g_t1_avg_1d = cat(mr1000g_t1_avg_1d, mr1000g_t1_avg, dims = 1);
-        mr1000g_t2_avg_1d = cat(mr1000g_t2_avg_1d, mr1000g_t2_avg, dims = 1);
-        mr1000g_sh1_std_1d = cat(mr1000g_sh1_std_1d, mr1000g_sh1_std, dims = 1);
-        mr1000g_sh2_std_1d = cat(mr1000g_sh2_std_1d, mr1000g_sh2_std, dims = 1);
-        mr1000g_press_avg_1d = cat(mr1000g_press_avg_1d, mr1000g_press_avg, dims = 1);
-        mr1000g_incly_avg_1d = cat(mr1000g_incly_avg_1d, mr1000g_incly_avg, dims = 1);
-        mr1000g_eps1_1d = cat(mr1000g_eps1_1d, mr1000g_eps1, dims = 1);
-        mr1000g_qc1_1d = cat(mr1000g_qc1_1d, mr1000g_qc1, dims = 1);
-        mr1000g_eps2_1d = cat(mr1000g_eps2_1d, mr1000g_eps2, dims = 1);
-        mr1000g_qc2_1d = cat(mr1000g_qc2_1d, mr1000g_qc2, dims = 1);
 
-        ad2cp_Unorth_1d = cat(ad2cp_Unorth_1d, ad2cp_Unorth, dims = 1);
-        ad2cp_Ueast_1d = cat(ad2cp_Ueast_1d, ad2cp_Ueast, dims = 1);
-        ad2cp_Utot_1d = cat(ad2cp_Utot_1d, ad2cp_Utot, dims = 1);
-        ad2cp_Udir_1d = cat(ad2cp_Udir_1d, ad2cp_Udir, dims = 1);
-        ad2cp_qf_1d = cat(ad2cp_qf_1d, ad2cp_qf, dims = 1);
+        if legato_flag == 1
+            legato_conductivity = missing2nan(df.LEGATO_CONDUCTIVITY);
+            legato_temperature = missing2nan(df.LEGATO_TEMPERATURE);
+            legato_pressure = missing2nan(df.LEGATO_PRESSURE);
+            legato_salinity = missing2nan(df.LEGATO_SALINITY);
+            legato_condtemp = missing2nan(df.LEGATO_CONDTEMP);
+
+            legato_conductivity_1d = cat(legato_conductivity_1d, legato_conductivity, dims = 1);
+            legato_temperature_1d = cat(legato_temperature_1d, legato_temperature, dims = 1);
+            legato_pressure_1d = cat(legato_pressure_1d, legato_pressure, dims = 1);
+            legato_salinity_1d = cat(legato_salinity_1d, legato_salinity, dims = 1);
+            legato_condtemp_1d = cat(legato_condtemp_1d, legato_condtemp, dims = 1);    
+        end    
+
+        if ad2cp_flag == 1
+            ad2cp_time = t;
+            #ad2cp_time = DateTime.(cleanAD2CPtime(collect(df.AD2CP_TIME), collect(df.PLD_REALTIMECLOCK)), ad2cptimeformat) .+ Dates.Year(2000);
+            ad2cp_heading = missing2nan(df.AD2CP_HEADING);
+            ad2cp_pitch = missing2nan(df.AD2CP_PITCH);
+            ad2cp_roll = missing2nan(df.AD2CP_ROLL);
+            ad2cp_pressure = missing2nan(df.AD2CP_PRESSURE);
+            ad2cp_alt = missing2nan(df.AD2CP_ALT);
+            ad2cp_v1_cn1 = cleanAD2CP(df.AD2CP_V1_CN1);
+            ad2cp_v2_cn1 = cleanAD2CP(df.AD2CP_V2_CN1);
+            ad2cp_v3_cn1 = cleanAD2CP(df.AD2CP_V3_CN1);
+            ad2cp_v4_cn1 = cleanAD2CP(df.AD2CP_V4_CN1);
+            ad2cp_v1_cn2 = cleanAD2CP(df.AD2CP_V1_CN2);
+            ad2cp_v2_cn2 = cleanAD2CP(df.AD2CP_V2_CN2);
+            ad2cp_v3_cn2 = cleanAD2CP(df.AD2CP_V3_CN2);
+            ad2cp_v4_cn2 = cleanAD2CP(df.AD2CP_V4_CN2);
+            ad2cp_v1_cn3 = cleanAD2CP(df.AD2CP_V1_CN3);
+            ad2cp_v2_cn3 = cleanAD2CP(df.AD2CP_V2_CN3);
+            ad2cp_v3_cn3 = cleanAD2CP(df.AD2CP_V3_CN3);
+            ad2cp_v4_cn3 = cleanAD2CP(df.AD2CP_V4_CN3);
+            ad2cp_v1_cn4 = cleanAD2CP(df.AD2CP_V1_CN4);
+            ad2cp_v2_cn4 = cleanAD2CP(df.AD2CP_V2_CN4);
+            ad2cp_v3_cn4 = cleanAD2CP(df.AD2CP_V3_CN4);
+            ad2cp_v4_cn4 = cleanAD2CP(df.AD2CP_V4_CN4);
+            ad2cp_v1_cn5 = cleanAD2CP(df.AD2CP_V1_CN5);
+            ad2cp_v2_cn5 = cleanAD2CP(df.AD2CP_V2_CN5);
+            ad2cp_v3_cn5 = cleanAD2CP(df.AD2CP_V3_CN5);
+            ad2cp_v4_cn5 = cleanAD2CP(df.AD2CP_V4_CN5);
+            ad2cp_v1_cn6 = cleanAD2CP(df.AD2CP_V1_CN6);
+            ad2cp_v2_cn6 = cleanAD2CP(df.AD2CP_V2_CN6);
+            ad2cp_v3_cn6 = cleanAD2CP(df.AD2CP_V3_CN6);
+            ad2cp_v4_cn6 = cleanAD2CP(df.AD2CP_V4_CN6);
+
+            tmpvar = Array{Float64,1}(undef, length(ad2cp_alt));
+            tmpvar .= NaN;
+    
+            if dataflag == "all"
+                ad2cp_Unorth = missing2nan(df.AD2CP_Unorth_c);
+                ad2cp_Ueast = missing2nan(df.AD2CP_Ueast_c);
+                ad2cp_Utot = missing2nan(df.AD2CP_Utot_c);
+                ad2cp_Udir = missing2nan(df.AD2CP_Udir_c);
+                ad2cp_qf = missing2nan(df.AD2CP_QF_c);
+            else
+                ad2cp_Unorth = tmpvar;
+                ad2cp_Ueast = tmpvar;
+                ad2cp_Utot = tmpvar;
+                ad2cp_Udir = tmpvar;
+                ad2cp_qf = tmpvar;
+            end
+
+            ad2cp_time1d = cat(ad2cp_time1d, ad2cp_time, dims = 1);
+            ad2cp_heading1d = cat(ad2cp_heading1d, ad2cp_heading, dims = 1);
+            ad2cp_pitch1d = cat(ad2cp_pitch1d, ad2cp_pitch, dims = 1);
+            ad2cp_roll1d = cat(ad2cp_roll1d, ad2cp_roll, dims = 1);
+            ad2cp_pressure1d = cat(ad2cp_pressure1d, ad2cp_pressure, dims = 1);
+            ad2cp_alt1d = cat(ad2cp_alt1d, ad2cp_alt, dims = 1);
+            ad2cp_v1_cn1_1d = cat(ad2cp_v1_cn1_1d, ad2cp_v1_cn1, dims = 1);
+            ad2cp_v2_cn1_1d = cat(ad2cp_v2_cn1_1d, ad2cp_v2_cn1, dims = 1);
+            ad2cp_v3_cn1_1d = cat(ad2cp_v3_cn1_1d, ad2cp_v3_cn1, dims = 1);
+            ad2cp_v4_cn1_1d = cat(ad2cp_v4_cn1_1d, ad2cp_v4_cn1, dims = 1);
+            ad2cp_v1_cn2_1d = cat(ad2cp_v1_cn2_1d, ad2cp_v1_cn2, dims = 1);
+            ad2cp_v2_cn2_1d = cat(ad2cp_v2_cn2_1d, ad2cp_v2_cn2, dims = 1);
+            ad2cp_v3_cn2_1d = cat(ad2cp_v3_cn2_1d, ad2cp_v3_cn2, dims = 1);
+            ad2cp_v4_cn2_1d = cat(ad2cp_v4_cn2_1d, ad2cp_v4_cn2, dims = 1);
+            ad2cp_v1_cn3_1d = cat(ad2cp_v1_cn3_1d, ad2cp_v1_cn3, dims = 1);
+            ad2cp_v2_cn3_1d = cat(ad2cp_v2_cn3_1d, ad2cp_v2_cn3, dims = 1);
+            ad2cp_v3_cn3_1d = cat(ad2cp_v3_cn3_1d, ad2cp_v3_cn3, dims = 1);
+            ad2cp_v4_cn3_1d = cat(ad2cp_v4_cn3_1d, ad2cp_v4_cn3, dims = 1);
+            ad2cp_v1_cn4_1d = cat(ad2cp_v1_cn4_1d, ad2cp_v1_cn4, dims = 1);
+            ad2cp_v2_cn4_1d = cat(ad2cp_v2_cn4_1d, ad2cp_v2_cn4, dims = 1);
+            ad2cp_v3_cn4_1d = cat(ad2cp_v3_cn4_1d, ad2cp_v3_cn4, dims = 1);
+            ad2cp_v4_cn4_1d = cat(ad2cp_v4_cn4_1d, ad2cp_v4_cn4, dims = 1);
+            ad2cp_v1_cn5_1d = cat(ad2cp_v1_cn5_1d, ad2cp_v1_cn5, dims = 1);
+            ad2cp_v2_cn5_1d = cat(ad2cp_v2_cn5_1d, ad2cp_v2_cn5, dims = 1);
+            ad2cp_v3_cn5_1d = cat(ad2cp_v3_cn5_1d, ad2cp_v3_cn5, dims = 1);
+            ad2cp_v4_cn5_1d = cat(ad2cp_v4_cn5_1d, ad2cp_v4_cn5, dims = 1);
+            ad2cp_v1_cn6_1d = cat(ad2cp_v1_cn6_1d, ad2cp_v1_cn6, dims = 1);
+            ad2cp_v2_cn6_1d = cat(ad2cp_v2_cn6_1d, ad2cp_v2_cn6, dims = 1);
+            ad2cp_v3_cn6_1d = cat(ad2cp_v3_cn6_1d, ad2cp_v3_cn6, dims = 1);
+            ad2cp_v4_cn6_1d = cat(ad2cp_v4_cn6_1d, ad2cp_v4_cn6, dims = 1);
+
+            ad2cp_Unorth_1d = cat(ad2cp_Unorth_1d, ad2cp_Unorth, dims = 1);
+            ad2cp_Ueast_1d = cat(ad2cp_Ueast_1d, ad2cp_Ueast, dims = 1);
+            ad2cp_Utot_1d = cat(ad2cp_Utot_1d, ad2cp_Utot, dims = 1);
+            ad2cp_Udir_1d = cat(ad2cp_Udir_1d, ad2cp_Udir, dims = 1);
+            ad2cp_qf_1d = cat(ad2cp_qf_1d, ad2cp_qf, dims = 1);    
+        end
+
+        if flbbcd_flag == 1
+            #flbbcd_chl_count = missing2nan(df.FLBBCD_CHL_COUNT);
+            #flbbcd_chl_scaled = missing2nan(df.FLBBCD_CHL_SCALED);
+            #flbbcd_bb_700_count = missing2nan(df.FLBBCD_BB_700_COUNT);
+            #flbbcd_bb_700_scaled = missing2nan(df.FLBBCD_BB_700_SCALED);
+            #flbbcd_cdom_count = missing2nan(df.FLBBCD_CDOM_COUNT);
+            #flbbcd_cdom_scaled = missing2nan(df.FLBBCD_CDOM_SCALED);
+
+            flbbcd_chl_count = [];
+            flbbcd_chl_scaled = [];
+            flbbcd_bb_700_count = [];
+            flbbcd_bb_700_scaled = [];
+            flbbcd_cdom_count = [];
+            flbbcd_cdom_scaled = [];
+
+            flbbcd_chl_count_1d = cat(flbbcd_chl_count_1d, flbbcd_chl_count, dims = 1);
+            flbbcd_chl_scaled_1d = cat(flbbcd_chl_scaled_1d, flbbcd_chl_scaled, dims = 1);
+            flbbcd_bb_700_count_1d = cat(flbbcd_bb_700_count_1d, flbbcd_bb_700_count, dims = 1);
+            flbbcd_bb_700_scaled_1d = cat(flbbcd_bb_700_scaled_1d, flbbcd_bb_700_scaled, dims = 1);
+            flbbcd_cdom_count_1d = cat(flbbcd_cdom_count_1d, flbbcd_cdom_count, dims = 1);
+            flbbcd_cdom_scaled_1d = cat(flbbcd_cdom_scaled_1d, flbbcd_cdom_scaled, dims = 1);    
+        end
+
+        if mr1000g_flag == 1
+            mr1000g_t1_avg = missing2nan(df."MR1000G-RDL_T1_AVG");
+            mr1000g_t2_avg = missing2nan(df."MR1000G-RDL_T2_AVG");
+            mr1000g_sh1_std = missing2nan(df."MR1000G-RDL_SH1_STD");
+            mr1000g_sh2_std = missing2nan(df."MR1000G-RDL_SH2_STD");
+            mr1000g_press_avg = missing2nan(df."MR1000G-RDL_PRESS_AVG");
+            mr1000g_incly_avg = missing2nan(df."MR1000G-RDL_INCLY_AVG");
+            mr1000g_eps1 = missing2nan(df."MR1000G-RDL_EPS1");
+            mr1000g_qc1 = missing2nan(df."MR1000G-RDL_QC1");
+            mr1000g_eps2 = missing2nan(df."MR1000G-RDL_EPS2");
+            mr1000g_qc2 = missing2nan(df."MR1000G-RDL_QC2");
+
+            mr1000g_t1_avg_1d = cat(mr1000g_t1_avg_1d, mr1000g_t1_avg, dims = 1);
+            mr1000g_t2_avg_1d = cat(mr1000g_t2_avg_1d, mr1000g_t2_avg, dims = 1);
+            mr1000g_sh1_std_1d = cat(mr1000g_sh1_std_1d, mr1000g_sh1_std, dims = 1);
+            mr1000g_sh2_std_1d = cat(mr1000g_sh2_std_1d, mr1000g_sh2_std, dims = 1);
+            mr1000g_press_avg_1d = cat(mr1000g_press_avg_1d, mr1000g_press_avg, dims = 1);
+            mr1000g_incly_avg_1d = cat(mr1000g_incly_avg_1d, mr1000g_incly_avg, dims = 1);
+            mr1000g_eps1_1d = cat(mr1000g_eps1_1d, mr1000g_eps1, dims = 1);
+            mr1000g_qc1_1d = cat(mr1000g_qc1_1d, mr1000g_qc1, dims = 1);
+            mr1000g_eps2_1d = cat(mr1000g_eps2_1d, mr1000g_eps2, dims = 1);
+            mr1000g_qc2_1d = cat(mr1000g_qc2_1d, mr1000g_qc2, dims = 1);    
+        end
+
+        display(yo)
         
         push!(pld_rt, PLD_RT(gliderSN, missionID, project, yo, t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt,  ad2cp_v1_cn1, ad2cp_v2_cn1, ad2cp_v3_cn1, ad2cp_v4_cn1, ad2cp_v1_cn2, ad2cp_v2_cn2, ad2cp_v3_cn2, ad2cp_v4_cn2, ad2cp_v1_cn3, ad2cp_v2_cn3, ad2cp_v3_cn3, ad2cp_v4_cn3, ad2cp_v1_cn4, ad2cp_v2_cn4, ad2cp_v3_cn4, ad2cp_v4_cn4, ad2cp_v1_cn5, ad2cp_v2_cn5, ad2cp_v3_cn5, ad2cp_v4_cn5, ad2cp_v1_cn6, ad2cp_v2_cn6, ad2cp_v3_cn6, ad2cp_v4_cn6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2, ad2cp_Unorth, ad2cp_Ueast, ad2cp_Utot, ad2cp_Udir, ad2cp_qf));    
     end #for
@@ -711,7 +870,7 @@ function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String
     return pld_rt, pld1d_rt
 end
 
-function seaexplorer_load_mission(gliderSN, missionID, project)
+function seaexplorer_load_mission(gliderSN::Int, missionID::Int, project::String)
 
     # setting src and data directory paths
     srcdir = "/Users/gong/GitHub/jlglider/";
@@ -720,7 +879,7 @@ function seaexplorer_load_mission(gliderSN, missionID, project)
     #dataroot = "/Users/gong/Research/sea064/";
 
     if (@isdefined gliderSN) != true
-        gliderSN = "SEA064"
+        gliderSN = 64
     end
 
     if (@isdefined missionID) != true
@@ -731,6 +890,7 @@ function seaexplorer_load_mission(gliderSN, missionID, project)
         project = "norse-janmayen"
     end
 
+    gliderName = "SEA" * string(gliderSN; pad=3); 
     # define data load location
     #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/";
 
@@ -739,31 +899,31 @@ function seaexplorer_load_mission(gliderSN, missionID, project)
     #deploydate = "20220311"
     #suffix = "data"
 
-    if (gliderSN == "SEA064") & (missionID == 37)
+    if (gliderSN == 64) & (missionID == 37)
         projectname = "norse"
         deploydate = "20221021"
         suffix = "deployment"
         datadir = dataroot * "sea064-20221021-norse-janmayen-complete/";
         dataflag = "all";
-    elseif (gliderSN == "SEA064") & (missionID == 38)
+    elseif (gliderSN == 64) & (missionID == 38)
         projectname = "norse"
         deploydate = "20221102"
         suffix = "deployment"
         datadir = dataroot * "sea064-20221102-norse-lofoten-complete/";
         dataflag = "all";
-    elseif (gliderSN == "SEA064") & (missionID == 48)
+    elseif (gliderSN == 64) & (missionID == 48)
         projectname = "norse"
         deploydate = "20231112"
         suffix = "deployment"
         datadir = dataroot * "sea064-20231112-norse/";
         dataflag = "all";
-    elseif (gliderSN == "SEA064") & (missionID == 58)
+    elseif (gliderSN == 64) & (missionID == 58)
         projectname = "nesma"
         deploydate = "20240709"
         suffix = "deployment"
         datadir = dataroot * "sea064-20240709-nesma";
         dataflag = "realtime";
-    elseif (gliderSN == "SEA094") & (missionID == 41)
+    elseif (gliderSN == 94) & (missionID == 41)
         projectname = "nesma"
         deploydate = "20240709"
         suffix = "deployment"
@@ -776,7 +936,11 @@ function seaexplorer_load_mission(gliderSN, missionID, project)
         scidir = datadir * "glimpse/";
     else 
         navdir = datadir * "nav/logs/";
-        scidir = datadir * "science/logs/";
+        if (gliderSN == 94) && (missionID == 41)
+            scidir = datadir * "delayed/pld064/home/user/logs/";
+        else
+            scidir = datadir * "delayed/pld1/logs/";
+        end
     end
 
     (SEAnav, SEAnav1d) = load_NAV(gliderSN, missionID, project, navdir, dataflag);
@@ -799,21 +963,29 @@ function seaexplorer_load_mission(missionYAML::String)
     
     datadir = dataroot * lowercase(gliderName) * "-" * string(deploydate) * "-" * lowercase(project) * "-" * suffix * "/";
 
-    if (dataflag == "realtime") | (dataflag == "all")
+    if (dataflag == "realtime") || (dataflag == "all")
         navdir = datadir * "glimpse/";
         scidir = datadir * "glimpse/";
     else 
-        navdir = datadir * "nav/logs/";
-        scidir = datadir * "science/logs/";
+        navdir = datadir * "delayed/nav/logs/";
+        if (gliderSN == 94) && (missionID == 41)
+            scidir = datadir * "delayed/pld064/home/user/logs/";
+        else
+            scidir = datadir * "delayed/pld1/logs/";
+        end
     end
 
+    display(navdir)
     (SEAnav, SEAnav1d) = load_NAV(gliderSN, missionID, project, navdir, dataflag);
-    (SEApld, SEApld1d) = load_PLD(gliderSN, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+
+    display(scidir)
+    #(SEApld, SEApld1d) = load_PLD(gliderSN, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    (SEApld, SEApld1d) = load_LEGATO(gliderSN, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
 
     return SEAnav, SEAnav1d, SEApld, SEApld1d
 end
 
-function seaexplorer_process(sea064pld1d)
+function seaexplorer_process(sea064pld1d::PLD_RT)
     lon = sea064pld1d.lon;
     lat = sea064pld1d.lat;
 
@@ -871,6 +1043,46 @@ function seaexplorer_process(sea064pld1d)
     SEAdata = SeaExplorerData(gliderSN, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
 end
 
+function seaexplorer_process(SEApld1d::LEGATO)
+    lon = SEApld1d.lon;
+    lat = SEApld1d.lat;
+
+    gind = findall(SEApld1d.nav_resource .== 110);
+    gpst = SEApld1d.t[gind];
+    gpslon, gpslat = lon[gind], lat[gind];
+
+    gliderSN = SEApld1d.gliderSN;
+    missionID = SEApld1d.missionID;
+    project = SEApld1d.project;
+
+    t = SEApld1d.t;
+    yo = SEApld1d.yo;
+    ns = SEApld1d.nav_resource;
+
+    badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< DateTime(2020,1,1,0,0,0)));
+    if isempty(badind) != true
+        lon[badind] .= NaN;
+        lat[badind] .= NaN;
+        t[badind] .= t[badind[end]+1];
+    end
+
+    #t = cleanTime(SEApld1d.t);
+    p = cleanPress(SEApld1d.legato_pressure);
+    z = gsw_z_from_p.(p, lat, 0, 0);
+    temp = cleanTemp(SEApld1d.legato_temperature);
+    salt = cleanSalt(SEApld1d.legato_salinity);
+    saltA = cleanSalt(gsw_sa_from_sp.(salt, p, lon, lat));
+    ctemp = cleanTemp(gsw_ct_from_t.(saltA, temp, p));
+    sigma0 = sigma0_from_t_sp(temp, salt, p, lon, lat);
+    spice0 = spice0_from_t_sp(temp, salt, p, lon, lat);
+    sndspd = gsw_sound_speed.(saltA, ctemp, p);
+
+    n2, pmid = N2_from_t_sp(temp, salt, p, lon, lat);
+    zmid = gsw_z_from_p.(pmid, lat[2:end], 0, 0);
+    tmid = t[1:end-1] .+ Second(15);
+
+    SEAdata = SeaExplorerCTD(gliderSN, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, n2, pmid, zmid, tmid);
+end
 
 #=
 function seaexplorer_process(sea064pld1d)
@@ -1005,5 +1217,30 @@ function seaexplorer_MR_laur_load(pld1, pld2, pz, dz)
     
     return lon1, lat1, lon2, lat2, eps1, eps2
 end    
+
+function seaexplorerYAMLload(missionYAMLdirpath::String)
+    if (@isdefined missionYAMLdirpath) == false
+        missionYAMLdirpath = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_PASSENGERS/";
+    end
+
+    if missionYAMLdirpath[end-4:end] != ".yaml"
+        if missionYAMLdirpath[end] != '/'
+         missionYAMLdirpath *= "/";
+        end
+        missionYAMLpath = Glob.glob("*.yaml", missionYAMLdirpath);
+    else
+        missionYAMLpath = [missionYAMLdirpath];
+    end    
+
+    #gliderCTDarray = SeaExplorerData[];
+    gliderCTDarray = SeaExplorerCTD[];
+
+    for i = 1:length(missionYAMLpath)
+        display(missionYAMLpath[i])
+        SEAnav, SEAnav1d, SEApld, SEApld1d = seaexplorer_load_mission(missionYAMLpath[i]);
+        push!(gliderCTDarray, seaexplorer_process(SEApld1d));
+    end
+    return gliderCTDarray;
+end
 
 end

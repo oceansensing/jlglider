@@ -107,6 +107,23 @@ mutable struct NAV
 end
 
 mutable struct LEGATO
+    gliderSN::Int64
+    missionID::Int64
+    project::String    
+    yo::Array{Int64};
+    t::Array{DateTime};
+    z::Array{Float64};
+    lon::Array{Float64};
+    lat::Array{Float64};
+    nav_resource::Array{Float64};
+    legato_conductivity::Array{Float64};
+    legato_temperature::Array{Float64};
+    legato_pressure::Array{Float64};
+    legato_salinity::Array{Float64};
+    legato_condtemp::Array{Float64};
+end
+
+mutable struct CTD
     t::Array{DateTime};
     p::Array{Float64};
     temp::Array{Float64};
@@ -190,7 +207,7 @@ mutable struct SeaExplorerData
     missionID::Int64
     project::String
     yo::Array{Int64}
-    ns::Array{Int64}
+    ns::Array{Float64}
     t::Array{DateTime}
     lon::Array{Float64}
     lat::Array{Float64}
@@ -223,6 +240,34 @@ mutable struct SeaExplorerData
     chla::Array{Float64}
     bb700::Array{Float64}
     cdom::Array{Float64}
+    n2::Array{Float64}
+    pmid::Array{Float64}
+    zmid::Array{Float64}
+    tmid::Array{DateTime}
+end
+
+mutable struct SeaExplorerCTD
+    gliderSN::Int64
+    missionID::Int64
+    project::String
+    yo::Array{Int64}
+    ns::Array{Float64}
+    t::Array{DateTime}
+    lon::Array{Float64}
+    lat::Array{Float64}
+    gpst::Array{DateTime}
+    gpslon::Array{Float64}
+    gpslat::Array{Float64}
+    p::Array{Float64}
+    z::Array{Float64}
+    temp::Array{Float64}
+    salt::Array{Float64}
+    saltA::Array{Float64}
+    ctemp::Array{Float64}
+    sigma0::Array{Float64}
+    spice0::Array{Float64}
+    sndspd::Array{Float64}
+
     n2::Array{Float64}
     pmid::Array{Float64}
     zmid::Array{Float64}
