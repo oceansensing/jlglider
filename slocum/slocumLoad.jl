@@ -239,13 +239,15 @@ function load_glider_ctd(missionYAMLpath::String)
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
     # save glider CTD data to a ctdStruct object
-    ctdData = ctdStruct(project, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = ctdStruct(project, gliderSN, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
 function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
+
+    gliderSN = -1;
     
     if (@isdefined datadir) == false
         # setup directories
@@ -415,7 +417,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
 
     #engData = engStruct[];
     #sciData = sciStruct[];
-    ctdData = ctdStruct(mission, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = ctdStruct(mission, gliderSN, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 

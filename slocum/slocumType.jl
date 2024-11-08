@@ -39,7 +39,8 @@ mutable struct engStruct
 end
 
 mutable struct ctdStruct
-    mission::String
+    project::String
+    gliderSN::Int
     glidername::String
     t::Array{Float64}
     p::Array{Float64}
