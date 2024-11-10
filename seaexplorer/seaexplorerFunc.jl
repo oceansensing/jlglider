@@ -3,13 +3,15 @@
 
 module seaexplorerFunc
 
-include("seaexplorerType.jl");
-include("gsw_c2po.jl");
+using Glider
+import Glider.seaexplorerType: NAV_RT, PLD_RT, LEGATO, SeaExplorerData, SeaExplorerCTD
+#include("seaexplorerType.jl");
 
-using Glob, DataFrames, CSV, Dates, Missings, NaNMath, Interpolations, YAML
+using Dates, Glob, DataFrames, CSV, Dates, Missings, NaNMath, Interpolations, YAML
 using NCDatasets
 using GibbsSeaWater, MAT
-import .seaexplorerType: NAV_RT, PLD_RT, SeaExplorerData, SeaExplorerCTD, LEGATO
+
+include("gsw_c2po.jl");
 import .gsw_c2po: sigma0_from_t_sp, spice0_from_t_sp, N2_from_t_sp
 
 # https://discourse.julialang.org/t/indices-of-intersection-of-two-arrays/23043/20
@@ -121,9 +123,27 @@ function cleanTemp(varin)
     return varout;
 end
 
+function cleanCond(varin; glidertype="seaexplorer")
+    if (@isdefined glidertype) == false
+        display("glidertype not defined in cleanCond, defaulting to seaexplorer")
+        glidertype = "seaexplorer"
+    end
+    varout = missing2nan(deepcopy(varin));
+    if lowercase(glidertype)[1:3] == "sea"
+        badind = findall((varin .>= 65.0) .|| (varin .<= 20.0));
+    elseif lowercase(glidertype)[1:3] == "slo"
+        badind = findall((varin .>= 6.5) .|| (varin .<= 2.0)); 
+    else
+        badind = findall((varin .>= 6.5) .|| (varin .<= 2.0)); 
+    end
+    varout[badind] .= NaN;
+    varout = convert(Vector{Float64}, varout);
+    return varout;
+end
+
 function cleanSalt(varin)
     varout = missing2nan(deepcopy(varin));
-    badind = findall((varin .>= 42.0) .|| (varin .<= 5.0));
+    badind = findall((varin .>= 42.0) .|| (varin .<= 10.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
     return varout;
@@ -131,7 +151,7 @@ end
 
 function cleanPress(varin)
     varout = missing2nan(deepcopy(varin));
-    badind = findall((varin .>= 7500.0) .|| (varin .< 0.0));
+    badind = findall((varin .>= 3000.0) .|| (varin .< 0.0));
     varout[badind] .= NaN;
     varout = convert(Vector{Float64}, varout);
     return varout;
@@ -186,7 +206,7 @@ function cleanFLBBCDcdom(varin)
     return varout;
 end
 
-function load_NAV(gliderSN::Int, missionID::Int, project::String, navdir::String, dataflag::String)
+function load_NAV(gliderSN::Int, gliderName::String, missionID::Int, project::String, navdir::String, dataflag::String)
     nav_rt = NAV_RT[];
 
     #missionroot = uppercase(glidername) * "." * mission;
@@ -306,7 +326,7 @@ function load_NAV(gliderSN::Int, missionID::Int, project::String, navdir::String
             yo = [yos[i]];
         end
     
-        t = DateTime.(df.Timestamp, timeformat);
+        t = datetime2unix.(DateTime.(df.Timestamp, timeformat));
         z = df.Depth;
         navlon = df.Lon;
         navlat = df.Lat;
@@ -352,9 +372,9 @@ function load_NAV(gliderSN::Int, missionID::Int, project::String, navdir::String
         Voltage1d = cat(Voltage1d, Voltage, dims=1);
         Altitude1d = cat(Altitude1d, Altitude, dims=1);
 
-        push!(nav_rt, NAV_RT(gliderSN, missionID, project, yo, t, z, lon, lat, NavState, SecurityLevel, Heading, Declination, Pitch, Roll, DeadReckoning, DesiredH, BallastCmd, BallastPos, LinCmd, LinPos, AngCmd, AngPos, Voltage, Altitude));
+        push!(nav_rt, NAV_RT(gliderSN, gliderName, missionID, project, yo, t, z, lon, lat, NavState, SecurityLevel, Heading, Declination, Pitch, Roll, DeadReckoning, DesiredH, BallastCmd, BallastPos, LinCmd, LinPos, AngCmd, AngPos, Voltage, Altitude));
     end #for
-    nav1d_rt = NAV_RT(gliderSN, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, NavState1d, SecurityLevel1d, Heading1d, Declination1d, Pitch1d, Roll1d, DeadReckoning1d, DesiredH1d, BallastCmd1d, BallastPos1d, LinCmd1d, LinPos1d, AngCmd1d, AngPos1d, Voltage1d, Altitude1d);
+    nav1d_rt = NAV_RT(gliderSN, gliderName, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, NavState1d, SecurityLevel1d, Heading1d, Declination1d, Pitch1d, Roll1d, DeadReckoning1d, DesiredH1d, BallastCmd1d, BallastPos1d, LinCmd1d, LinPos1d, AngCmd1d, AngPos1d, Voltage1d, Altitude1d);
 
     # combinating NAV_RT and PLD_RT data into one glider data structure
     #gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
@@ -362,7 +382,7 @@ function load_NAV(gliderSN::Int, missionID::Int, project::String, navdir::String
     return nav_rt, nav1d_rt
 end
 
-function load_LEGATO(gliderSN::Int, missionID::Int, project::String, scidir::String, dataflag::String)
+function load_LEGATO(gliderSN::Int, gliderName::String, missionID::Int, project::String, scidir::String, dataflag::String)
     legato_flag = 1;
     ctd = LEGATO[];
     if (dataflag == "sub") | (dataflag == "realtime") | (dataflag == "all")
@@ -459,7 +479,7 @@ function load_LEGATO(gliderSN::Int, missionID::Int, project::String, scidir::Str
         end
     
         # extract location data from data frame
-        t = DateTime.(df.PLD_REALTIMECLOCK, timeformat);
+        t = datetime2unix.(DateTime.(df.PLD_REALTIMECLOCK, timeformat));
         z = missing2nan(df.NAV_DEPTH);
         navlon = df.NAV_LONGITUDE;
         navlat = df.NAV_LATITUDE;
@@ -492,9 +512,9 @@ function load_LEGATO(gliderSN::Int, missionID::Int, project::String, scidir::Str
 
         display(yo)
         
-        push!(ctd, LEGATO(gliderSN, missionID, project, yo, t, z, lon, lat, nav_resource, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp));    
+        push!(ctd, LEGATO(gliderSN, gliderName, missionID, project, yo, t, z, lon, lat, nav_resource, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp));    
     end #for
-    ctd1d = LEGATO(gliderSN, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, nav_resource1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d);
+    ctd1d = LEGATO(gliderSN, gliderName, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, nav_resource1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d);
 
     # combinating NAV_RT and PLD_RT data into one glider data structure
     #gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
@@ -502,7 +522,7 @@ function load_LEGATO(gliderSN::Int, missionID::Int, project::String, scidir::Str
     return ctd, ctd1d
 end
 
-function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String, dataflag::String)
+function load_PLD(gliderSN::Int, glidername::String, missionID::Int, project::String, scidir::String, dataflag::String)
     legato_flag = 1
     ad2cp_flag = 1
     flbbcd_flag = 1
@@ -692,7 +712,7 @@ function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String
         end
     
         # extract location data from data frame
-        t = DateTime.(df.PLD_REALTIMECLOCK, timeformat);
+        t = datetime2unix.(DateTime.(df.PLD_REALTIMECLOCK, timeformat));
         z = missing2nan(df.NAV_DEPTH);
         navlon = df.NAV_LONGITUDE;
         navlat = df.NAV_LATITUDE;
@@ -860,9 +880,9 @@ function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String
 
         display(yo)
         
-        push!(pld_rt, PLD_RT(gliderSN, missionID, project, yo, t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt,  ad2cp_v1_cn1, ad2cp_v2_cn1, ad2cp_v3_cn1, ad2cp_v4_cn1, ad2cp_v1_cn2, ad2cp_v2_cn2, ad2cp_v3_cn2, ad2cp_v4_cn2, ad2cp_v1_cn3, ad2cp_v2_cn3, ad2cp_v3_cn3, ad2cp_v4_cn3, ad2cp_v1_cn4, ad2cp_v2_cn4, ad2cp_v3_cn4, ad2cp_v4_cn4, ad2cp_v1_cn5, ad2cp_v2_cn5, ad2cp_v3_cn5, ad2cp_v4_cn5, ad2cp_v1_cn6, ad2cp_v2_cn6, ad2cp_v3_cn6, ad2cp_v4_cn6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2, ad2cp_Unorth, ad2cp_Ueast, ad2cp_Utot, ad2cp_Udir, ad2cp_qf));    
+        push!(pld_rt, PLD_RT(gliderSN, glidername, missionID, project, yo, t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt,  ad2cp_v1_cn1, ad2cp_v2_cn1, ad2cp_v3_cn1, ad2cp_v4_cn1, ad2cp_v1_cn2, ad2cp_v2_cn2, ad2cp_v3_cn2, ad2cp_v4_cn2, ad2cp_v1_cn3, ad2cp_v2_cn3, ad2cp_v3_cn3, ad2cp_v4_cn3, ad2cp_v1_cn4, ad2cp_v2_cn4, ad2cp_v3_cn4, ad2cp_v4_cn4, ad2cp_v1_cn5, ad2cp_v2_cn5, ad2cp_v3_cn5, ad2cp_v4_cn5, ad2cp_v1_cn6, ad2cp_v2_cn6, ad2cp_v3_cn6, ad2cp_v4_cn6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2, ad2cp_Unorth, ad2cp_Ueast, ad2cp_Utot, ad2cp_Udir, ad2cp_qf));    
     end #for
-    pld1d_rt = PLD_RT(gliderSN, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, nav_resource1d, ad2cp_time1d, ad2cp_heading1d, ad2cp_pitch1d, ad2cp_roll1d, ad2cp_pressure1d, ad2cp_alt1d, ad2cp_v1_cn1_1d, ad2cp_v2_cn1_1d, ad2cp_v3_cn1_1d, ad2cp_v4_cn1_1d, ad2cp_v1_cn2_1d, ad2cp_v2_cn2_1d, ad2cp_v3_cn2_1d, ad2cp_v4_cn2_1d, ad2cp_v1_cn3_1d, ad2cp_v2_cn3_1d, ad2cp_v3_cn3_1d, ad2cp_v4_cn3_1d, ad2cp_v1_cn4_1d, ad2cp_v2_cn4_1d, ad2cp_v3_cn4_1d, ad2cp_v4_cn4_1d, ad2cp_v1_cn5_1d, ad2cp_v2_cn5_1d, ad2cp_v3_cn5_1d, ad2cp_v4_cn5_1d, ad2cp_v1_cn6_1d, ad2cp_v2_cn6_1d, ad2cp_v3_cn6_1d, ad2cp_v4_cn6_1d, flbbcd_chl_count_1d, flbbcd_chl_scaled_1d, flbbcd_bb_700_count_1d, flbbcd_bb_700_scaled_1d, flbbcd_cdom_count_1d, flbbcd_cdom_scaled_1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d, mr1000g_t1_avg_1d, mr1000g_t2_avg_1d, mr1000g_sh1_std_1d, mr1000g_sh2_std_1d, mr1000g_press_avg_1d, mr1000g_incly_avg_1d, mr1000g_eps1_1d, mr1000g_qc1_1d, mr1000g_eps2_1d, mr1000g_qc2_1d, ad2cp_Unorth_1d, ad2cp_Ueast_1d, ad2cp_Utot_1d, ad2cp_Udir_1d, ad2cp_qf_1d);
+    pld1d_rt = PLD_RT(gliderSN, glidername, missionID, project, yo1d, t1d, z1d, lon1d, lat1d, nav_resource1d, ad2cp_time1d, ad2cp_heading1d, ad2cp_pitch1d, ad2cp_roll1d, ad2cp_pressure1d, ad2cp_alt1d, ad2cp_v1_cn1_1d, ad2cp_v2_cn1_1d, ad2cp_v3_cn1_1d, ad2cp_v4_cn1_1d, ad2cp_v1_cn2_1d, ad2cp_v2_cn2_1d, ad2cp_v3_cn2_1d, ad2cp_v4_cn2_1d, ad2cp_v1_cn3_1d, ad2cp_v2_cn3_1d, ad2cp_v3_cn3_1d, ad2cp_v4_cn3_1d, ad2cp_v1_cn4_1d, ad2cp_v2_cn4_1d, ad2cp_v3_cn4_1d, ad2cp_v4_cn4_1d, ad2cp_v1_cn5_1d, ad2cp_v2_cn5_1d, ad2cp_v3_cn5_1d, ad2cp_v4_cn5_1d, ad2cp_v1_cn6_1d, ad2cp_v2_cn6_1d, ad2cp_v3_cn6_1d, ad2cp_v4_cn6_1d, flbbcd_chl_count_1d, flbbcd_chl_scaled_1d, flbbcd_bb_700_count_1d, flbbcd_bb_700_scaled_1d, flbbcd_cdom_count_1d, flbbcd_cdom_scaled_1d, legato_conductivity_1d, legato_temperature_1d, legato_pressure_1d, legato_salinity_1d, legato_condtemp_1d, mr1000g_t1_avg_1d, mr1000g_t2_avg_1d, mr1000g_sh1_std_1d, mr1000g_sh2_std_1d, mr1000g_press_avg_1d, mr1000g_incly_avg_1d, mr1000g_eps1_1d, mr1000g_qc1_1d, mr1000g_eps2_1d, mr1000g_qc2_1d, ad2cp_Unorth_1d, ad2cp_Ueast_1d, ad2cp_Utot_1d, ad2cp_Udir_1d, ad2cp_qf_1d);
 
     # combinating NAV_RT and PLD_RT data into one glider data structure
     #gliderRT = SeaExplorerRT(nav_rt, pld_rt, nav1d_rt, pld1d_rt);
@@ -870,7 +890,7 @@ function load_PLD(gliderSN::Int, missionID::Int, project::String, scidir::String
     return pld_rt, pld1d_rt
 end
 
-function seaexplorer_load_mission(gliderSN::Int, missionID::Int, project::String)
+function seaexplorer_load_mission(gliderSN::Int, glidername::String, missionID::Int, project::String)
 
     # setting src and data directory paths
     srcdir = "/Users/gong/GitHub/jlglider/";
@@ -880,6 +900,10 @@ function seaexplorer_load_mission(gliderSN::Int, missionID::Int, project::String
 
     if (@isdefined gliderSN) != true
         gliderSN = 64
+    end
+
+    if (@isdefined glidername) != true
+        glidername = "sea064"
     end
 
     if (@isdefined missionID) != true
@@ -943,8 +967,8 @@ function seaexplorer_load_mission(gliderSN::Int, missionID::Int, project::String
         end
     end
 
-    (SEAnav, SEAnav1d) = load_NAV(gliderSN, missionID, project, navdir, dataflag);
-    (SEApld, SEApld1d) = load_PLD(gliderSN, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    (SEAnav, SEAnav1d) = load_NAV(gliderSN, glidername, missionID, project, navdir, dataflag);
+    (SEApld, SEApld1d) = load_PLD(gliderSN, glidername,  missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
 
     return SEAnav, SEAnav1d, SEApld, SEApld1d
 end
@@ -952,7 +976,7 @@ end
 function seaexplorer_load_mission(missionYAML::String)
 
     mission = YAML.load_file(missionYAML);
-    gliderName = mission["gliderName"];
+    glidername = mission["gliderName"];
     gliderSN = mission["gliderSN"];
     missionID = mission["missionID"];
     project = mission["project"];
@@ -961,7 +985,7 @@ function seaexplorer_load_mission(missionYAML::String)
     suffix = mission["suffix"];
     dataflag = mission["dataflag"];
     
-    datadir = dataroot * lowercase(gliderName) * "-" * string(deploydate) * "-" * lowercase(project) * "-" * suffix * "/";
+    datadir = dataroot * lowercase(glidername) * "-" * string(deploydate) * "-" * lowercase(project) * "-" * suffix * "/";
 
     if (dataflag == "realtime") || (dataflag == "all")
         navdir = datadir * "glimpse/";
@@ -976,11 +1000,11 @@ function seaexplorer_load_mission(missionYAML::String)
     end
 
     display(navdir)
-    (SEAnav, SEAnav1d) = load_NAV(gliderSN, missionID, project, navdir, dataflag);
+    (SEAnav, SEAnav1d) = load_NAV(gliderSN, glidername, missionID, project, navdir, dataflag);
 
     display(scidir)
-    #(SEApld, SEApld1d) = load_PLD(gliderSN, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
-    (SEApld, SEApld1d) = load_LEGATO(gliderSN, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    #(SEApld, SEApld1d) = load_PLD(gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    (SEApld, SEApld1d) = load_LEGATO(gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
 
     return SEAnav, SEAnav1d, SEApld, SEApld1d
 end
@@ -996,12 +1020,14 @@ function seaexplorer_process(sea064pld1d::PLD_RT)
     gliderSN = sea064pld1d.gliderSN;
     missionID = sea064pld1d.missionID;
     project = sea064pld1d.project;
+    glidername = sea064pld1d.glidername
 
     t = sea064pld1d.t;
     yo = sea064pld1d.yo;
     ns = sea064pld1d.nav_resource;
+    t0 = datetime2unix(DateTime(2020,1,1,0,0,0)); 
 
-    badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< DateTime(2020,1,1,0,0,0)));
+    badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< t0));
     if isempty(badind) != true
         lon[badind] .= NaN;
         lat[badind] .= NaN;
@@ -1040,7 +1066,7 @@ function seaexplorer_process(sea064pld1d::PLD_RT)
     bb700 = cleanFLBBCDbb700(sea064pld1d.flbbcd_bb_700_scaled);
     cdom = cleanFLBBCDcdom(sea064pld1d.flbbcd_cdom_scaled);
 
-    SEAdata = SeaExplorerData(gliderSN, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
+    SEAdata = SeaExplorerData(gliderSN, glidername, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, mr_eps1, mr_eps2, mr_qc1, mr_qc2, mr_sh1_std, mr_sh2_std, mr_t1_avg, mr_t2_avg, ad2cp_Ueast, ad2cp_Unorth, ad2cp_Utot, ad2cp_Udir, ad2cp_qf, chla, bb700, cdom, n2, pmid, zmid, tmid);
 end
 
 function seaexplorer_process(SEApld1d::LEGATO)
@@ -1052,14 +1078,16 @@ function seaexplorer_process(SEApld1d::LEGATO)
     gpslon, gpslat = lon[gind], lat[gind];
 
     gliderSN = SEApld1d.gliderSN;
+    glidername = SEApld1d.glidername;
     missionID = SEApld1d.missionID;
     project = SEApld1d.project;
 
+    t0 = datetime2unix(DateTime(2020,1,1,0,0,0));
     t = SEApld1d.t;
     yo = SEApld1d.yo;
     ns = SEApld1d.nav_resource;
 
-    badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< DateTime(2020,1,1,0,0,0)));
+    badind = findall((lon .== 0.0 .&& lat .== 0.0) .|| (t .< t0));
     if isempty(badind) != true
         lon[badind] .= NaN;
         lat[badind] .= NaN;
@@ -1070,6 +1098,7 @@ function seaexplorer_process(SEApld1d::LEGATO)
     p = cleanPress(SEApld1d.legato_pressure);
     z = gsw_z_from_p.(p, lat, 0, 0);
     temp = cleanTemp(SEApld1d.legato_temperature);
+    cond = cleanCond(SEApld1d.legato_conductivity, glidertype="seaexplorer");
     salt = cleanSalt(SEApld1d.legato_salinity);
     saltA = cleanSalt(gsw_sa_from_sp.(salt, p, lon, lat));
     ctemp = cleanTemp(gsw_ct_from_t.(saltA, temp, p));
@@ -1079,9 +1108,9 @@ function seaexplorer_process(SEApld1d::LEGATO)
 
     n2, pmid = N2_from_t_sp(temp, salt, p, lon, lat);
     zmid = gsw_z_from_p.(pmid, lat[2:end], 0, 0);
-    tmid = t[1:end-1] .+ Second(15);
+    tmid = t[1:end-1] .+ 15.0;
 
-    SEAdata = SeaExplorerCTD(gliderSN, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, salt, saltA, ctemp, sigma0, spice0, sndspd, n2, pmid, zmid, tmid);
+    SEAdata = SeaExplorerCTD(gliderSN, glidername, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, cond, salt, saltA, ctemp, sigma0, spice0, sndspd, n2, pmid, zmid, tmid);
 end
 
 #=

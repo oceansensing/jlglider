@@ -1,15 +1,17 @@
 # define glider data types for SeaExplorer glider
-# gong@vims.edu: 2022-10-23
+# gong@vims.edu: 2022-10-23, updated 2024-10-23
 module seaexplorerType
 
-using Dates
+export NAV_RT, PLD_RT, NAV, LEGATO, CTD, FLBBCD, AD2CP, MR1000G, SeaExplorerTest, SeaExplorer, SeaExplorerData, SeaExplorerCTD
 
+using Dates
 mutable struct NAV_RT
     gliderSN::Int64
+    glidername::String
     missionID::Int64
     project::String    
     yo::Array{Int64};
-    t::Array{DateTime};
+    t::Array{Float64};
     z::Array{Float64};
     lon::Array{Float64};
     lat::Array{Float64};
@@ -33,10 +35,11 @@ end
 
 mutable struct PLD_RT
     gliderSN::Int64
+    glidername::String
     missionID::Int64
     project::String    
     yo::Array{Int64};
-    t::Array{DateTime};
+    t::Array{Float64};
     z::Array{Float64};
     lon::Array{Float64};
     lat::Array{Float64};
@@ -108,10 +111,11 @@ end
 
 mutable struct LEGATO
     gliderSN::Int64
+    glidername::String
     missionID::Int64
     project::String    
     yo::Array{Int64};
-    t::Array{DateTime};
+    t::Array{Float64};
     z::Array{Float64};
     lon::Array{Float64};
     lat::Array{Float64};
@@ -204,14 +208,15 @@ end
 
 mutable struct SeaExplorerData
     gliderSN::Int64
+    glidername::String
     missionID::Int64
     project::String
     yo::Array{Int64}
     ns::Array{Float64}
-    t::Array{DateTime}
+    t::Array{Float64}
     lon::Array{Float64}
     lat::Array{Float64}
-    gpst::Array{DateTime}
+    gpst::Array{Float64}
     gpslon::Array{Float64}
     gpslat::Array{Float64}
     p::Array{Float64}
@@ -243,24 +248,26 @@ mutable struct SeaExplorerData
     n2::Array{Float64}
     pmid::Array{Float64}
     zmid::Array{Float64}
-    tmid::Array{DateTime}
+    tmid::Array{Float64}
 end
 
 mutable struct SeaExplorerCTD
     gliderSN::Int64
+    glidername::String
     missionID::Int64
     project::String
     yo::Array{Int64}
     ns::Array{Float64}
-    t::Array{DateTime}
+    t::Array{Float64}
     lon::Array{Float64}
     lat::Array{Float64}
-    gpst::Array{DateTime}
+    gpst::Array{Float64}
     gpslon::Array{Float64}
     gpslat::Array{Float64}
     p::Array{Float64}
     z::Array{Float64}
     temp::Array{Float64}
+    cond::Array{Float64}
     salt::Array{Float64}
     saltA::Array{Float64}
     ctemp::Array{Float64}
@@ -271,9 +278,10 @@ mutable struct SeaExplorerCTD
     n2::Array{Float64}
     pmid::Array{Float64}
     zmid::Array{Float64}
-    tmid::Array{DateTime}
+    tmid::Array{Float64}
 end
 
+#=
 mutable struct plotSetting
     #figoutdir::String
     pint::Float64
@@ -331,5 +339,6 @@ mutable struct ctdStruct
     castnum::Int
     qflag::Int
 end
+=#
 
 end

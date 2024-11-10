@@ -3,19 +3,29 @@ if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
 end
 
-include("seaexplorerFunc.jl")
-import .seaexplorerFunc: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process, seaexplorerYAMLload
+# loading the Glider module with all relevant types
+using Glider
 
+# import all the functions used
+include("/Users/gong/GitHub/jlglider/seaexplorer/seaexplorerFunc.jl")
+include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
+import .seaexplorerFunc: seaexplorerYAMLload, seaexplorer_load_mission 
+import .gliderPlot: plot_glider_ctd, plotGliderCTD
 using JLD2
 
-reloadflag = true
+reloadflag = false
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdir = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_PASSENGERS/";
+missionYAMLdirpath = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_PASSENGERS/";
+
+#SEAnav, SEAnav1d, SEApld, SEApld1d = seaexplorer_load_mission(missionYAMLdirpath * "sea094-20240709-passengers.yaml");
 
 if @isdefined(gliderCTDarray) == false
+    display("Loading data...")
+    #global gliderCTDarray = SeaExplorerCTD[];
     if reloadflag == true
-        gliderCTDarray = seaexplorerYAMLload(missionYAMLdir);
+        gliderCTDarray = seaexplorerYAMLload(missionYAMLdirpath);
         jldsave(gliderdatadir * "PASSENGERS_seaexplorerCTDdata.jld2"; gliderCTDarray);
         display("Done reloading data.")
     else
@@ -23,6 +33,39 @@ if @isdefined(gliderCTDarray) == false
         display("Done loading data.")
     end
 end
+
+global ps = Glider.gliderPlotType.plotSetting[];
+global pst = Glider.gliderPlotType.plotStruct[];
+for i = 1:length(gliderCTDarray)
+    pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+    iday = 1; # day intervals for plotting
+    ms = 6; # marker size
+    tsms = 6; # time series marker size
+    pres = (1600, 800); # plot resolution
+    tspres = (1000, 1000); # time series plot resolution
+    fs = 42; # font size
+    global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
+
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+    project = gliderCTDarray[i].project;
+    glidername = gliderCTDarray[i].glidername;
+    tempmin = 5.0;
+    tempmax = 30.0;
+    condmin = 30;
+    condmax = 50;
+    saltmin = 34.5;
+    saltmax = 37.5;
+    sigma0min = 20.0;
+    sigma0max = 30.0;
+    spice0min = -5.0;
+    spice0max = 5.0;
+    sndspdmin = 1450;
+    sndspdmax = 1530;
+    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+end
+
+plotGliderCTD(gliderCTDarray, ps, pst)
+
 
 #plotSeaExplorerCTD(gliderCTDarray)
 
