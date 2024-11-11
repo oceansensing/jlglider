@@ -271,7 +271,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :balance, flipaxis = true, label = "Spice0")
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Spice0")
     fig
     #save(figoutdir * project * "_" * glidername * "_spice0.png", fig)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_spice0.png", fig)
@@ -627,7 +627,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
     # approximate x-axis scaling to make it look "normal"
     dlat = latmax - latmin;
     dlon = lonmax - lonmin;
-    lat0 = NaNMath.mean([38.5]);
+    lat0 = NaNMath.mean(gliderCTDarray[1].lat);
     xfac = sind(90-lat0);
     yres = 2000;
     pres = (abs(ceil(yres * (xfac/(dlat/dlon)))), abs(yres));
@@ -656,7 +656,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
         zrange = (-6000, 6000);
     end
     
-    plottitle = uppercase(gliderCTDarray[1].project) * " " * gliderCTDarray[1].glidertype * " " * varname * "(" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * ")";
+    plottitle = uppercase(gliderCTDarray[1].project) * " " * gliderCTDarray[1].glidertype * " " * varname * " (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "-" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[1].t)))) * ")";
     plotname = uppercase(gliderCTDarray[1].project) * "_" * lowercase(gliderCTDarray[1].glidertype) * "_" * varname * ".png" 
 
     fig = Figure(size = pres, fontsize = 64)
