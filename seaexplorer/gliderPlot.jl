@@ -262,7 +262,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Year Day",
         ylabel = "Depth (m)"
     )
-    Makie.scatter!(x, y, color=z, colormap=:balance, markersize=ms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     #ax.xticks = (xtick .- x0, xticklabel);
     #=
     if length(xtick) > 10
@@ -316,12 +316,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sigma0;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z);
-    xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
-    xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
-    ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
-    ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y); 
-    zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
-    zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
+    #xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
+    #xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
+    #ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
+    #ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y); 
+    #zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
+    #zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
+
+    xmin = pst.saltmin;
+    xmax = pst.saltmax;
+    ymin = pst.tempmin;
+    ymax = pst.tempmax;
+    zmin = pst.sigma0min;
+    zmax = pst.sigma0max;
+
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " CT/SA",
@@ -329,8 +337,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Absolute Salinity",
         ylabel = "Conservative Temperature"
     )
-    #xlims!(ax, xmin, xmax);
-    #ylims!(ax, ymin, ymax);
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
@@ -347,12 +355,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sndspd;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
-    xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
-    xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
-    ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
-    ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y);
-    zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
-    zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
+    #xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
+    #xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
+    #ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
+    #ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y);
+    #zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
+    #zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
+
+    xmin = pst.spice0min;
+    xmax = pst.spice0max;
+    ymin = pst.sigma0min;
+    ymax = pst.sigma0max;
+    zmin = pst.sndspdmin;
+    zmax = pst.sndspdmax;
+
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Sigma0-Spice0",
@@ -360,8 +376,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Spiciness",
         ylabel = "Potential Density Anomaly"
     )
-    #xlims!(ax, xmin, xmax);
-    #ylims!(ax, ymin, ymax);
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sound Speed")
@@ -379,12 +395,20 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     z = gliderCTD.sigma0;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z);
-    xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
-    xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
-    ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
-    ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y);
-    zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
-    zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
+    #xmin = NaNMath.mean(x) .- (nsig+0.5) * NaNMath.std(x);
+    #xmax = NaNMath.mean(x) .+ (nsig+0.5) * NaNMath.std(x);
+    #ymin = NaNMath.mean(y) .- (nsig+0.5) * NaNMath.std(y);
+    #ymax = NaNMath.mean(y) .+ (nsig+0.5) * NaNMath.std(y);
+    #zmin = NaNMath.mean(z) .- nsig * NaNMath.std(z);
+    #zmax = NaNMath.mean(z) .+ nsig * NaNMath.std(z);
+
+    xmin = pst.saltmin;
+    xmax = pst.saltmax;
+    ymin = pst.tempmin;
+    ymax = pst.tempmax;
+    zmin = pst.sigma0min;
+    zmax = pst.sigma0max;
+
     fig = Figure(; size = tspres, fontsize = fs)
     ax = Axis(fig[1, 1],
         #title = project * " " * uppercasefirst(glidername) * " T/S",
@@ -392,8 +416,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         xlabel = "Practical Salinity",
         ylabel = "In-Situ Temperature"
     )
-    #xlims!(ax, xmin, xmax);
-    #ylims!(ax, ymin, ymax);
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
