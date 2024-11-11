@@ -1,8 +1,9 @@
 ---
+  gliderType: SeaExplorer
   gliderName: SEA064
   gliderSN: 64
   missionID: 59
-  project: nesma
+  project: nesma-passengers
   deploydate: 20240720
   dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
   suffix: complete

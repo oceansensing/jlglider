@@ -16,6 +16,10 @@ mutable struct plotStruct
     figoutdir::String
     project::String
     glidername::String
+    lonmin::Float64
+    lonmax::Float64
+    latmin::Float64
+    latmax::Float64
     tempmin::Float64
     tempmax::Float64
     condmin::Float64

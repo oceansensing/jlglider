@@ -6,6 +6,7 @@ export NAV_RT, PLD_RT, NAV, LEGATO, CTD, FLBBCD, AD2CP, MR1000G, SeaExplorerTest
 
 using Dates
 mutable struct NAV_RT
+    glidertype::String
     gliderSN::Int64
     glidername::String
     missionID::Int64
@@ -34,6 +35,7 @@ mutable struct NAV_RT
 end
 
 mutable struct PLD_RT
+    glidertype::String
     gliderSN::Int64
     glidername::String
     missionID::Int64
@@ -110,6 +112,7 @@ mutable struct NAV
 end
 
 mutable struct LEGATO
+    glidertype::String
     gliderSN::Int64
     glidername::String
     missionID::Int64
@@ -207,6 +210,7 @@ mutable struct SeaExplorer
 end
 
 mutable struct SeaExplorerData
+    glidertype::String
     gliderSN::Int64
     glidername::String
     missionID::Int64
@@ -252,6 +256,7 @@ mutable struct SeaExplorerData
 end
 
 mutable struct SeaExplorerCTD
+    glidertype::String
     gliderSN::Int64
     glidername::String
     missionID::Int64

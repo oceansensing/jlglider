@@ -11,7 +11,7 @@ include("/Users/gong/GitHub/jlglider/seaexplorer/seaexplorerFunc.jl")
 include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
 include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
 import .seaexplorerFunc: seaexplorerYAMLload, seaexplorer_load_mission 
-import .gliderPlot: plot_glider_ctd, plotGliderCTD
+import .gliderPlot: plot_glider_ctd, plotGliderCTD, plotGliderMap
 using JLD2
 
 reloadflag = false
@@ -43,12 +43,14 @@ for i = 1:length(gliderCTDarray)
     tsms = 6; # time series marker size
     pres = (1600, 800); # plot resolution
     tspres = (1000, 1000); # time series plot resolution
-    fs = 42; # font size
+    fs = 32; # font size
     global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
 
     figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
     project = gliderCTDarray[i].project;
     glidername = gliderCTDarray[i].glidername;
+    latmin, latmax = 37, 40;
+    lonmin, lonmax = -65.2, -59.8;    
     tempmin = 4.0;
     tempmax = 32.0;
     condmin = 30;
@@ -61,11 +63,11 @@ for i = 1:length(gliderCTDarray)
     spice0max = 7.5;
     sndspdmin = 1480;
     sndspdmax = 1550;
-    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
 
 plotGliderCTD(gliderCTDarray, ps, pst)
-
+plotGliderMap(gliderCTDarray, pst, pzrange=[-40,-30], varname="saltA", logzflag=0);
 
 #plotSeaExplorerCTD(gliderCTDarray)
 

@@ -5,7 +5,7 @@ using Glider
 include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
 using .C2PO: yearday2datetime, datetime2yearday
 #using .gliderType: plotSetting, plotStruct, ctdStruct, sciStruct
-using NaNMath, GibbsSeaWater, Dates, Interpolations, Statistics
+using NaNMath, GibbsSeaWater, Dates, Interpolations, Statistics, NCDatasets
 using GLMakie, ColorSchemes
 
 function datetick(unix_t::Array{Float64})
@@ -551,6 +551,8 @@ function plotGliderCTD(gliderCTDarray, plotsetting, plotstruct)
             figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
             project = "PASSENGERS"
             glidername = "Sylvia"
+            latmin, latmax = 37, 40;
+            lonmin, lonmax = -65.2, -59.8;            
             tempmin = 5.0;
             tempmax = 30.0;
             condmin = 3.0;
@@ -600,6 +602,87 @@ function plotGliderCTD(gliderCTDarray, plotsetting, plotstruct)
         plot_glider_ctd(gliderCTDraw, ps[i], pst[i]);
     end
     display("Done.")
+end
+
+function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA", logzflag=0)
+    #using NCDatasets, GLMakie, NaNMath, Statistics, Dates
+
+    if (@isdefined logzflag) == false
+        logzflag = 0;
+    end
+
+    bathypath = "/Users/gong/oceansensing Dropbox/C2PO/Data/bathy/ETOPO1/ETOPO_2022_v1_30s_N90W180_surface.nc";
+    bathyds = Dataset(bathypath,"r");
+    
+    lon = bathyds["lon"][:];
+    lat = bathyds["lat"][:];
+    
+    #latmin, latmax = 37, 40;
+    #lonmin, lonmax = -65.2, -59.8;
+    lonmin = pst[1].lonmin
+    lonmax = pst[1].lonmax
+    latmin = pst[1].latmin
+    latmax = pst[1].latmax
+    
+    # approximate x-axis scaling to make it look "normal"
+    dlat = latmax - latmin;
+    dlon = lonmax - lonmin;
+    lat0 = NaNMath.mean([38.5]);
+    xfac = sind(90-lat0);
+    yres = 2000;
+    pres = (abs(ceil(yres * (xfac/(dlat/dlon)))), abs(yres));
+    
+    # extract indices from the bathymetric data file
+    latind = findall(latmin-0.1 .<= lat .<= latmax+0.1);
+    lonind = findall(lonmin-0.1 .<= lon .<= lonmax+0.1);
+    
+    z = Float64.(bathyds["z"][lonind, latind]); # recasting as Float64 to fix a StackOverFlow error seen in GLMakie 0.6.0.
+    x = lon[lonind];
+    y = lat[latind];
+    
+    pzind = findall(z .> 1);
+    nzind = findall(z .< -1);
+    zzind = findall(-1 .<= z .<= 1);
+    
+    if logzflag == 1
+        log10z = deepcopy(z);
+        log10z[pzind] .= log10.(z[pzind]);
+        log10z[nzind] .= -log10.(-z[nzind]);
+        log10z[zzind] .= 0;
+        zrange = (-4, 4);
+        zp = log10z;
+    else
+        zp = z;
+        zrange = (-6000, 6000);
+    end
+    
+    plottitle = uppercase(gliderCTDarray[1].project) * " " * gliderCTDarray[1].glidertype * " " * varname * "(" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * ")";
+    plotname = uppercase(gliderCTDarray[1].project) * "_" * lowercase(gliderCTDarray[1].glidertype) * "_" * varname * ".png" 
+
+    fig = Figure(size = pres, fontsize = 64)
+    ax = Axis(
+        fig[1, 1];
+        title = plottitle,
+        xlabel = "Longitude",
+        ylabel = "Latitude",
+    )
+    Makie.contourf!(x, y, zp, colormap = :bukavu, levels = range(zrange[1], zrange[2], length = 128))
+    xlims!(lonmin, lonmax);
+    ylims!(latmin, latmax);
+    
+    for ii = 1:length(gliderCTDarray)
+        zind = findall(minimum(pzrange) .<= gliderCTDarray[ii].z .<= maximum(pzrange));
+        local x = gliderCTDarray[ii].lon[zind];
+        local y = gliderCTDarray[ii].lat[zind];
+        local c = gliderCTDarray[ii].saltA[zind];
+        cmin = minimum(c);
+        cmax = maximum(c);
+        display(ii)
+        GLMakie.scatter!(x, y, color=c, colorrange=(cmin,cmax), colormap=:jet, markersize=20);
+    end
+    fig
+    save(pst[1].figoutdir * plotname, fig)
+    GLMakie.closeall()
 end
 
 end
