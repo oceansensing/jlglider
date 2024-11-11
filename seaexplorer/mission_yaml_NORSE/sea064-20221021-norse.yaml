@@ -1,4 +1,5 @@
 ---
+  gliderType: SeaExplorer
   gliderName: SEA064
   gliderSN: 64
   missionID: 37
@@ -6,4 +7,4 @@
   deploydate: 20221021
   dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
   suffix: complete
-  dataflag: all
+  dataflag: delayed

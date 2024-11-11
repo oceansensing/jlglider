@@ -3,40 +3,82 @@ if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
 end
 
-include("seaexplorerFunc.jl")
+# loading the Glider module with all relevant types
+using Glider
 
-import .seaexplorerFunc: load_NAV, load_PLD, seaexplorer_load_mission, seaexplorer_process
+# import all the functions used
+include("/Users/gong/GitHub/jlglider/seaexplorer/seaexplorerFunc.jl")
+include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
+import .seaexplorerFunc: seaexplorerYAMLload, seaexplorer_load_mission 
+import .gliderPlot: plot_glider_ctd, plotGliderCTD, plotGliderMap
+using JLD2
 
-#mission = 48; # M37 is Jan Mayen in 2022, M38 is Lofoten Basin in 2022, M48 is Jan Mayen in 2023
-#include("seaexplorer_load.jl"), M55 is NESMA leg 1;
-#jm22nav, jm22nav1d, jm22pld, jm22pld1d = seaexplorer_load_mission(37);
-#lbe22nav, lbe22nav1d, lbe22pld, lbe22pld1d = seaexplorer_load_mission(38);
-#jm23nav, jm23nav1d, jm23pld, jm23pld1d = seaexplorer_load_mission(48);
-#jm22 = seaexplorer_process(jm22pld1d);
-#lbe22 = seaexplorer_process(lbe22pld1d);
-#jm23 = seaexplorer_process(jm23pld1d);
+reloadflag = false
 
-#sea064pld1d = jm23;
-#jm = jm23;
-#lbe = lbe22;
+gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
+missionYAMLdirpath = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_NORSE/";
 
-missionYAML = "sea064-20221021-norse.yml";
-sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAML);
-#sea064 = seaexplorer_process(sea064pld1d);
-jm22 = seaexplorer_process(sea064pld1d);
+#SEAnav, SEAnav1d, SEApld, SEApld1d = seaexplorer_load_mission(missionYAMLdirpath * "sea094-20240709-passengers.yaml");
 
-missionYAML = "sea064-20221102-norse.yml";
-sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAML);
-#sea064 = seaexplorer_process(sea064pld1d);
-lbe22 = seaexplorer_process(sea064pld1d);
+if @isdefined(gliderCTDarray) == false
+    display("Loading data...")
+    #global gliderCTDarray = SeaExplorerCTD[];
+    if reloadflag == true
+        gliderCTDarray = seaexplorerYAMLload(missionYAMLdirpath);
+        jldsave(gliderdatadir * "NORSE_seaexplorerCTDdata.jld2"; gliderCTDarray);
+        display("Done reloading data.")
+    else
+        gliderCTDarray = load(gliderdatadir * "NORSE_seaexplorerCTDdata.jld2")["gliderCTDarray"];
+        display("Done loading data.")
+    end
+end
 
-missionYAML = "sea064-20231112-norse.yml";
-sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAML);
-#sea064 = seaexplorer_process(sea064pld1d);
-jm23 = seaexplorer_process(sea064pld1d);
+global ps = Glider.gliderPlotType.plotSetting[];
+global pst = Glider.gliderPlotType.plotStruct[];
+for i = 1:length(gliderCTDarray)
+    pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+    iday = 1; # day intervals for plotting
+    ms = 10; # marker size
+    tsms = 6; # time series marker size
+    pres = (1600, 800); # plot resolution
+    tspres = (1000, 1000); # time series plot resolution
+    fs = 32; # font size
+    global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
 
-#jm = jm22;
-#lbe = lbe22;
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+    project = gliderCTDarray[i].project;
+    glidername = gliderCTDarray[i].glidername;
+    lonmin, lonmax = -10, -5.5;    
+    latmin, latmax = 70.2, 71.5;
+    tempmin, tempmax = -2, 9;
+    condmin, condmax = 25, 37;
+    saltmin, saltmax = 33.3, 35.5;
+    sigma0min, sigma0max = 26.8, 28.2;
+    spice0min, spice0max = -1.25, 1.25;
+    sndspdmin, sndspdmax = 1450, 1485;
+    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+end
+
+plotGliderCTD(gliderCTDarray, ps, pst)
+plotGliderMap(gliderCTDarray, pst, pzrange=[-40,-30], varname="saltA", logzflag=0);
+
+#plotSeaExplorerCTD(gliderCTDarray)
+
+#missionYAML = "sea064-20240720-nesma.yaml";
+#sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission(missionYAMLdir * missionYAML);
+#sea064nesma0720 = seaexplorer_process(sea064pld1d);
+
+#missionYAML = "sea094-20240709-nesma.yml";
+#sea094nav, sea094nav1d, sea094pld, sea094pld1d = seaexplorer_load_mission(missionYAML);
+#sea094nesma0709 = seaexplorer_process(sea064pld1d);
+
+
+# SEA064: M37 is Jan Mayen in 2022, M38 is Lofoten Basin in 2022, M48 is Jan Mayen in 2023, M58 is NESMA 2024
+#sea064nav, sea064nav1d, sea064pld, sea064pld1d = seaexplorer_load_mission("sea064", 58)
+# SEA094: M41 is NESMA 2024
+#sea094nav, sea094nav1d, sea094pld, sea094pld1d = seaexplorer_load_mission("sea094", 41);
+#sea094 = seaexplorer_process(sea094pld1d);
 
 #include("freya_MR_laur_load.jl");
 #include("seaexplorer_processing.jl");
