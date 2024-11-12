@@ -1330,6 +1330,8 @@ function seaexplorerCSVwrite(missionYAMLpath::String, csvdir::String)
         longitude = SEApld1d.lon,
         latitude = SEApld1d.lat, 
         pressure = SEApld1d.p, 
+        temperature = SEApld1d.temp,
+        salinity = SEApld1d.salt,
         nav_resource = SEApld1d.ns,
         declination = declination, 
         pitch = pitch,
@@ -1340,9 +1342,9 @@ function seaexplorerCSVwrite(missionYAMLpath::String, csvdir::String)
     CSV.write(csvdir * glidername * "_M" * string(missionID) * ".csv", seadf);
 end
 
-function seaexplorerCSVwrite(missionYAMLdir::Vector{Any}, csvdir::String)
-    for i = 1:length(missionYAMLdir)
-        seaexplorerCSVwrite(missionYAMLpath[i], csvdir);
+function seaexplorerCSVwrite(missionYAMLdirpath::Vector{Any}, csvdir::String)
+    for i = 1:length(missionYAMLdirpath)
+        seaexplorerCSVwrite(missionYAMLdirpath[i], csvdir);
     end
 end
 

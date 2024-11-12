@@ -1,21 +1,11 @@
-# Usage Example:
-# write_glider_data(glider = "SEA064", mission = 48, csvdir = "./")
+# Usage: include("write_glider_data_csv.jl")
 
-workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
-if (workdir in LOAD_PATH) == false
-    push!(LOAD_PATH, workdir);
-end
-
-using Glider
-import Glider.seaexplorerType: LEGATO, SeaExplorerCTD
+#using Glider
+#import Glider.seaexplorerType: LEGATO, SeaExplorerCTD
 
 include("seaexplorerFunc.jl")
 import .seaexplorerFunc: seaexplorer_load_mission, seaexplorer_process, seaexplorerCSVwrite
-using Dates, DataFrames, CSV, Interpolations
-
-# DG: this function writes out the seaexplorer glider mission data for use with gliderad2cp library
-#function write_glider_data(missionYAMLdirpath::String)
-#end
+#using Dates, DataFrames, CSV, Interpolations
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
 missionYAMLpath = [];
