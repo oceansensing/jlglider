@@ -186,10 +186,10 @@ function load_glider_ctd(missionYAMLpath::String)
     mlat = NaNMath.mean(m_gps_lat[2]);
 
     presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
-    lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, trange, [-80.0 -50.0], presfunc, mlat);
-    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, trange, [20.0 60.0], presfunc, mlat);  
-    tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], presfunc, mlat)
-    condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], presfunc, mlat)
+    lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, trange, [-80.0 10.0], presfunc, mlat);
+    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, trange, [20.0 80.0], presfunc, mlat);  
+    tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, trange, [-2.0 40.0], presfunc, mlat)
+    condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, trange, [0.1 100.0], presfunc, mlat)
 
     #presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
     #lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, trange, [-80.0 -50.0], sci_water_pressure, mlat);
