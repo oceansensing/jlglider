@@ -317,14 +317,6 @@ function load_NAV(glidertype::String, gliderSN::Int, gliderName::String, mission
         navfilepath = glilist[i];
         print(navfilepath * "\n")
         df = CSV.read(navfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
-
-        if dataflag == "all"
-        #    yo = parse.(Int, glilist_suffix[yolist]);
-            yo = df.YO_NUMBER;
-        else
-        #    yo = [parse(Int, yostring)];
-            yo = [yos[i]];
-        end
     
         t = datetime2unix.(DateTime.(df.Timestamp, timeformat));
         z = df.Depth;
@@ -333,6 +325,15 @@ function load_NAV(glidertype::String, gliderSN::Int, gliderName::String, mission
         lon = trunc.(navlon ./ 100) + (navlon .- trunc.(navlon ./ 100)*100) / 60;
         lat = trunc.(navlat ./ 100) + (navlat .- trunc.(navlat ./ 100)*100) / 60;
 
+        if dataflag == "all"
+            #yo = parse.(Int, glilist_suffix[yolist]);
+            yo = df.YO_NUMBER;
+        else
+            #yo = [parse(Int, yostring)];
+            yoi = yos[i];
+            yo = [yoi for j in 1:length(z)];
+        end
+    
         NavState = df.NavState;
         SecurityLevel = df.SecurityLevel;
         Heading = df.Heading;
@@ -468,15 +469,6 @@ function load_LEGATO(glidertype::String, gliderSN::Int, gliderName::String, miss
         pldfilepath = pldlist[i];
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
-
-        # separating '.all' from '.###' files
-        if dataflag == "all"
-        #    yo = parse.(Int, pldlist_suffix[yolist]);
-            yo = df.YO_NUMBER;
-        else
-        #    yo = [parse(Int, yostring)];
-            yo = [yos[i]];
-        end
     
         # extract location data from data frame
         t = datetime2unix.(DateTime.(df.PLD_REALTIMECLOCK, timeformat));
@@ -488,6 +480,16 @@ function load_LEGATO(glidertype::String, gliderSN::Int, gliderName::String, miss
         lon = missing2nan(lon);
         lat = missing2nan(lat);
         nav_resource = missing2nan(df.NAV_RESOURCE);
+
+        # separating '.all' from '.###' files
+        if dataflag == "all"
+            #yo = parse.(Int, pldlist_suffix[yolist]);
+            yo = df.YO_NUMBER;
+        else
+            #yo = [parse(Int, yostring)];
+            yoi = yos[i];
+            yo = [yoi for j in 1:length(z)];
+        end
 
         yo1d = cat(yo1d, yo, dims = 1);
         t1d = cat(t1d, t, dims = 1);
@@ -510,7 +512,7 @@ function load_LEGATO(glidertype::String, gliderSN::Int, gliderName::String, miss
             legato_condtemp_1d = cat(legato_condtemp_1d, legato_condtemp, dims = 1);    
         end   
 
-        display(yo)
+        display(yo[1])
         
         push!(ctd, LEGATO(glidertype, gliderSN, gliderName, missionID, project, yo, t, z, lon, lat, nav_resource, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp));    
     end #for
@@ -701,15 +703,6 @@ function load_PLD(glidertype::String, gliderSN::Int, glidername::String, mission
         pldfilepath = pldlist[i];
         print(pldfilepath * "\n")
         df = CSV.read(pldfilepath, header=1, delim=";", DataFrame, buffer_in_memory=true);
-
-        # separating '.all' from '.###' files
-        if dataflag == "all"
-        #    yo = parse.(Int, pldlist_suffix[yolist]);
-            yo = df.YO_NUMBER;
-        else
-        #    yo = [parse(Int, yostring)];
-            yo = [yos[i]];
-        end
     
         # extract location data from data frame
         t = datetime2unix.(DateTime.(df.PLD_REALTIMECLOCK, timeformat));
@@ -721,6 +714,16 @@ function load_PLD(glidertype::String, gliderSN::Int, glidername::String, mission
         lon = missing2nan(lon);
         lat = missing2nan(lat);
         nav_resource = df.NAV_RESOURCE;
+
+        # separating '.all' from '.###' files
+        if dataflag == "all"
+            #yo = parse.(Int, pldlist_suffix[yolist]);
+            yo = df.YO_NUMBER;
+        else
+            #yo = [parse(Int, yostring)];
+            yoi = yos[i];
+            yo = [yoi for j in 1:length(z)];
+        end
 
         yo1d = cat(yo1d, yo, dims = 1);
         t1d = cat(t1d, t, dims = 1);
@@ -878,7 +881,7 @@ function load_PLD(glidertype::String, gliderSN::Int, glidername::String, mission
             mr1000g_qc2_1d = cat(mr1000g_qc2_1d, mr1000g_qc2, dims = 1);    
         end
 
-        display(yo)
+        display(yo[1])
         
         push!(pld_rt, PLD_RT(glidertype, gliderSN, glidername, missionID, project, yo, t, z, lon, lat, nav_resource, ad2cp_time, ad2cp_heading, ad2cp_pitch, ad2cp_roll, ad2cp_pressure, ad2cp_alt,  ad2cp_v1_cn1, ad2cp_v2_cn1, ad2cp_v3_cn1, ad2cp_v4_cn1, ad2cp_v1_cn2, ad2cp_v2_cn2, ad2cp_v3_cn2, ad2cp_v4_cn2, ad2cp_v1_cn3, ad2cp_v2_cn3, ad2cp_v3_cn3, ad2cp_v4_cn3, ad2cp_v1_cn4, ad2cp_v2_cn4, ad2cp_v3_cn4, ad2cp_v4_cn4, ad2cp_v1_cn5, ad2cp_v2_cn5, ad2cp_v3_cn5, ad2cp_v4_cn5, ad2cp_v1_cn6, ad2cp_v2_cn6, ad2cp_v3_cn6, ad2cp_v4_cn6, flbbcd_chl_count, flbbcd_chl_scaled, flbbcd_bb_700_count, flbbcd_bb_700_scaled, flbbcd_cdom_count, flbbcd_cdom_scaled, legato_conductivity, legato_temperature, legato_pressure, legato_salinity, legato_condtemp, mr1000g_t1_avg, mr1000g_t2_avg, mr1000g_sh1_std, mr1000g_sh2_std, mr1000g_press_avg, mr1000g_incly_avg, mr1000g_eps1, mr1000g_qc1, mr1000g_eps2, mr1000g_qc2, ad2cp_Unorth, ad2cp_Ueast, ad2cp_Utot, ad2cp_Udir, ad2cp_qf));    
     end #for
@@ -1008,8 +1011,12 @@ function seaexplorer_load_mission(missionYAML::String)
     (SEAnav, SEAnav1d) = load_NAV(glidertype, gliderSN, glidername, missionID, project, navdir, dataflag);
 
     display(scidir)
-    #(SEApld, SEApld1d) = load_PLD(gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
-    (SEApld, SEApld1d) = load_LEGATO(glidertype, gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    if gliderSN == 64
+        #(SEApld, SEApld1d) = load_PLD(glidertype, gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+        (SEApld, SEApld1d) = load_LEGATO(glidertype, gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    elseif gliderSN == 94
+        (SEApld, SEApld1d) = load_LEGATO(glidertype, gliderSN, glidername, missionID, project, scidir, dataflag); # last dataflag parameter, 0 for sub individual files, 1 for sub all, >2 for raw individual files
+    end
 
     return SEAnav, SEAnav1d, SEApld, SEApld1d
 end
@@ -1277,6 +1284,66 @@ function seaexplorerYAMLload(missionYAMLdirpath::String)
         push!(gliderCTDarray, seaexplorer_process(SEApld1d));
     end
     return gliderCTDarray;
+end
+
+# this function export the processed glider data into CSV files for further AD2CP processing
+function seaexplorerCSVwrite(missionYAMLpath::String, csvdir::String)
+    if (@isdefined missionYAMLpath) == false
+        missionYAMLpath = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_PASSENGERS/";
+    end
+
+    if (@isdefined csvdir) == false
+        csvdir = "./";
+    end
+
+    SEAnav, SEAnav1d, SEApld, SEApld1d = seaexplorer_load_mission(missionYAMLpath);
+    SEApld1d = seaexplorer_process(SEApld1d);
+
+    glidertype = SEApld1d.glidertype;
+    gliderSN = SEApld1d.gliderSN;
+    glidername = SEApld1d.glidername;
+    missionID = SEApld1d.missionID;
+    project = SEApld1d.project;
+
+    #nav_unixt = Dates.datetime2unix.(SEAnav1d.t); 
+    nav_unixt = SEAnav1d.t;
+    tind = sortperm(nav_unixt);
+
+    PitchFunc = linear_interpolation(nav_unixt[tind], SEAnav1d.Pitch[tind], extrapolation_bc=Line()); 
+    pitch = PitchFunc(SEApld1d.t);
+
+    HeadingFunc = linear_interpolation(nav_unixt[tind], SEAnav1d.Heading[tind], extrapolation_bc=Line());
+    heading = HeadingFunc(SEApld1d.t);
+
+    RollFunc = linear_interpolation(nav_unixt[tind], SEAnav1d.Roll[tind], extrapolation_bc=Line());
+    roll = RollFunc(SEApld1d.t);
+
+    DeclinationFunc = linear_interpolation(nav_unixt[tind], SEAnav1d.Declination[tind], extrapolation_bc=Line());
+    declination = DeclinationFunc(SEApld1d.t);
+
+    DeadReckoningFunc = extrapolate(interpolate((SEAnav1d.t,), Float64.(SEAnav1d.DeadReckoning), Gridded(Constant())), Flat());
+    deadreckoning = Int64.(DeadReckoningFunc(SEApld1d.t));
+
+    seadf = DataFrame(
+        time = Dates.unix2datetime.(SEApld1d.t), 
+        dive_number = SEApld1d.yo, 
+        longitude = SEApld1d.lon,
+        latitude = SEApld1d.lat, 
+        pressure = SEApld1d.p, 
+        nav_resource = SEApld1d.ns,
+        declination = declination, 
+        pitch = pitch,
+        heading = heading,
+        roll = roll,
+        dead_reckoning = deadreckoning
+        );
+    CSV.write(csvdir * glidername * "_M" * string(missionID) * ".csv", seadf);
+end
+
+function seaexplorerCSVwrite(missionYAMLdir::Vector{Any}, csvdir::String)
+    for i = 1:length(missionYAMLdir)
+        seaexplorerCSVwrite(missionYAMLpath[i], csvdir);
+    end
 end
 
 end
