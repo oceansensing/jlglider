@@ -2,20 +2,32 @@
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
 # gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
 #
+workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
+if (workdir in LOAD_PATH) == false
+    push!(LOAD_PATH, workdir);
+end
 
-using PyCall
-using Glob, YAML, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML, JLD2, NCDatasets, GLMakie
+workdir = "/Users/gong/GitHub/jlglider/slocum"
+if (workdir in LOAD_PATH) == false
+    push!(LOAD_PATH, workdir);
+end
 
-include("slocumType.jl")
-include("slocumFunc.jl")
-include("slocumLoad.jl")
-include("slocumPlot.jl")
+using JLD2, Glider
 
-using .slocumType: plotSetting, plotStruct, ctdStruct, sciStruct
+#include("slocumType.jl")
+#include("slocumFunc.jl")
+include("/Users/gong/GitHub/jlglider/slocum/slocumLoad.jl")
+#include("slocumPlot.jl")
+include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
+
+#using .gliderType: plotSetting, plotStruct, ctdStruct, sciStruct
 #using Main.slocumLoad.slocumType: ctdStruct
-import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc
+#import .C2PO: pyrow2jlcol, intersectalajulia2 
+#import .slocumFunc: glider_var_load, glider_presfunc
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
-import .slocumPlot: plot_glider_ctd, plotSlocumCTD
+#import .slocumPlot: plot_glider_ctd, plotSlocumCTD
+import .gliderPlot: plotGliderCTD, plotGliderMap
 
 reloadflag = true
 
@@ -33,72 +45,31 @@ if @isdefined(gliderCTDarray) == false
     end
 end
 
-plotSlocumCTD(gliderCTDarray)
+global ps = Glider.gliderPlotType.plotSetting[];
+global pst = Glider.gliderPlotType.plotStruct[];
+for i = 1:length(gliderCTDarray)
+    pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+    iday = 1; # day intervals for plotting
+    ms = 10; # marker size
+    tsms = 6; # time series marker size
+    pres = (1600, 800); # plot resolution
+    tspres = (1000, 1000); # time series plot resolution
+    fs = 32; # font size
+    global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
 
-bathypath = "/Users/gong/oceansensing Dropbox/C2PO/Data/bathy/ETOPO1/ETOPO_2022_v1_30s_N90W180_surface.nc";
-bathyds = Dataset(bathypath,"r");
-
-lon = bathyds["lon"][:];
-lat = bathyds["lat"][:];
-
-latmin, latmax = 37, 40;
-lonmin, lonmax = -65, -60;
-
-# approximate x-axis scaling to make it look "normal"
-dlat = latmax - latmin;
-dlon = lonmax - lonmin;
-lat0 = NaNMath.mean([38.5]);
-xfac = sind(90-lat0);
-yres = 2000;
-pres = (abs(ceil(yres * (xfac/(dlat/dlon)))), abs(yres));
-
-# extract indices from the bathymetric data file
-latind = findall(latmin-0.1 .<= lat .<= latmax+0.1);
-lonind = findall(lonmin-0.1 .<= lon .<= lonmax+0.1);
-
-z = Float64.(bathyds["z"][lonind, latind]); # recasting as Float64 to fix a StackOverFlow error seen in GLMakie 0.6.0.
-x = lon[lonind];
-y = lat[latind];
-
-pzind = findall(z .> 1);
-nzind = findall(z .< -1);
-zzind = findall(-1 .<= z .<= 1);
-
-log10z = deepcopy(z);
-log10z[pzind] .= log10.(z[pzind]);
-log10z[nzind] .= -log10.(-z[nzind]);
-log10z[zzind] .= 0;
-
-fig = Figure(size = pres, fontsize = 54)
-ax = Axis(
-    fig[1, 1];
-    title = "Gulf Stream PASSENGERS Glider Deployments (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "--" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")",
-    xlabel = "Longitude",
-    ylabel = "Latitude",
-)
-Makie.contourf!(x, y, log10z, colormap = :bukavu, levels = range(-6., 6., length = 128))
-xlims!(lonmin, lonmax);
-ylims!(latmin, latmax);
-
-for ii = 1:length(gliderCTDarray)
-    zind = findall(-40 .<= gliderCTDarray[ii].z .<= -30);
-    display(ii)
-    Makie.scatter!(
-        gliderCTDarray[ii].lon[zind], 
-        gliderCTDarray[ii].lat[zind], 
-        color = gliderCTDarray[ii].saltA[zind], 
-        colorrange = (minimum(gliderCTDarray[1].t), maximum(gliderCTDarray[end].t)), 
-        colormap=:heat, 
-        markersize=8
-        )
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+    project = gliderCTDarray[i].project;
+    glidername = gliderCTDarray[i].glidername;
+    latmin, latmax = 37, 40;
+    lonmin, lonmax = -65.2, -59.8;    
+    tempmin, tempmax = 4.0, 32.0;
+    condmin, condmax = 3, 6.5;
+    saltmin, saltmax = 31.0, 37.25;
+    sigma0min, sigma0max = 20.0, 30.0;
+    spice0min, spice0max = -1.5, 7.5;
+    sndspdmin, sndspdmax = 1480, 1550;
+    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
-fig
-save("/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/GS_PASSENGERS_glider_saltA.png", fig)
-GLMakie.closeall()
 
-#=pst = pst_electa;
-glider1 = electaCTDraw;
-glider2 = glider1;
-#plot_glider_map(electaCTDraw, sylviaCTDraw, ps, pst);
-include("slocumPlotMapTest.jl");
-=#
+plotGliderCTD(gliderCTDarray, ps, pst)
+plotGliderMap(gliderCTDarray, pst, pzrange=[-40,-30], varname="saltA", logzflag=0);

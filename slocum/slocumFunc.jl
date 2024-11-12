@@ -1,29 +1,11 @@
 # this module includes all the functions relevant for slocum glider data processing
 # 2023-06-06  gong@vims.edu
+# 2024-11-11  gong@vims.edu: major refactoring
 
 module slocumFunc
 
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations
-
-# define function for converting an array from python row major to julia column major
-function pyrow2jlcol(invar::Matrix{Float64})
-    return reverse(rotr90(invar), dims = 2);
-end
-
-# https://discourse.julialang.org/t/indices-of-intersection-of-two-arrays/23043/20
-function intersectalajulia2(a,b)
-    ia = findall(in(b), a)
-    ib = findall(in(view(a,ia)), b)
-    return unique(view(a,ia)), ia, ib[indexin(view(a,ia), view(b,ib))]
-end
-
-function intersectalajulia4(a,b)
-    ab=intersect(a,b)
-    ia = [findall(==(e), a) for e in ab]
-    ib = [findall(==(e), b) for e in ab]
-    return hcat(ab, ia,ib)
-end
 
 function glider_presfunc(sci_water_pressure, trange::Array{Float64})
     if isempty(sci_water_pressure) != true
@@ -106,7 +88,8 @@ function glider_var_load(t::Array{Float64}, pres::Array{Float64}, glidervar::Arr
     return t, presout, varout, varind;
 end
 
-function glider_var_load(glidervar, trange::Array{Float64}, varlim, sci_water_pressure, lat)
+
+function glider_var_load(glidervar, trange::Array{Float64}, varlim, sci_water_pressure::Tuple{Vector{Float64}, Vector{Float64}}, lat)
     gsw = GibbsSeaWater;
     if isempty(glidervar) != true
         presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
@@ -130,11 +113,12 @@ function glider_var_load(glidervar, trange::Array{Float64}, varlim, sci_water_pr
     return varfunc, vartime, varpres, varrawval, varz
 end
 
-function glider_var_load(glidervar, tbound::Float64, varlim, presfunc, lat)
+function glider_var_load(glidervar, trange::Array{Float64}, varlim, presfunc, lat)
     gsw = GibbsSeaWater;
     if isempty(glidervar) != true
         #presfunc, prestime, presraw = glider_presfunc(p, trange);
-        varind = findall(((NaNMath.median(glidervar[1]) - tbound) .<= glidervar[1] .<= (NaNMath.median(glidervar[1]) + tbound)) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
+        #varind = findall(((NaNMath.median(glidervar[1]) - tbound) .<= glidervar[1] .<= (NaNMath.median(glidervar[1]) + tbound)) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
+        varind = findall((trange[1] .<= glidervar[1] .<= trange[end]) .& (varlim[1] .<= glidervar[2] .<= varlim[end])); 
         vartime = glidervar[1][varind];
         varraw = glidervar[2][varind];
         sortedvarind = sortperm(vartime);
@@ -152,44 +136,6 @@ function glider_var_load(glidervar, tbound::Float64, varlim, presfunc, lat)
         varfunc = [];
     end
     return varfunc, vartime, varrawval, varpres, varz
-end
-
-
-# DG 2024-09-06, adopted from seaexplorer
-function datetime2yearday(xdt::DateTime)
-    year = Dates.year(xdt);
-    yday = Dates.dayofyear(xdt);
-    seconds_in_day = 86400;
-    ydayfrac = yday + (Dates.hour(xdt) * 3600 .+ Dates.minute(xdt) * 60 .+ Dates.second(xdt)) ./ seconds_in_day;
-    return ydayfrac;
-end
-
-# DG 2024-09-06, with help from ChatGPT 4o
-function yearday2datetime(yyyy::Int, yearday::Float64)
-    # Separate integer part (day) and fractional part (time of day)
-    int_day = Int(floor(yearday))  # Get the integer part of the day
-    fractional_day = yearday - int_day  # Get the fractional part of the day
-
-    # Convert fractional day into hours, minutes, and seconds
-    total_seconds = Int(round(fractional_day * 86400))  # 86400 seconds in a day
-    hours = div(total_seconds, 3600)  # Number of full hours
-    minutes = div(total_seconds % 3600, 60)  # Number of full minutes
-    seconds = total_seconds % 60  # Remaining seconds
-
-    # Start from January 1st of the given year and add the number of days
-    dateint = Date(yyyy, 1, 1) + Day(int_day - 1)  # Subtract 1 because days start from 1
-
-    # Create the final DateTime with the computed hours, minutes, and seconds
-    return DateTime(year(dateint), month(dateint), day(dateint), hours, minutes, seconds)
-    #return DateTime(date) + Time(hours, minutes, seconds)
-end
-
-function unix2yearday(unixt::Float64)
-    return datetime2yearday(unix2datetime(unixt));
-end
-
-function yearday2unix(yyyy::Int, yearday::Float64)
-    return unix2datetime(yearday2datetime(yyyy, yearday));
 end
 
 end #slocumFunc module

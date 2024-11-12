@@ -7,11 +7,17 @@ module slocumLoad
 using PyCall
 using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 
-include("slocumType.jl")
-include("slocumFunc.jl")
+using Glider
+import Glider.slocumType: engStruct, ctdStruct, sciStruct
 
-using .slocumType: ctdStruct, sciStruct
-using .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_presfunc, yearday2datetime, datetime2yearday
+include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+import .C2PO: pyrow2jlcol, intersectalajulia2, intersectalajulia4, unix2yearday, yearday2unix, datetime2yearday, yearday2datetime
+
+#include("slocumType.jl")
+#using .slocumType: ctdStruct, sciStruct
+
+include("slocumFunc.jl")
+using .slocumFunc: glider_var_load, glider_presfunc
 
 #=
 # define function for converting an array from python row major to julia column major
@@ -39,7 +45,7 @@ function glider_ctd_qc(t::Array{Float64}, pres::Array{Float64}, temp::Array{Floa
     return t[gind], pres[gind], temp[gind], cond[gind];
 end
 
-function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, mission, glidername, loadmode)
+function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, glidertype, gliderSN, glidername, missionID, project, loadmode)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
 
@@ -140,13 +146,13 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
-    ctdData = slocumType.ctdStruct(mission, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = Glider.slocumType.ctdStruct(glidertype, gliderSN, glidername, missionID, project, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
 # new function to load glider CTD data using YAML metadata file (2024-09-05)
 function load_glider_ctd(missionYAMLpath::String)
-    tbound = 3600*24*365.0 * 0.4; 
+    tbound = 3600*24*365.0 * 0.2; 
 
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
@@ -156,6 +162,7 @@ function load_glider_ctd(missionYAMLpath::String)
     glidertype = missionYAML["gliderType"];
     glidername = missionYAML["gliderName"];
     gliderSN = missionYAML["gliderSN"];
+    missionID = missionYAML["missionID"];
     project = missionYAML["project"];
     dataroot = missionYAML["dataroot"];
     deploydate = string(missionYAML["deploydate"]);
@@ -180,16 +187,16 @@ function load_glider_ctd(missionYAMLpath::String)
 
     # unix time of the mission start time
     unixt0 = Dates.datetime2unix(Dates.DateTime(deploydate[1:4] * "-" * deploydate[5:6] * "-" * deploydate[7:8]));
-    trange = [unixt0, unixt0 + tbound/2]; # mission start time + 6 months
+    trange = [unixt0, unixt0 + tbound]; # mission start time + 6 months
 
     # load engineering and CTD data from raw glider DBD and EBD files
     m_present_time = dataGliderEng.get("m_present_time")[1];
-    m_present_time_ind = findall((NaNMath.median(m_present_time) - tbound) .< m_present_time .< (NaNMath.median(m_present_time) + tbound));
+    m_present_time_ind = findall(unixt0 .< m_present_time .< (unixt0 + tbound));
     #m_present_time_ind = findall(trange[1] .< m_present_time .< trange[end]);
     m_present_time = m_present_time[m_present_time_ind];
     
     sci_m_present_time = dataGliderEng.get("sci_m_present_time")[1];
-    sci_m_present_time_ind = findall((NaNMath.median(sci_m_present_time) - tbound) .< sci_m_present_time .< (NaNMath.median(sci_m_present_time) + tbound));
+    sci_m_present_time_ind = findall(unixt0 .< sci_m_present_time .< (unixt0 + tbound));
     #sci_m_present_time_ind = findall(trange[1] .< sci_m_present_time .< trange[end]);
     sci_m_present_time = sci_m_present_time[sci_m_present_time_ind];
     
@@ -202,11 +209,11 @@ function load_glider_ctd(missionYAMLpath::String)
     mlon = NaNMath.mean(m_gps_lon[2]);
     mlat = NaNMath.mean(m_gps_lat[2]);
 
-    presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, tbound);
-    lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, tbound, [-80.0 -50.0], presfunc, mlat);
-    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, tbound, [20.0 60.0], presfunc, mlat);  
-    tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, tbound, [0.1 40.0], presfunc, mlat)
-    condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, tbound, [0.01 100.0], presfunc, mlat)
+    presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
+    lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, trange, [-80.0 -50.0], presfunc, mlat);
+    latfunc, lattime, latraw, latpres, latz = glider_var_load(m_gps_lat, trange, [20.0 60.0], presfunc, mlat);  
+    tempfunc, temptime, tempraw, temppres, tempz = glider_var_load(sci_water_temp, trange, [0.1 40.0], presfunc, mlat)
+    condfunc, condtime, condraw, condpres, condz = glider_var_load(sci_water_cond, trange, [0.01 100.0], presfunc, mlat)
 
     #presfunc, prestime, presraw = glider_presfunc(sci_water_pressure, trange);
     #lonfunc, lontime, lonraw, lonpres, lonz = glider_var_load(m_gps_lon, trange, [-80.0 -50.0], sci_water_pressure, mlat);
@@ -239,7 +246,7 @@ function load_glider_ctd(missionYAMLpath::String)
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
 
     # save glider CTD data to a ctdStruct object
-    ctdData = ctdStruct(project, gliderSN, glidername, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = Glider.slocumType.ctdStruct(glidertype, gliderSN, glidername, missionID, project, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
@@ -417,7 +424,7 @@ function load_glider_ctd(datadir, cacdir, trange, datamode, mission, glidername)
 
     #engData = engStruct[];
     #sciData = sciStruct[];
-    ctdData = ctdStruct(mission, gliderSN, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+    ctdData = Glider.slocumType.ctdStruct(mission, gliderSN, glidername, tctd, pres, z, lon, lat, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
     return ctdData
 end
 
@@ -490,7 +497,7 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     if isempty(sci_flbbcd_chlor_units) != true
         chlatime, chlapres, chlaraw, chlaind = glider_var_load(sci_m_present_time[tis], sci_water_pressure[tis], sci_flbbcd_chlor_units, trange, [-0.1 3.0])
         chlaz = gsw.gsw_z_from_p.(chlapres*10, mlat, 0.0, 0.0);
-        chlaData = sciStruct(mission, glidername, chlatime, chlapres, chlaz, lon, lat, chlaraw);
+        chlaData = Glider.slocumType.sciStruct(mission, glidername, chlatime, chlapres, chlaz, lon, lat, chlaraw);
     else
         chlaData = [];
     end
@@ -498,7 +505,7 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     if isempty(sci_flbbcd_cdom_units) != true
         cdomtime, cdompres, cdomraw, cdomind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_flbbcd_cdom_units, trange, [-5.0 5.0])
         cdomz = gsw.gsw_z_from_p.(cdompres*10, mlat, 0.0, 0.0); 
-        cdomData = sciStruct(mission, glidername, cdomtime, cdompres, cdomz, lon, lat, cdomraw);
+        cdomData = Glider.slocumType.sciStruct(mission, glidername, cdomtime, cdompres, cdomz, lon, lat, cdomraw);
     else
         cdomData = [];
     end
@@ -506,7 +513,7 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     if isempty(sci_flbbcd_bb_units) != true
         bb700time, bb700pres, bb700raw, bb700ind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_flbbcd_bb_units, trange, [0.0 0.008])
         bb700z = gsw.gsw_z_from_p.(bb700pres*10, mlat, 0.0, 0.0); 
-        bb700Data = sciStruct(mission, glidername, bb700time, bb700pres, bb700z, lon, lat, bb700raw);
+        bb700Data = Glider.slocumType.sciStruct(mission, glidername, bb700time, bb700pres, bb700z, lon, lat, bb700raw);
     else
         bb700Data = [];
     end
@@ -514,7 +521,7 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     if isempty(sci_bsipar_par) != true
         bpartime, bparpres, bparraw, bparind = glider_var_load(sci_m_present_time, sci_water_pressure, sci_bsipar_par, trange, [0.0 6000.0])
         bparz = gsw.gsw_z_from_p.(bparpres*10, mlat, 0.0, 0.0); 
-        bparData = sciStruct(mission, glidername, bpartime, bparpres, bparz, lon, lat, bparraw);
+        bparData = Glider.slocumType.sciStruct(mission, glidername, bpartime, bparpres, bparz, lon, lat, bparraw);
     else
         bparData = [];
     end
@@ -525,7 +532,7 @@ end
 # this function load the glider CTD data from the gliderData directory using metadata from YAML file for each mission
 function slocumYAMLload(missionYAMLdirpath::String)
     if (@isdefined missionYAMLdirpath) == false
-        missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml/";
+        missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml_GS/";
     end
 
     if missionYAMLdirpath[end-4:end] != ".yaml"

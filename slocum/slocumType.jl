@@ -1,37 +1,11 @@
 module slocumType
 
-mutable struct plotSetting
-    #figoutdir::String
-    pint::Float64
-    iday::Float64
-    ms::Float64
-    tsms::Float64
-    pres::Tuple{Int64, Int64}
-    tspres::Tuple{Int64, Int64}
-    fs::Float64
-end
-
-mutable struct plotStruct
-    figoutdir::String
-    project::String
-    glidername::String
-    #resolution::Tuple{Int64, Int64}
-    #markersize::Float64
-    tempmin::Float64
-    tempmax::Float64
-    condmin::Float64
-    condmax::Float64
-    saltmin::Float64
-    saltmax::Float64
-    sigma0min::Float64
-    sigma0max::Float64
-    spice0min::Float64
-    spice0max::Float64
-    sndspdmin::Float64
-    sndspdmax::Float64
-end
-
 mutable struct engStruct
+    glidertype::String
+    gliderSN::Int
+    glidername::String
+    missionID::Int
+    project::String
     t::Array{Float64}
     p::Array{Float64}
     lon::Array{Float64}
@@ -39,9 +13,11 @@ mutable struct engStruct
 end
 
 mutable struct ctdStruct
-    project::String
+    glidertype::String
     gliderSN::Int
     glidername::String
+    missionID::Int
+    project::String
     t::Array{Float64}
     p::Array{Float64}
     z::Array{Float64}
@@ -60,8 +36,11 @@ mutable struct ctdStruct
 end
 
 mutable struct sciStruct
-    mission::String
-    glidername::String    
+    glidertype::String
+    gliderSN::Int
+    glidername::String
+    missionID::Int
+    project::String
     t::Array{Float64}
     p::Array{Float64}
     z::Array{Float64}
