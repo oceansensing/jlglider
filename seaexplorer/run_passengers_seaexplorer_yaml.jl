@@ -62,6 +62,10 @@ end
 
 plotGliderCTD(gliderCTDarray, ps, pst)
 plotGliderMap(gliderCTDarray, pst, pzrange=[-40,-30], varname="saltA", logzflag=0);
+#include("write_glider_data_csv.jl");
+
+
+
 
 #plotSeaExplorerCTD(gliderCTDarray)
 
