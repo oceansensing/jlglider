@@ -1,7 +1,8 @@
 # this script loads Slocum glider data using dbdreader
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
 # gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
-#
+# gong@vims.edu 2024-11-11: major refactoring to unify plotting for seaexplorer and slocum glider data
+
 workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
 if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
@@ -14,19 +15,11 @@ end
 
 using JLD2, Glider
 
-#include("slocumType.jl")
-#include("slocumFunc.jl")
 include("/Users/gong/GitHub/jlglider/slocum/slocumLoad.jl")
-#include("slocumPlot.jl")
 include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
 include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
 
-#using .gliderType: plotSetting, plotStruct, ctdStruct, sciStruct
-#using Main.slocumLoad.slocumType: ctdStruct
-#import .C2PO: pyrow2jlcol, intersectalajulia2 
-#import .slocumFunc: glider_var_load, glider_presfunc
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
-#import .slocumPlot: plot_glider_ctd, plotSlocumCTD
 import .gliderPlot: plotGliderCTD, plotGliderMap
 
 reloadflag = true

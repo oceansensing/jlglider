@@ -1,6 +1,6 @@
 # this script loads Slocum glider data as configured for MARACOOS W missions using dbdreader
 # gong@vims.edu 2023-03-26: adopted from the PASSENGERS version - added sorting of raw data by time and plotting of chla data
-#
+# gong@vims.edu 2024-11-11: add slocumYAMLload function and load_glider_ctd using YAML metadata
 
 module slocumLoad
 
@@ -13,32 +13,8 @@ import Glider.slocumType: engStruct, ctdStruct, sciStruct
 include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
 import .C2PO: pyrow2jlcol, intersectalajulia2, intersectalajulia4, unix2yearday, yearday2unix, datetime2yearday, yearday2datetime
 
-#include("slocumType.jl")
-#using .slocumType: ctdStruct, sciStruct
-
 include("slocumFunc.jl")
 using .slocumFunc: glider_var_load, glider_presfunc
-
-#=
-# define function for converting an array from python row major to julia column major
-function pyrow2jlcol(invar::Matrix{Float64})
-    return reverse(rotr90(invar), dims = 2);
-end
-
-# https://discourse.julialang.org/t/indices-of-intersection-of-two-arrays/23043/20
-function intersectalajulia2(a,b)
-    ia = findall(in(b), a)
-    ib = findall(in(view(a,ia)), b)
-    return unique(view(a,ia)), ia, ib[indexin(view(a,ia), view(b,ib))]
-end
-
-function intersectalajulia4(a,b)
-    ab=intersect(a,b)
-    ia = [findall(==(e), a) for e in ab]
-    ib = [findall(==(e), b) for e in ab]
-    return hcat(ab, ia,ib)
-end
-=#
 
 function glider_ctd_qc(t::Array{Float64}, pres::Array{Float64}, temp::Array{Float64}, cond::Array{Float64}, trange::Array{Float64})
     gind = findall((trange[1] .<= t .<= trange[end]) .& (0.0 .<= pres .<= 105.0) .& (-2.0 .<= temp .<= 40.0) .& (2.0 .<= cond .<= 7.0)); 
@@ -468,8 +444,6 @@ function load_glider_sci(datadir, cacdir, trange, datamode, mission, glidername,
     # find common glider values
     tctd = unique(intersect(prestime, temptime, condtime));
     tind = findall(trange[1] .<= tctd .<= trange[end]);
-
-
 
     #t, sci_m_present_time, lon, lat, sci_water_pressure, sci_flbbcd_chlor_units, sci_flbbcd_cdom_units, sci_flbbcd_bb_units, sci_bsipar_par = dataGlider.get_sync("sci_m_present_time", "m_lon", "m_lat", "sci_water_pressure", "sci_flbbcd_chlor_units", "sci_flbbcd_cdom_units", "sci_flbbcd_bb_units", "sci_bsipar_par");
     #tis = sortperm(sci_m_present_time);
