@@ -1,10 +1,8 @@
 module gliderPlot
 
 using Glider
-#include("/Users/gong/GitHub/jlglider/slocum/gliderPlotType.jl")
 include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
 using .C2PO: yearday2datetime, datetime2yearday
-#using .gliderType: plotSetting, plotStruct, ctdStruct, sciStruct
 using NaNMath, GibbsSeaWater, Dates, Interpolations, Statistics, NCDatasets
 using GLMakie, ColorSchemes
 
@@ -656,7 +654,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
         zrange = (-6000, 6000);
     end
     
-    plottitle = uppercase(gliderCTDarray[1].project) * " " * gliderCTDarray[1].glidertype * " " * varname * " (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "-" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[1].t)))) * ")";
+    plottitle = uppercase(gliderCTDarray[1].project) * " " * gliderCTDarray[1].glidertype * " " * varname * " (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "-" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")";
     plotname = uppercase(gliderCTDarray[1].project) * "_" * lowercase(gliderCTDarray[1].glidertype) * "_" * varname * ".png" 
 
     fig = Figure(size = pres, fontsize = 64)

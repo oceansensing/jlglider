@@ -25,7 +25,7 @@ import .gliderPlot: plotGliderCTD, plotGliderMap
 reloadflag = true
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/mission_yaml_GS/";
+missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_PASSENGERS/";
 
 if @isdefined(gliderCTDarray) == false
     if reloadflag == true

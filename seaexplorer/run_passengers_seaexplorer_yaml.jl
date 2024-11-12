@@ -17,7 +17,7 @@ using JLD2
 reloadflag = false
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdirpath = "/Users/gong/GitHub/jlglider/seaexplorer/mission_yaml_PASSENGERS/";
+missionYAMLdirpath = "/Users/gong/GitHub/jlglider/seaexplorer/seaexplorer_yaml_PASSENGERS/";
 
 #SEAnav, SEAnav1d, SEApld, SEApld1d = seaexplorer_load_mission(missionYAMLdirpath * "sea094-20240709-passengers.yaml");
 
