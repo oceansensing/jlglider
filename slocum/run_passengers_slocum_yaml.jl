@@ -50,7 +50,7 @@ for i = 1:length(gliderCTDarray)
     fs = 32; # font size
     global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
 
-    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/NESMA-PASSENGERS/";
     project = gliderCTDarray[i].project;
     glidername = gliderCTDarray[i].glidername;
     latmin, latmax = 37, 40;

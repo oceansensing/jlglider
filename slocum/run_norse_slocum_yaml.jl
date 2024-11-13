@@ -22,7 +22,7 @@ include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .gliderPlot: plotGliderCTD, plotGliderMap
 
-reloadflag = true
+reloadflag = false
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
 missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_NORSE/";
@@ -50,19 +50,27 @@ for i = 1:length(gliderCTDarray)
     fs = 32; # font size
     global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
 
-    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/NORSE/";
     project = gliderCTDarray[i].project;
     glidername = gliderCTDarray[i].glidername;
+    #lonmin, lonmax = -10, -5.5;    
+    #latmin, latmax = 70.2, 71.5;
+    #tempmin, tempmax = -2, 9;
+    #condmin, condmax = 2.5, 3.7;
+    #saltmin, saltmax = 33.3, 35.5;
+    #sigma0min, sigma0max = 26.8, 28.2;
+    #spice0min, spice0max = -1.25, 1.25;
+    #sndspdmin, sndspdmax = 1450, 1485;
     lonmin, lonmax = -10, -5.5;    
     latmin, latmax = 70.2, 71.5;
-    tempmin, tempmax = -2, 9;
-    condmin, condmax = 2.5, 3.7;
-    saltmin, saltmax = 33.3, 35.5;
+    tempmin, tempmax = -1, 6.5;
+    condmin, condmax = 2.7, 3.4;
+    saltmin, saltmax = 33.7, 35.2;
     sigma0min, sigma0max = 26.8, 28.2;
-    spice0min, spice0max = -1.25, 1.25;
-    sndspdmin, sndspdmax = 1450, 1485;
-    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+    spice0min, spice0max = -1.25, 0.55;
+    sndspdmin, sndspdmax = 1450, 1475;
+global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
 
 plotGliderCTD(gliderCTDarray, ps, pst)
-plotGliderMap(gliderCTDarray, pst, pzrange=[-40,-30], varname="saltA", logzflag=0);
+plotGliderMap(gliderCTDarray, pst, pzrange=[-20, -10], varname="saltA", logzflag=0);
