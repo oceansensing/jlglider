@@ -83,9 +83,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     tdt = unix2datetime.(gliderCTD.t); 
     yday = datetime2yearday.(tdt);
 
-    x = yday;
-    xdt, xtick, xticklabel = datetick(x);
-    #y = zzraw;
+    #x = yday;
+    x = tdt;
+    #xdt, xtick, xticklabel = datetick(x);
+
     y = gliderCTD.z;
 
     # plotting temperature
@@ -97,11 +98,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Temperature",
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     ylims!(ax, ymin, ymax);
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:thermal, markersize=ms, colorrange=(zmin, zmax))
     #=
     ax.xticks = (xtick .- x0, xticklabel);
     if length(xtick) > 10
@@ -111,9 +112,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     end
     =#
 
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Temperature (°C)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = true, label = "Temperature (°C)")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_temp_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting conductivity
     z = gliderCTD.cond;
@@ -125,7 +128,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Conductivity",
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conductivity",
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     ylims!(ax, ymin, ymax);
@@ -138,9 +141,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conductivity (S/m)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conductivity (S/m)")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_cond_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting salinity
     z = gliderCTD.salt;
@@ -152,11 +157,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Salinity",
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Salinity",
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     ylims!(ax, ymin, ymax);
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:haline, markersize=ms, colorrange=(zmin, zmax))
     #ax.xticks = (xtick .- x0, xticklabel);
     #=
     if length(xtick) > 10
@@ -165,9 +170,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Salinity (psu)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :haline, flipaxis = true, label = "Salinity (psu)")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_salt_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting conservative temperature
     z = gliderCTD.ctemp;
@@ -179,11 +186,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Conservative Temperature",
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Conservative Temperature",
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     ylims!(ax, ymin, ymax);
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:thermal, markersize=ms, colorrange=(zmin, zmax))
     #ax.xticks = (xtick .- x0, xticklabel);
     #=
     if length(xtick) > 10
@@ -192,9 +199,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Conservative Temperature (°C)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :thermal, flipaxis = true, label = "Conservative Temperature (°C)")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_ctemp_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting absolute salinity
     #z = saltAraw[1:pint:end];
@@ -207,11 +216,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     ax = Axis(fig[1, 1],
         #title = mission * " " * uppercasefirst(glidername) * " Absolute Salinity",
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Absolute Salinity",
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     ylims!(ax, ymin, ymax);
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:haline, markersize=ms, colorrange=(zmin, zmax))
     #ax.xticks = (xtick .- x0, xticklabel);
     #=
     if length(xtick) > 10
@@ -220,9 +229,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Absolute Salinity (g/kg)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :haline, flipaxis = true, label = "Absolute Salinity (g/kg)")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_saltA_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting sigma0
     #z = sigma0raw[1:pint:end];
@@ -233,14 +244,14 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     zmax = pst.sigma0max;
     fig = Figure(; size = pres, fontsize = fs)
     ax = Axis(fig[1, 1],
-        #title = project * " " * uppercasefirst(glidername) * " Potential Density",
-        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Potential Density",
+        #title = project * " " * uppercasefirst(glidername) * " Potential Density Anomaly",
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Potential Density Anomaly",
 
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     ylims!(ax, ymin, ymax);
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:dense, markersize=ms, colorrange=(zmin, zmax))
     #ax.xticks = (xtick .- x0, xticklabel);
     #=
     if length(xtick) > 10
@@ -249,9 +260,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Potential Density (kg/m^3)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = true, label = L"\sigma_{\theta} (kg/m^{3})")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting spice0
     #z = spice0raw[1:pint:end];
@@ -265,9 +278,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         #title = mission * " " * uppercasefirst(glidername) * " Spiciness0",
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Spice0",
 
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
+    ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
     #ax.xticks = (xtick .- x0, xticklabel);
     #=
@@ -277,10 +291,12 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Spice0")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Spice0")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     #save(figoutdir * project * "_" * glidername * "_spice0.png", fig)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_spice0_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
 
     # plotting sound speed
     #z = sndspdraw[1:pint:end];
@@ -295,7 +311,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         #title = mission * " – " * uppercasefirst(glidername) * " sound speed",
         title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Sound Speed",
         #title =  uppercasefirst(glidername) * " Sound Speed",
-        xlabel = "Year Day",
+        #xlabel = "Time",
         ylabel = "Depth (m)",
         #label = :bold
     )
@@ -308,11 +324,12 @@ function plot_glider_ctd(gliderCTD, ps, pst)
         ax.xticks = (xtick[1:1:end] .- x0, xticklabel[1:1:end]);
     end
     =#
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Sound Speed (m/s)")
+    cb = Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label = "Sound Speed (m/s)")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
     fig
     #save(figoutdir * project * "_" * glidername * "_soundspeed.png", fig)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_soundspeed_" * string(Int(abs(ymin))) * ".png", fig)
-
+    GLMakie.closeall()
 
     # plotting CT/SA diagram
     #x = saltAraw[1:pint:end]; 
@@ -348,7 +365,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = true, label="Sigma0")
     fig
     #save(figoutdir * project * "_" * glidername * "_CT-SA.png", fig)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_CA-SA.png", fig)
@@ -391,7 +408,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     fig
     #save(figoutdir * project * "_" * glidername * "_sigma0spice0.png", fig)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0spice0.png", fig)
-
+    GLMakie.closeall()
 
 # plotting T/S diagram
     #x = saltAraw[1:pint:end]; 
@@ -427,10 +444,11 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     ylims!(ax, ymin, ymax);
     Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
-    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Sigma0")
+    Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = true, label="Sigma0")
     fig
     #save(figoutdir * project * "_" * glidername * "_TSraw.png", fig)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_TSraw.png", fig)
+    GLMakie.closeall()
 
     #=
     # plotting Chl-a
@@ -662,7 +680,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
         zp = log10z;
     else
         zp = z;
-        zrange = (-6000, 6000);
+        zrange = (-4000, 4000);
     end
     
     plottitle = uppercase(gliderCTDarray[i].project) * " " * gliderCTDarray[i].glidertype * " " * varname * " (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "-" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")";
@@ -675,7 +693,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
         xlabel = "Longitude",
         ylabel = "Latitude",
     )
-    Makie.contourf!(x, y, zp, colormap = :bukavu, levels = range(zrange[1], zrange[2], length = 128))
+    Makie.contourf!(x, y, zp, colormap = ColorSchemes.bukavu, levels = range(zrange[1], zrange[2], length = 128))
     xlims!(lonmin, lonmax);
     ylims!(latmin, latmax);
     
@@ -687,13 +705,21 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
             local c = gliderCTDarray[ii].saltA[zind];
             cmin = pst[i].saltmin;
             cmax = pst[i].saltmax;
+            cmap = ColorSchemes.haline;
         elseif varname == "ctemp"
             local c = gliderCTDarray[ii].ctemp[zind];
             cmin = pst[i].tempmin;
             cmax = pst[i].tempmax;
+            cmap = ColorSchemes.thermal;
+        elseif varname == "spice0"
+            local c = gliderCTDarray[ii].spice0[zind];
+            cmin = pst[i].spice0min;
+            cmax = pst[i].spice0max;
+            cmap = ColorSchemes.jet;
         end
         display(ii)
-        GLMakie.scatter!(x, y, color=c, colorrange=(cmin,cmax), colormap=:jet, markersize=20);
+        GLMakie.scatter!(x, y, color=c, colorrange=(cmin,cmax), colormap=cmap, markersize=20);
+        #Colorbar(fig[1, 2], limits = (cmin,cmax), colormap=cmap, flipaxis=true, label=varname)
     end
     fig
     save(pst[1].figoutdir * plotname, fig)

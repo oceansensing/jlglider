@@ -35,40 +35,41 @@ function plotEPS(MRdata, title, figoutpath, ylimits)
     depth = depth[pind];
     eps1 = eps1[pind];
 
-    x = unix2yearday.(unixt);
+    x = unix2datetime.(unixt);
     y = depth;
     c = eps1;
 
     cmin, cmax = -12, -6
 
     rmprocs(workers())
-    fig = Figure(size = (1600, 800), fontsize = 28)
+    fig = Figure(size = (1600, 500), fontsize = 32)
     ax = Axis(fig[1, 1],
         title = title,
-        xlabel = "Year Day of " * string(year(t[1])),
+        #xlabel = "Time",
         ylabel = "Depth (m)"
     )
     Makie.scatter!(ax, x, y, color = log10.(c), colormap = :jet, marker = :circle, markersize = 8, colorrange=(cmin, cmax))
     ylims!(ax, ylimits[1], ylimits[2])
 
-    Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = true, label = "Epsilon log(W/kg)")
+    cb = Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = true, label = "Epsilon log(W/kg)")
+    cb.labelrotation = 3*π/2;
     fig
     save(figoutpath, fig)
     GLMakie.closeall()
 end
 
-title22 = "TKE Dissipation (SEA064 NORSE 2022)";
+title22 = "NORSE-JANMAYEN 2022 SEA064 TKE Dissipation Rate";
 figoutpath22 = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/ONR_annual_report_NORSE/2024/NORSE2022_MR.png"; 
 plotEPS(jm22, title22, figoutpath22, [-1000, 0])
 
-title22 = "TKE Dissipation (SEA064 NORSE 2022)";
+title22 = "NORSE-JANMAYEN 2022 SEA064 TKE Dissipation Rate";
 figoutpath22 = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/ONR_annual_report_NORSE/2024/NORSE2022_MR_600.png"; 
 plotEPS(jm22, title22, figoutpath22, [-600, 0])
 
-title23 = "TKE Dissipation (SEA064 NORSE 2023)";
+title23 = "NORSE-JANMAYEN 2023 SEA064 TKE Dissipation Rate";
 figoutpath23 = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/ONR_annual_report_NORSE/2024/NORSE2023_MR.png"; 
 plotEPS(jm23, title23, figoutpath23, [-600, 0])
 
-title23 = "TKE Dissipation (SEA064 NORSE 2023)";
+title23 = "NORSE-JANMAYEN 2023 SEA064 TKE Dissipation Rate";
 figoutpath23 = "/Users/gong/oceansensing Dropbox/Donglai Gong/Projects/NORSE/ONR_annual_report_NORSE/2024/NORSE2023_MR_350.png"; 
 plotEPS(jm23, title23, figoutpath23, [-350, 0])
