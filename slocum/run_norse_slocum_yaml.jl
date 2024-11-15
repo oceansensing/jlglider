@@ -45,7 +45,7 @@ for i = 1:length(gliderCTDarray)
     iday = 1; # day intervals for plotting
     ms = 10; # marker size
     tsms = 6; # time series marker size
-    pres = (1600, 800); # plot resolution
+    pres = (1600, 500); # plot resolution
     tspres = (1000, 1000); # time series plot resolution
     fs = 32; # font size
     global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
@@ -67,10 +67,10 @@ for i = 1:length(gliderCTDarray)
     condmin, condmax = 2.7, 3.4;
     saltmin, saltmax = 33.7, 35.2;
     sigma0min, sigma0max = 26.8, 28.2;
-    spice0min, spice0max = -1.25, 0.55;
+    spice0min, spice0max = -1.1, 0.5;
     sndspdmin, sndspdmax = 1450, 1475;
 global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
 
 plotGliderCTD(gliderCTDarray, ps, pst)
-plotGliderMap(gliderCTDarray, pst, pzrange=[-20, -10], varname="saltA", logzflag=0);
+plotGliderMap(gliderCTDarray, pst, pzrange=[-20, -10], varname="spice0", logzflag=0);
