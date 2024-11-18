@@ -20,6 +20,8 @@ mutable struct plotStruct
     lonmax::Float64
     latmin::Float64
     latmax::Float64
+    zlo::Float64
+    zhi::Float64
     tempmin::Float64
     tempmax::Float64
     condmin::Float64

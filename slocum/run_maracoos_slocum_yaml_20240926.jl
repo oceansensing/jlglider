@@ -22,18 +22,18 @@ include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .gliderPlot: plotGliderCTD, plotGliderMap
 
-reloadflag = true
+reloadflag = false
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_MAB/";
+missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/mission_yaml_MAB/sylvia-20240926-hurricane.yaml";
 
 if @isdefined(gliderCTDarray) == false
     if reloadflag == true
-        gliderCTDarray = slocumYAMLload(missionYAMLdir);
-        jldsave(gliderdatadir * "MARACOOS_slocumCTDdata.jld2"; gliderCTDarray);
+        gliderCTDarray = slocumYAMLload(missionYAMLdirpath);
+        jldsave(gliderdatadir * "MARACOOS_slocumCTDdata_20240926.jld2"; gliderCTDarray);
         display("Done reloading data.")
     else
-        gliderCTDarray = load(gliderdatadir * "MARACOOS_slocumCTDdata.jld2")["gliderCTDarray"];
+        gliderCTDarray = load(gliderdatadir * "MARACOOS_slocumCTDdata_20240926.jld2")["gliderCTDarray"];
         display("Done loading data.")
     end
 end
@@ -55,13 +55,14 @@ for i = 1:length(gliderCTDarray)
     glidername = gliderCTDarray[i].glidername;
     latmin, latmax = 35, 42;
     lonmin, lonmax = -77.5, -69;    
-    tempmin, tempmax = 4.0, 32.0;
-    condmin, condmax = 3, 6.5;
-    saltmin, saltmax = 31.0, 37.25;
-    sigma0min, sigma0max = 20.0, 30.0;
-    spice0min, spice0max = -1.5, 7.5;
-    sndspdmin, sndspdmax = 1480, 1550;
-    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+    zlo, zhi = -100, 0;
+    tempmin, tempmax = 9.0, 23.1;
+    condmin, condmax = 3.5, 5.2;
+    saltmin, saltmax = 29.0, 35.5;
+    sigma0min, sigma0max = 20.9, 26.5;
+    spice0min, spice0max = -1, 4;
+    sndspdmin, sndspdmax = 1490, 1530;
+    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
 
 plotGliderCTD(gliderCTDarray, ps, pst)

@@ -49,8 +49,10 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     tspres = ps.tspres;
     fs = ps.fs;
     figoutdir = pst.figoutdir;
-    ymin = -350;
-    ymax = 0;
+    ymin = pst.zlo;
+    ymax = pst.zhi;
+#    ymin = -350;
+#    ymax = 0;
 
     nsig = 2.5; # number of standard deviations for color range
     #end
@@ -363,7 +365,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     )
     xlims!(ax, xmin, xmax);
     ylims!(ax, ymin, ymax);
-    Makie.scatter!(x, y, color=z, colormap=:jet, markersize=tsms, colorrange=(zmin, zmax))
+    Makie.scatter!(x, y, color=z, colormap=:dense, markersize=tsms, colorrange=(zmin, zmax))
     #ax.xticks = (t[1]:86400:t[end], string.(Date.(td[1]:Day(1):td[end])))
     Colorbar(fig[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = true, label="Sigma0")
     fig
