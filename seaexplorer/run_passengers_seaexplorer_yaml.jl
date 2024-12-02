@@ -1,3 +1,5 @@
+plotflag = false
+
 workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
 if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
@@ -34,36 +36,39 @@ if @isdefined(gliderCTDarray) == false
     end
 end
 
-global ps = Glider.gliderPlotType.plotSetting[];
-global pst = Glider.gliderPlotType.plotStruct[];
-for i = 1:length(gliderCTDarray)
-    pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
-    iday = 1; # day intervals for plotting
-    ms = 10; # marker size
-    tsms = 6; # time series marker size
-    pres = (1600, 800); # plot resolution
-    tspres = (1000, 1000); # time series plot resolution
-    fs = 32; # font size
-    global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
+if plotflag == true
 
-    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/NESMA-PASSENGERS/";
-    project = gliderCTDarray[i].project;
-    glidername = gliderCTDarray[i].glidername;
-    latmin, latmax = 37, 40;
-    lonmin, lonmax = -65.2, -59.8;    
-    tempmin, tempmax = 4.0, 32.0;
-    condmin, condmax = 30, 65;
-    saltmin, saltmax = 32.0, 37.25;
-    sigma0min, sigma0max = 20.0, 30.0;
-    spice0min, spice0max = -1, 7.5;
-    sndspdmin, sndspdmax = 1480, 1550;
-    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+    global ps = Glider.gliderPlotType.plotSetting[];
+    global pst = Glider.gliderPlotType.plotStruct[];
+    for i = 1:length(gliderCTDarray)
+        pint = 1; # this is the data decimation for plotting. Makie is so fast that it's not necessary, but Plots.jl would need it. Not using Plots.jl because of a bug there with colormap
+        iday = 1; # day intervals for plotting
+        ms = 10; # marker size
+        tsms = 6; # time series marker size
+        pres = (1600, 800); # plot resolution
+        tspres = (1000, 1000); # time series plot resolution
+        fs = 32; # font size
+        global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
+
+        figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/NESMA-PASSENGERS/";
+        project = gliderCTDarray[i].project;
+        glidername = gliderCTDarray[i].glidername;
+        latmin, latmax = 38.0, 40;
+        lonmin, lonmax = -65.2, -61.5;    
+        zlo, zhi = -1000, 0;
+        tempmin, tempmax = 4.0, 32.0;
+        condmin, condmax = 30, 65;
+        saltmin, saltmax = 32.0, 37.25;
+        sigma0min, sigma0max = 20.0, 30.0;
+        spice0min, spice0max = -1, 7.5;
+        sndspdmin, sndspdmax = 1480, 1550;
+        global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+    end
+
+    plotGliderCTD(gliderCTDarray, ps, pst)
+    plotGliderMap(gliderCTDarray, pst, pzrange=[-20,-10], varname="spice0", logzflag=0);
+    #include("write_glider_data_csv.jl");
 end
-
-plotGliderCTD(gliderCTDarray, ps, pst)
-plotGliderMap(gliderCTDarray, pst, pzrange=[-20,-10], varname="spice0", logzflag=0);
-#include("write_glider_data_csv.jl");
-
 
 
 

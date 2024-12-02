@@ -53,6 +53,7 @@ for i = 1:length(gliderCTDarray)
     if missionID == 38
         lonmin, lonmax = -10, -5.5;    
         latmin, latmax = 70.2, 71.5;
+        zlo, zhi = -1000, 0;
         tempmin, tempmax = -2, 9;
         condmin, condmax = 25, 37;
         saltmin, saltmax = 35, 35.4;
@@ -62,6 +63,7 @@ for i = 1:length(gliderCTDarray)
     else
         lonmin, lonmax = -10, -5.5;    
         latmin, latmax = 70.2, 71.5;
+        zlo, zhi = -1000, 0;
         tempmin, tempmax = -1, 6.5;
         condmin, condmax = 27, 34;
         saltmin, saltmax = 33.7, 35.2;
@@ -69,7 +71,7 @@ for i = 1:length(gliderCTDarray)
         spice0min, spice0max = -1.0, 0.55;
         sndspdmin, sndspdmax = 1450, 1475;
     end
-    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+    global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
 
 plotGliderCTD(gliderCTDarray, ps, pst)
