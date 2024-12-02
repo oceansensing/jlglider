@@ -631,7 +631,7 @@ function plotGliderCTD(gliderCTDarray, plotsetting, plotstruct)
     display("Done.")
 end
 
-function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA", logzflag=0)
+function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA", logzflag=0)
     #using NCDatasets, GLMakie, NaNMath, Statistics, Dates
 
     if (@isdefined logzflag) == false
@@ -682,7 +682,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-40, -30], varname="saltA",
         zp = log10z;
     else
         zp = z;
-        zrange = (-4000, 4000);
+        zrange = (-6000, 6000);
     end
     
     plottitle = uppercase(gliderCTDarray[i].project) * " " * gliderCTDarray[i].glidertype * " " * varname * " (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "-" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")";
