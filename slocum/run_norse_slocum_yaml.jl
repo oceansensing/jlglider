@@ -3,7 +3,7 @@
 # gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
 # gong@vims.edu 2024-11-11: major refactoring to unify plotting for seaexplorer and slocum glider data
 
-workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
+workdir = "/Users/gong/GitHub/jlglider/common"
 if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
 end
@@ -16,7 +16,7 @@ end
 using JLD2, Glider
 
 include("/Users/gong/GitHub/jlglider/slocum/slocumLoad.jl")
-include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
 include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
 
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
