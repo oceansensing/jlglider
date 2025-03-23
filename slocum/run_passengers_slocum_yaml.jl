@@ -3,6 +3,7 @@
 # gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
 # gong@vims.edu 2024-11-11: major refactoring to unify plotting for seaexplorer and slocum glider data
 
+reloadflag = false
 plotflag = true
 
 workdir = "/Users/gong/GitHub/jlglider/common"
@@ -28,8 +29,6 @@ include("/Users/gong/GitHub/jlglider/plotting/gliderPlot.jl")
 
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .gliderPlot: plotGliderCTD, plotGliderMap
-
-reloadflag = true
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
 missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_PASSENGERS/2024/";

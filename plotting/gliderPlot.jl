@@ -643,8 +643,8 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA",
     bathypath = "/Users/gong/oceansensing Dropbox/C2PO/Data/bathy/ETOPO1/ETOPO_2022_v1_30s_N90W180_surface.nc";
     bathyds = Dataset(bathypath,"r");
     
-    lon = bathyds["lon"][:];
-    lat = bathyds["lat"][:];
+    lonb = bathyds["lon"][:];
+    latb = bathyds["lat"][:];
     
     #latmin, latmax = 37, 40;
     #lonmin, lonmax = -65.2, -59.8;
@@ -662,29 +662,31 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA",
     pres = (abs(ceil(yres * (xfac/(dlat/dlon)))), abs(yres));
     
     # extract indices from the bathymetric data file
-    latind = findall(latmin-0.1 .<= lat .<= latmax+0.1);
-    lonind = findall(lonmin-0.1 .<= lon .<= lonmax+0.1);
+    latbind = findall(latmin-0.1 .<= latb .<= latmax+0.1);
+    lonbind = findall(lonmin-0.1 .<= lonb .<= lonmax+0.1);
     
-    z = Float64.(bathyds["z"][lonind, latind]); # recasting as Float64 to fix a StackOverFlow error seen in GLMakie 0.6.0.
-    x = lon[lonind];
-    y = lat[latind];
+    zb = Float64.(bathyds["z"][lonbind, latbind]); # recasting as Float64 to fix a StackOverFlow error seen in GLMakie 0.6.0.
+    xb = lonb[lonbind];
+    yb = latb[latbind];
     
-    pzind = findall(z .> 1);
-    nzind = findall(z .< -1);
-    zzind = findall(-1 .<= z .<= 1);
-    
+    pzbind = findall(zb .> 1);
+    nzbind = findall(zb .< -1);
+    zzbind = findall(-1 .<= zb .<= 1);
+        
+    logzflag = 0;
     if logzflag == 1
-        log10z = deepcopy(z);
-        log10z[pzind] .= log10.(z[pzind]);
-        log10z[nzind] .= -log10.(-z[nzind]);
-        log10z[zzind] .= 0;
+        log10zb = deepcopy(zb);
+        log10zb[pzbind] .= log10.(zb[pzbind]);
+        log10zb[nzbind] .= -log10.(-zb[nzbind]);
+        log10zb[zzbind] .= 0;
         zrange = (-4, 4);
-        zp = log10z;
+        zbp = log10zb;
     else
-        zp = z;
+        zbp = zb;
         zrange = (-6000, 6000);
     end
     
+
     plottitle = uppercase(gliderCTDarray[i].project) * " " * gliderCTDarray[i].glidertype * " " * varname * " (" * string(year(unix2datetime(NaNMath.minimum(gliderCTDarray[1].t)))) * "-" * string(year(unix2datetime(NaNMath.maximum(gliderCTDarray[end].t)))) * ")";
     plotname = uppercase(gliderCTDarray[i].project) * "_" * lowercase(gliderCTDarray[i].glidertype) * "_" * varname * ".png" 
 
@@ -695,7 +697,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA",
         xlabel = "Longitude",
         ylabel = "Latitude",
     )
-    Makie.contourf!(x, y, zp, colormap = ColorSchemes.bukavu, levels = range(zrange[1], zrange[2], length = 128))
+    Makie.contourf!(xb, yb, zbp, colormap = ColorSchemes.bukavu, levels = range(zrange[1], zrange[2], length = 128))
     xlims!(lonmin, lonmax);
     ylims!(latmin, latmax);
     
@@ -703,20 +705,22 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA",
         zind = findall(minimum(pzrange) .<= gliderCTDarray[ii].z .<= maximum(pzrange));
         local x = gliderCTDarray[ii].lon[zind];
         local y = gliderCTDarray[ii].lat[zind];
+        local z = gliderCTDarray[ii].z[zind];
+
         if varname == "saltA"
             local c = gliderCTDarray[ii].saltA[zind];
-            cmin = pst[i].saltmin;
-            cmax = pst[i].saltmax;
+            cmin = pst[ii].saltmin;
+            cmax = pst[ii].saltmax;
             cmap = ColorSchemes.haline;
         elseif varname == "ctemp"
             local c = gliderCTDarray[ii].ctemp[zind];
-            cmin = pst[i].tempmin;
-            cmax = pst[i].tempmax;
+            cmin = pst[ii].tempmin;
+            cmax = pst[ii].tempmax;
             cmap = ColorSchemes.thermal;
         elseif varname == "spice0"
             local c = gliderCTDarray[ii].spice0[zind];
-            cmin = pst[i].spice0min;
-            cmax = pst[i].spice0max;
+            cmin = pst[ii].spice0min;
+            cmax = pst[ii].spice0max;
             cmap = ColorSchemes.jet;
         end
         display(ii)
@@ -724,7 +728,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA",
         #Colorbar(fig[1, 2], limits = (cmin,cmax), colormap=cmap, flipaxis=true, label=varname)
     end
     fig
-    save(pst[1].figoutdir * plotname, fig)
+    save(pst[i].figoutdir * plotname, fig)
     GLMakie.closeall()
 end
 
