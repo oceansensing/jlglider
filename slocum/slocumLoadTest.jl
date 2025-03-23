@@ -4,7 +4,7 @@ using Glob, NaNMath, Statistics, GibbsSeaWater, Dates, Interpolations, YAML
 using Glider
 import Glider.slocumType: engStruct, ctdStruct, sciStruct
 
-include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
 import .C2PO: pyrow2jlcol, intersectalajulia2, intersectalajulia4, unix2yearday, yearday2unix, datetime2yearday, yearday2datetime
 
 include("slocumFunc.jl")

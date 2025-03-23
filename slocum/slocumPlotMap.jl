@@ -1,9 +1,5 @@
 # gong@vims.edu 2023-12-28
 # this script plots spatial data for the slocum glider
-workdir = "/Users/gong/GitHub/jlglider/slocum/"
-if (workdir in LOAD_PATH) == false
-    push!(LOAD_PATH, workdir);
-end
 
 using GLMakie, NCDatasets, NaNMath, Dates, Interpolations
 #import seaexplorer_functions: seaexplorer_MR_laur_load
