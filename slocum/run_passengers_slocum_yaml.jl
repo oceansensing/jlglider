@@ -5,7 +5,12 @@
 
 plotflag = true
 
-workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
+workdir = "/Users/gong/GitHub/jlglider/common"
+if (workdir in LOAD_PATH) == false
+    push!(LOAD_PATH, workdir);
+end
+
+workdir = "/Users/gong/GitHub/jlglider/plotting"
 if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
 end
@@ -18,8 +23,8 @@ end
 using JLD2, Dates, Glider
 
 include("/Users/gong/GitHub/jlglider/slocum/slocumLoad.jl")
-include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
-include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
+include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/plotting/gliderPlot.jl")
 
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .gliderPlot: plotGliderCTD, plotGliderMap
