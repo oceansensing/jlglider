@@ -24,22 +24,25 @@ end
 function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, glidertype, gliderSN, glidername, missionID, project, loadmode)
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
+    
+    engdatadir = datadir * "eng/";
+    scidatadir = datadir * "sci/";
 
     if loadmode == "uppercase"
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = engdatadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = scidatadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     else
         if datamode == "realtime"
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[st]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = engdatadir * "*.[sStT][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         else
             #dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[de]bd", complement_files = true, cacheDir = cacdir);
-            dataGlider = dbdreader.MultiDBD(pattern = datadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
+            dataGlider = dbdreader.MultiDBD(pattern = scidatadir * "*.[dDeE][bB][dD]", cacheDir = cacdir, complemented_files_only = false, skip_initial_line = true);
         end
     end
 
@@ -128,10 +131,10 @@ end
 
 # new function to load glider CTD data using YAML metadata file (2024-09-05)
 function load_glider_ctd(missionYAMLpath::String)
-    tbound = 3600*24*365.0 * 0.2; 
-
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
+
+    tbound = 3600*24*365.0 * 0.2; 
 
     # load mission YAML file
     missionYAML = YAML.load(IOBuffer(read(missionYAMLpath, String)));
@@ -178,6 +181,22 @@ function load_glider_ctd(missionYAMLpath::String)
     
     m_gps_lat = dataGliderEng.get("m_gps_lat", return_nans=false);
     m_gps_lon = dataGliderEng.get("m_gps_lon", return_nans=false);
+
+    midlat = median(m_gps_lat[2]);
+    midlon = median(m_gps_lon[2]);
+    latmin, latmax = midlat - 10, midlat + 10;
+    lonmin, lonmax = midlon - 20, midlon + 20;    
+
+    latind = findall((latmin .<= m_gps_lat[2] .<= latmax) .& (1e9 .< m_gps_lat[1] .< 1e10));
+    m_gps_lat_t = m_gps_lat[1][latind];
+    m_gps_lat_v = m_gps_lat[2][latind];
+    m_gps_lat = (m_gps_lat_t, m_gps_lat_v);
+
+    lonind = findall((lonmin .<= m_gps_lon[2] .<= lonmax) .& (1e9 .< m_gps_lon[1] .< 1e10));
+    m_gps_lon_t = m_gps_lon[1][lonind];
+    m_gps_lon_v = m_gps_lon[2][lonind];
+    m_gps_lon = (m_gps_lon_t, m_gps_lon_v);
+
     sci_water_pressure = dataGliderSci.get("sci_water_pressure", return_nans=true);
     sci_water_temp = dataGliderSci.get("sci_water_temp", return_nans=true);
     sci_water_cond = dataGliderSci.get("sci_water_cond", return_nans=true);
