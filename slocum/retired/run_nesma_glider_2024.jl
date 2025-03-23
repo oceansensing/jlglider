@@ -16,7 +16,7 @@ import .slocumFunc: pyrow2jlcol, intersectalajulia2, glider_var_load, glider_ctd
 import .slocumLoad: load_glider_ctd, load_glider_sci
 import .slocumPlot: plot_glider_ctd
 
-datamode = "realtime"; # delayed or realtime
+datamode = "delayed"; # delayed or realtime
 mission = "NESMA-2024";
 
 # specify valid data time period
