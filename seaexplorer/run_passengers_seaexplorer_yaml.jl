@@ -10,8 +10,8 @@ using Glider
 
 # import all the functions used
 include("/Users/gong/GitHub/jlglider/seaexplorer/seaexplorerFunc.jl")
-include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
-include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
+include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/plotting/gliderPlot.jl")
 import .seaexplorerFunc: seaexplorerYAMLload, seaexplorer_load_mission 
 import .gliderPlot: plot_glider_ctd, plotGliderCTD, plotGliderMap
 using JLD2
