@@ -65,6 +65,7 @@ for i = 1:length(gliderCTDarray)
     #sndspdmin, sndspdmax = 1450, 1485;
     lonmin, lonmax = -10, -5.5;    
     latmin, latmax = 70.2, 71.5;
+    zlo, zhi = -350, 0;
     tempmin, tempmax = -1, 6.5;
     condmin, condmax = 2.7, 3.4;
     saltmin, saltmax = 33.7, 35.2;
