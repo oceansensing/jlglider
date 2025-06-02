@@ -13,19 +13,22 @@ if (workdir in LOAD_PATH) == false
     push!(LOAD_PATH, workdir);
 end
 
+user = "gong";
+githubdir = "/Users/$user/GitHub";
+missionYAMLdir = githubdir * "/jlglider/slocum/slocum_yaml_NORSE/";
+gliderdatadir = "/Users/$user/oceansensing Dropbox/C2PO/glider/gliderData/"; 
+figoutdir = "/Users/$user/oceansensing Dropbox/C2PO/glider/gliderData/figures/NORSE/";
+
 using JLD2, Glider
 
-include("/Users/gong/GitHub/jlglider/slocum/slocumLoad.jl")
-include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
-include("/Users/gong/GitHub/jlglider/seaexplorer/gliderPlot.jl")
+include(githubdir * "/jlglider/slocum/slocumLoad.jl")
+include(githubdir * "/jlglider/common/C2PO.jl")
+include(githubdir * "/jlglider/plotting/gliderPlot.jl")
 
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .gliderPlot: plotGliderCTD, plotGliderMap
 
 reloadflag = false
-
-gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdir = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_NORSE/";
 
 if @isdefined(gliderCTDarray) == false
     if reloadflag == true
@@ -50,7 +53,6 @@ for i = 1:length(gliderCTDarray)
     fs = 32; # font size
     global ps = push!(ps, Glider.gliderPlotType.plotSetting(pint, iday, ms, tsms, pres, tspres, fs));
 
-    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/NORSE/";
     project = gliderCTDarray[i].project;
     glidername = gliderCTDarray[i].glidername;
     #lonmin, lonmax = -10, -5.5;    
