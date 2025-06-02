@@ -1,0 +1,10 @@
+---
+  gliderType: slocum
+  gliderName: electa
+  gliderSN: 926
+  project: maracoos
+  deploydate: 20250501
+  dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
+  suffix: realtime
+  dataflag: realtime
+  
