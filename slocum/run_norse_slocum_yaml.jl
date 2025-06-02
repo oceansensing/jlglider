@@ -65,14 +65,14 @@ for i = 1:length(gliderCTDarray)
     #sndspdmin, sndspdmax = 1450, 1485;
     lonmin, lonmax = -10, -5.5;    
     latmin, latmax = 70.2, 71.5;
-    zlo, zhi = -350, 0;
+    zlo, zhi = -350.0, 0.0;
     tempmin, tempmax = -1, 6.5;
     condmin, condmax = 2.7, 3.4;
     saltmin, saltmax = 33.7, 35.2;
     sigma0min, sigma0max = 26.8, 28.2;
     spice0min, spice0max = -1.1, 0.5;
     sndspdmin, sndspdmax = 1450, 1475;
-global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
 end
 
 plotGliderCTD(gliderCTDarray, ps, pst)
