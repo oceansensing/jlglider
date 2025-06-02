@@ -28,9 +28,9 @@ include(githubdir * "/jlglider/plotting/gliderPlot.jl")
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
 import .gliderPlot: plotGliderCTD, plotGliderMap
 
-reloadflag = false
+reloadflag = true
 
-if @isdefined(gliderCTDarray) == false
+if (@isdefined(gliderCTDarray) == false) | (reloadflag == true)
     if reloadflag == true
         gliderCTDarray = slocumYAMLload(missionYAMLdir);
         jldsave(gliderdatadir * "NORSE_slocumCTDdata.jld2"; gliderCTDarray);
