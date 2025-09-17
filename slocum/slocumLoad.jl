@@ -25,7 +25,7 @@ function load_glider_ctd(datadir, cacdir, trange, lonrange, latrange, datamode, 
     dbdreader = pyimport("dbdreader");
     gsw = GibbsSeaWater;
     
-    engdatadir = datadir * "eng/";
+    engdatadir = datadir * "gli/";
     scidatadir = datadir * "sci/";
 
     if loadmode == "uppercase"
@@ -148,8 +148,9 @@ function load_glider_ctd(missionYAMLpath::String)
     datamode = missionYAML["dataflag"];
     suffix = missionYAML["suffix"];
 
-    datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/"; 
-    dataENGdir = datadir * "eng/";
+    #datadir = dataroot * glidername * "-" * deploydate * "-" * project * "-" * suffix * "/" * "data/"; 
+    datadir = dataroot * glidername * "-" * deploydate * "-" * project * "/" * "data/"; 
+    dataENGdir = datadir * "gli/";
     dataSCIdir = datadir * "sci/";
     cacdir = datadir * "cache/";
 

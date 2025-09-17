@@ -1,10 +1,10 @@
 ---
   gliderType: Slocum
-  gliderName: Electa
-  gliderSN: 926
+  gliderName: Sylvia
+  gliderSN: 417
   missionID: -1
-  project: nesma-passengers
-  deploydate: 20230523
+  project: passengers
+  deploydate: 20230609
   dataroot: /Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/
   suffix: complete
   dataflag: delayed

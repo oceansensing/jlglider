@@ -3,7 +3,7 @@
 # gong@vims.edu 2024-09-05: added a function to load glider data from yaml metadata files for a general mission
 # gong@vims.edu 2024-11-11: major refactoring to unify plotting for seaexplorer and slocum glider data
 
-reloadflag = false
+reloadflag = true
 plotflag = true
 
 workdir = "/Users/gong/GitHub/jlglider/common"
@@ -31,15 +31,15 @@ import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLl
 import .gliderPlot: plotGliderCTD, plotGliderMap
 
 gliderdatadir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/"; 
-missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_PASSENGERS/2024/";
+missionYAMLdirpath = "/Users/gong/GitHub/jlglider/slocum/slocum_yaml_PASSENGERS/all/";
 
 if @isdefined(gliderCTDarray) == false
     if reloadflag == true
         gliderCTDarray = slocumYAMLload(missionYAMLdirpath);
-        jldsave(gliderdatadir * "PASSENGERS2024_slocumCTDdata.jld2"; gliderCTDarray);
+        jldsave(gliderdatadir * "PASSENGERS_slocumCTDdata.jld2"; gliderCTDarray);
         display("Done reloading data.")
     else
-        gliderCTDarray = load(gliderdatadir * "PASSENGERS2024_slocumCTDdata.jld2")["gliderCTDarray"];
+        gliderCTDarray = load(gliderdatadir * "PASSENGERS_slocumCTDdata.jld2")["gliderCTDarray"];
         display("Done loading data.")
     end
 end
@@ -72,6 +72,6 @@ if plotflag == true
         global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
     end
 
-    #plotGliderCTD(gliderCTDarray, ps, pst)
-    #plotGliderMap(gliderCTDarray, pst, pzrange=[-20,-10], varname="spice0", logzflag=0);
+    plotGliderCTD(gliderCTDarray, ps, pst)
+    plotGliderMap(gliderCTDarray, pst, pzrange=[-20,-10], varname="spice0", logzflag=0);
 end
