@@ -1,7 +1,7 @@
 module gliderPlot
 
 using Glider
-include("/Users/gong/GitHub/ocean_julia/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
 using .C2PO: yearday2datetime, datetime2yearday
 using NaNMath, GibbsSeaWater, Dates, Interpolations, Statistics, NCDatasets
 using GLMakie, ColorSchemes
@@ -49,8 +49,8 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     tspres = ps.tspres;
     fs = ps.fs;
     figoutdir = pst.figoutdir;
-    ymin = pst.zlo;
-    ymax = pst.zhi;
+    ymin = pst.zmin;
+    ymax = pst.zmax;
 #    ymin = -350;
 #    ymax = 0;
 
@@ -150,6 +150,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     GLMakie.closeall()
 
     # plotting salinity
+    y = gliderCTD.z;
     z = gliderCTD.salt;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
@@ -179,6 +180,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     GLMakie.closeall()
 
     # plotting conservative temperature
+    y = gliderCTD.z;
     z = gliderCTD.ctemp;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
@@ -209,6 +211,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
 
     # plotting absolute salinity
     #z = saltAraw[1:pint:end];
+    y = gliderCTD.z;
     z = gliderCTD.saltA;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z); 
@@ -239,6 +242,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
 
     # plotting sigma0
     #z = sigma0raw[1:pint:end];
+    y = gliderCTD.z;
     z = gliderCTD.sigma0;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z);
@@ -270,6 +274,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
 
     # plotting spice0
     #z = spice0raw[1:pint:end];
+    y = gliderCTD.z;
     z = gliderCTD.spice0;
     #zmin = NaNMath.minimum(z);
     #zmax = NaNMath.maximum(z);
@@ -300,7 +305,39 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_spice0_" * string(Int(abs(ymin))) * ".png", fig)
     GLMakie.closeall()
 
+    # plotting turner angle
+    SA = gliderCTD.saltA;
+    CT = gliderCTD.ctemp; 
+    p = gliderCTD.p*10; 
+    Tu = Array{Float64, 1}(undef, length(SA)-1);
+    Rsubrho = Array{Float64, 1}(undef, length(SA)-1); 
+    p_mid = Array{Float64, 1}(undef, length(SA)-1);  
+    GibbsSeaWater.gsw_turner_rsubrho(SA, CT, p, length(SA), Tu, Rsubrho, p_mid);
+    c = Tu;
+    cmin = -180;
+    cmax = 180;
+    y = GibbsSeaWater.gsw_z_from_p.(p_mid, NaNMath.mean(gliderCTD.lat), 0.0, 0.0); 
+
+    jet8 = resample_cmap(:jet, 8);
+
+    fig = Figure(; size = pres, fontsize = fs);
+    ax = Axis(fig[1, 1],
+        title = uppercase(project) * " " * yyyy0 * " " * uppercasefirst(glidername) * " Turner Angle",
+        #xlabel = "Time",
+        ylabel = "Depth (m)",
+        #label = :bold
+    )
+    ylims!(ax, ymin, ymax);
+    Makie.scatter!(x[1:end-1], y, color=c, colormap=jet8, markersize=10, colorrange=(cmin, cmax))
+    cb = Colorbar(fig[1, 2], limits = (cmin, cmax), colormap = jet8, flipaxis = true, label = "Turner Angle")
+    cb.labelrotation = 3*π/2 # Rotate by 90 degrees (π/2 radians)
+    fig
+    save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_Tu_" * string(Int(abs(ymin))) * ".png", fig)
+    GLMakie.closeall()
+
     # plotting sound speed
+
+    y = gliderCTD.z;
     #z = sndspdraw[1:pint:end];
     z = gliderCTD.sndspd;
     #zmin = NaNMath.minimum(z);
@@ -412,7 +449,7 @@ function plot_glider_ctd(gliderCTD, ps, pst)
     save(figoutdir * project * "_" * glidername * "_" * yyyy0 * mm0 * dd0 * "_sigma0spice0.png", fig)
     GLMakie.closeall()
 
-# plotting T/S diagram
+    # plotting T/S diagram
     #x = saltAraw[1:pint:end]; 
     #y = ctempraw[1:pint:end];
     #z = sigma0raw[1:pint:end];
@@ -631,14 +668,194 @@ function plotGliderCTD(gliderCTDarray, plotsetting, plotstruct)
     display("Done.")
 end
 
+function plotGliderTSarray(gliderCTDarray, ps, pst)
+    display("Plotting plotGliderTSarray...")
+    figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/";
+
+    tspres = (1600, 1200);
+    fs = ps[1].fs;
+    ms = 1;
+    project = pst[end].project;
+    yyyy0 = string(Dates.year(unix2datetime(gliderCTDarray[1].t[1])), pad=4);
+    yyyyN = string(Dates.year(unix2datetime(gliderCTDarray[end].t[end])), pad=4);
+
+    saltmin = minimum([Float64(pst[i].saltmin) for i in 1:length(pst)]);
+    saltmax = maximum([Float64(pst[i].saltmax) for i in 1:length(pst)]);
+    tempmin = minimum([Float64(pst[i].tempmin) for i in 1:length(pst)]);
+    tempmax = maximum([Float64(pst[i].tempmax) for i in 1:length(pst)]);
+    spice0min = minimum([Float64(pst[i].spice0min) for i in 1:length(pst)]);
+    spice0max = maximum([Float64(pst[i].spice0max) for i in 1:length(pst)]);
+    sigma0min = minimum([Float64(pst[i].sigma0min) for i in 1:length(pst)]);
+    sigma0max = maximum([Float64(pst[i].sigma0max) for i in 1:length(pst)]);
+    sndspdmin = minimum([Float64(pst[i].sndspdmin) for i in 1:length(pst)]);
+    sndspdmax = maximum([Float64(pst[i].sndspdmax) for i in 1:length(pst)]); 
+    tmin = minimum(gliderCTDarray[1].t);
+    tmax = maximum(gliderCTDarray[end].t);
+
+    xmin = saltmin;
+    xmax = saltmax;
+    ymin = tempmin;
+    ymax = tempmax;
+
+    # time as color
+    figTS = Figure(; size = tspres, fontsize = fs)
+    ax = Axis(figTS[1, 1],
+        title = uppercase(project) * " " * yyyy0 * "-" * yyyyN * " VIMS Gliders" * " CT/SA - time",
+        xlabel = "Absolute Salinity",
+        ylabel = "Conservative Temperature"
+    )
+    xmin = saltmin;
+    xmax = saltmax;
+    ymin = tempmin;
+    ymax = tempmax;
+    zmin = tmin;
+    zmax = tmax;
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
+
+    for i = 1:length(gliderCTDarray)
+        gliderCTD = gliderCTDarray[i];
+        x = gliderCTD.saltA;
+        y = gliderCTD.ctemp;
+        z = gliderCTD.t;
+        Makie.scatter!(x, y, color=z, colormap=:jet, markersize=ms, colorrange=(zmin, zmax))
+    end
+    Colorbar(figTS[1, 2], limits = (zmin, zmax), colormap = :jet, flipaxis = true, label="Unix Time")
+    figTS
+    save(figoutdir * project * "_glider_" * yyyy0 * "-" * yyyyN * "_CA-SA-time.png", figTS);
+    GLMakie.closeall()
+
+    #density as color
+    figTS = Figure(; size = tspres, fontsize = fs)
+    ax = Axis(figTS[1, 1],
+        title = uppercase(project) * " " * yyyy0 * "-" * yyyyN * " VIMS Gliders" * " CT/SA - sigma0",
+        xlabel = "Absolute Salinity",
+        ylabel = "Conservative Temperature"
+    )
+    xmin = saltmin;
+    xmax = saltmax;
+    ymin = tempmin;
+    ymax = tempmax;
+    zmin = sigma0min;
+    zmax = sigma0max;
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
+
+    for i = 1:length(gliderCTDarray)
+        gliderCTD = gliderCTDarray[i];
+        x = gliderCTD.saltA;
+        y = gliderCTD.ctemp;
+        z = gliderCTD.sigma0;
+        Makie.scatter!(x, y, color=z, colormap=:dense, markersize=ms, colorrange=(zmin, zmax))
+    end
+    Colorbar(figTS[1, 2], limits = (zmin, zmax), colormap = :dense, flipaxis = true, label="sigma0 (kg/m^3)")
+    figTS
+    save(figoutdir * project * "_glider_" * yyyy0 * "-" * yyyyN * "_CA-SA-sigma0.png", figTS);
+    GLMakie.closeall()
+
+    #sound speed as color
+    figTS = Figure(; size = tspres, fontsize = fs)
+    ax = Axis(figTS[1, 1],
+        title = uppercase(project) * " " * yyyy0 * "-" * yyyyN * " VIMS Gliders" * " CT/SA - c",
+        xlabel = "Absolute Salinity",
+        ylabel = "Conservative Temperature"
+    )
+    xmin = saltmin;
+    xmax = saltmax;
+    ymin = tempmin;
+    ymax = tempmax;
+    cmin = sndspdmin;
+    cmax = sndspdmax;
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
+
+    for i = 1:length(gliderCTDarray)
+        gliderCTD = gliderCTDarray[i];
+        x = gliderCTD.saltA;
+        y = gliderCTD.ctemp;
+        c = gliderCTD.sndspd;
+        Makie.scatter!(x, y, color=c, colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+    end
+    Colorbar(figTS[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = true, label="Sound Speed (m/s)")
+    figTS
+    save(figoutdir * project * "_glider_" * yyyy0 * "-" * yyyyN * "_CA-SA-sndspd.png", figTS);
+    GLMakie.closeall()
+
+    display("Done plotting plotGliderTSarray.")
+
+    #c/spice0, sigma0 as color 2D
+    figSS = Figure(; size = tspres, fontsize = fs)
+    ax = Axis(figSS[1, 1],
+        title = uppercase(project) * " " * yyyy0 * "-" * yyyyN * " VIMS Gliders" * " c/spice0 - sigma0",
+        xlabel = "Spice0",
+        ylabel = "Sounds Speed (m/s)"
+    )
+    xmin = spice0min;
+    xmax = spice0max;
+    ymin = 1470;
+    ymax = 1550;
+    cmin = sigma0min;
+    cmax = sigma0max;
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
+
+    for i = 1:length(gliderCTDarray)
+        gliderCTD = gliderCTDarray[i];
+        x = gliderCTD.spice0;
+        y = gliderCTD.sndspd;
+        c = gliderCTD.sigma0;
+        Makie.scatter!(x, y, color=c, colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+    end
+    Colorbar(figSS[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = true, label="Sound Speed (m/s)")
+    figSS
+    save(figoutdir * project * "_glider_" * yyyy0 * "-" * yyyyN * "_SS-Spice0-sigma0.png", figSS);
+    GLMakie.closeall()
+
+    #c/spice0/sigma0 as color 3D
+    figSS3d = Figure(; size = tspres, fontsize = fs)
+    ax = Axis3(figSS3d[1, 1],
+        title = uppercase(project) * " " * yyyy0 * "-" * yyyyN * " VIMS Gliders" * " c/spice0/sigma0 - temp",
+        xlabel = "Spice0",
+        ylabel = "Sounds Speed (m/s)",
+        zlabel = "Sigma0 (kg/m^3)"
+    )
+    xmin = spice0min;
+    xmax = spice0max;
+    ymin = sndspdmin;
+    ymax = sndspdmax;
+    zmin = sigma0min;
+    zmax = sigma0max;
+    cmin = tempmin;
+    cmax = tempmax;
+    xlims!(ax, xmin, xmax);
+    ylims!(ax, ymin, ymax);
+    zlims!(ax, zmin, zmax);
+
+    for i = 1:length(gliderCTDarray)
+        gliderCTD = gliderCTDarray[i];
+        x = gliderCTD.spice0;
+        y = gliderCTD.sndspd;
+        z = gliderCTD.sigma0;
+        c = gliderCTD.ctemp;
+        Makie.scatter!(x, y, z, color=c, colormap=:jet, markersize=ms, colorrange=(cmin, cmax))
+    end
+    Colorbar(figSS3d[1, 2], limits = (cmin, cmax), colormap = :jet, flipaxis = true, label="Conservative Temperature")
+    figSS3d
+    #save(figoutdir * project * "_glider_" * yyyy0 * "-" * yyyyN * "_SS-Spice0-sigma0-ctemp.png", figSS3d);
+    #GLMakie.closeall()
+    display("Done plotting plotGliderTSarray.")
+
+end
+
 function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA", logzflag=0)
+    display("Plotting plotGliderMap...")
     #using NCDatasets, GLMakie, NaNMath, Statistics, Dates
 
     if (@isdefined logzflag) == false
         logzflag = 0;
     end
 
-    i = 1;
+    i = length(gliderCTDarray);
 
     bathypath = "/Users/gong/oceansensing Dropbox/C2PO/Data/bathy/ETOPO1/ETOPO_2022_v1_30s_N90W180_surface.nc";
     bathyds = Dataset(bathypath,"r");
@@ -730,6 +947,7 @@ function plotGliderMap(gliderCTDarray, pst; pzrange=[-30, -20], varname="saltA",
     fig
     save(pst[i].figoutdir * plotname, fig)
     GLMakie.closeall()
+    display("Done plotGliderMap.")
 end
 
 end
