@@ -1,4 +1,4 @@
-plotflag = false
+plotflag = true
 
 workdir = "/Users/gong/GitHub/jlglider/seaexplorer"
 if (workdir in LOAD_PATH) == false
@@ -11,6 +11,7 @@ using Glider
 # import all the functions used
 include("/Users/gong/GitHub/jlglider/seaexplorer/seaexplorerFunc.jl")
 include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
+#include("/Users/gong/GitHub/jlglider/common/Glider.jl")
 include("/Users/gong/GitHub/jlglider/plotting/gliderPlot.jl")
 import .seaexplorerFunc: seaexplorerYAMLload, seaexplorer_load_mission 
 import .gliderPlot: plot_glider_ctd, plotGliderCTD, plotGliderMap
@@ -53,23 +54,23 @@ if plotflag == true
         figoutdir = "/Users/gong/oceansensing Dropbox/C2PO/glider/gliderData/figures/NESMA-PASSENGERS/";
         project = gliderCTDarray[i].project;
         glidername = gliderCTDarray[i].glidername;
-        latmin, latmax = 38.0, 40;
-        lonmin, lonmax = -65.2, -61.5;    
-        zlo, zhi = -1000, 0;
+        latmin, latmax = 37.5, 40;
+        lonmin, lonmax = -65.2, -61.2; 
+        pmin, pmax = 0, 1000;   
+        zmin, zmax = -1000, 0;
         tempmin, tempmax = 4.0, 32.0;
         condmin, condmax = 30, 65;
         saltmin, saltmax = 32.0, 37.25;
         sigma0min, sigma0max = 20.0, 30.0;
         spice0min, spice0max = -1, 7.5;
-        sndspdmin, sndspdmax = 1480, 1550;
-        global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+        sndspdmin, sndspdmax = 1470, 1550;
+        global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, pmin, pmax, zmin, zmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
     end
 
     plotGliderCTD(gliderCTDarray, ps, pst)
     plotGliderMap(gliderCTDarray, pst, pzrange=[-20,-10], varname="spice0", logzflag=0);
     #include("write_glider_data_csv.jl");
 end
-
 
 
 #plotSeaExplorerCTD(gliderCTDarray)
