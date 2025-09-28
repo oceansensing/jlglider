@@ -240,6 +240,7 @@ function load_glider_ctd(missionYAMLpath::String)
     sigma0 = gsw.gsw_sigma0.(saltA, ctemp);
     spice0 = gsw.gsw_spiciness0.(saltA, ctemp);
     sndspd = gsw.gsw_sound_speed.(saltA, ctemp, pres*10);
+    #[Tu, Rsubrho, p_mid] = gsw.gsw_Turner_Rsubrho(saltA,ctemp,pres*10);
 
     # save glider CTD data to a ctdStruct object
     ctdData = Glider.slocumType.ctdStruct(glidertype, gliderSN, glidername, missionID, project, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
