@@ -25,6 +25,7 @@ using JLD2, Dates, Glider
 
 include("/Users/gong/GitHub/jlglider/slocum/slocumLoad.jl")
 include("/Users/gong/GitHub/jlglider/common/C2PO.jl")
+include("/Users/gong/GitHub/jlglider/common/Glider.jl")
 include("/Users/gong/GitHub/jlglider/plotting/gliderPlot.jl")
 
 import .slocumLoad: load_glider_ctd, load_glider_sci, glider_ctd_qc, slocumYAMLload
@@ -62,17 +63,18 @@ if plotflag == true
         glidername = gliderCTDarray[i].glidername;
         latmin, latmax = 37.5, 40;
         lonmin, lonmax = -65.2, -61.2;    
-        zlo, zhi = -1000, 0;
+        zmin, zmax = -1000, 0;
+        pmin, pmax = 0, 1000;
         tempmin, tempmax = 4.0, 32.0;
         condmin, condmax = 3, 6.5;
         saltmin, saltmax = 31.0, 37.25;
         sigma0min, sigma0max = 20.0, 30.0;
         spice0min, spice0max = -1.5, 7.5;
-        sndspdmin, sndspdmax = 1480, 1550;
-        global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, zlo, zhi, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
+        sndspdmin, sndspdmax = 1470, 1550;
+        global pst = push!(pst, Glider.gliderPlotType.plotStruct(figoutdir, project, glidername, lonmin, lonmax, latmin, latmax, pmin, pmax, zmin, zmax, tempmin, tempmax, condmin, condmax, saltmin, saltmax, sigma0min, sigma0max, spice0min, spice0max, sndspdmin, sndspdmax));
     end
 
     plotGliderTSarray(gliderCTDarray, ps, pst)
-    #plotGliderCTD(gliderCTDarray, ps, pst)
+    plotGliderCTD(gliderCTDarray, ps, pst)
     plotGliderMap(gliderCTDarray, pst, pzrange=[-20,-10], varname="spice0", logzflag=0);
 end
