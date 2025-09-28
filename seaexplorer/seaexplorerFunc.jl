@@ -5,6 +5,8 @@ module seaexplorerFunc
 
 using Glider
 import Glider.seaexplorerType: NAV_RT, PLD_RT, LEGATO, SeaExplorerData, SeaExplorerCTD
+#import Glider.slocumType: engStruct, ctdStruct, sciStruct
+
 #include("seaexplorerType.jl");
 
 using Dates, Glob, DataFrames, CSV, Dates, Missings, NaNMath, Interpolations, YAML
@@ -1125,6 +1127,8 @@ function seaexplorer_process(SEApld1d::LEGATO)
     tmid = t[1:end-1] .+ 15.0;
 
     SEAdata = SeaExplorerCTD(glidertype, gliderSN, glidername, missionID, project, yo, ns, t, lon, lat, gpst, gpslon, gpslat, p, z, temp, cond, salt, saltA, ctemp, sigma0, spice0, sndspd, n2, pmid, zmid, tmid);
+    ctdData = Glider.slocumType.ctdStruct(glidertype, gliderSN, glidername, missionID, project, tctd, pres, z, lonf, latf, temp, cond, salt, ctemp, saltA, sigma0, spice0, sndspd, 0, 0);
+
 end
 
 #=
